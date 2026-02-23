@@ -1,0 +1,17 @@
+{
+	"id": "test_missing_provider_config",
+	"graph": {
+		"nodes": {
+			"node1": {
+				"tool": "model_call",
+				"complexity": "simple",
+				"provider": "anthropic",
+				"input": "test"
+			}
+		},
+		"edges": []
+	},
+	"permissions": {
+		"node1": "always"
+	}
+}

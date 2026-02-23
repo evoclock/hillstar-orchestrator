@@ -1,0 +1,102 @@
+{
+  "id": "haiku_pipeline_workflow",
+  "version": "1.0",
+  "description": "Multi-provider workflow: Write haikus → Extract entities → Reconstruct from representation",
+  "graph": {
+    "nodes": {
+      "write_haikus": {
+        "tool": "model_call",
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001",
+        "task": "Write three haikus with themes around nature, birds, and connectedness. Format each haiku on separate lines.",
+        "input": "Write three haikus with themes around nature, birds, and connectedness. Format each haiku on separate lines.",
+        "parameters": {
+          "max_tokens": 512
+        }
+      },
+      "extract_entities": {
+        "tool": "model_call",
+        "provider": "openai",
+        "model": "gpt-5-nano",
+        "task": "From the haikus provided, extract key entities (birds, nature elements, concepts) as a JSON array. Return only valid JSON.",
+        "input": "From these haikus: {{ write_haikus.output }}\n\nExtract key entities (birds, nature elements, concepts) as a JSON array. Return only valid JSON.",
+        "parameters": {
+          "max_tokens": 256
+        }
+      },
+      "identify_themes": {
+        "tool": "model_call",
+        "provider": "mistral_mcp",
+        "model": "mistral-medium-latest",
+        "task": "Identify the major themes and metaphors used in the haikus. List each theme on a separate line.",
+        "input": "From these haikus: {{ write_haikus.output }}\n\nIdentify the major themes and metaphors used. List each theme on a separate line.",
+        "parameters": {
+          "max_tokens": 256
+        }
+      },
+      "reconstruct_from_representation": {
+        "tool": "model_call",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-5-20250929",
+        "task": "Given only the extracted entities and themes, reconstruct what the original haikus were about. Provide a summary of the haiku collection.",
+        "input": "Entities: {{ extract_entities.output }}\n\nThemes: {{ identify_themes.output }}\n\nGiven only these entities and themes, reconstruct what the original haikus were about. Provide a summary.",
+        "parameters": {
+          "max_tokens": 1024
+        }
+      },
+      "validate_reconstruction": {
+        "tool": "model_call",
+        "provider": "devstral_local",
+        "model": "devstral-small-2-24b",
+        "task": "Compare the reconstruction with what you know about haiku poetry. Does it capture the essence of haikus about nature, birds, and connectedness?",
+        "input": "Original reconstruction: {{ reconstruct_from_representation.output }}\n\nCompare this with what you know about haiku poetry. Does it capture the essence of haikus about nature, birds, and connectedness? Provide a brief validation.",
+        "parameters": {
+          "max_tokens": 512
+        }
+      }
+    },
+    "edges": [
+      {"from": "write_haikus", "to": "extract_entities"},
+      {"from": "write_haikus", "to": "identify_themes"},
+      {"from": "extract_entities", "to": "reconstruct_from_representation"},
+      {"from": "identify_themes", "to": "reconstruct_from_representation"},
+      {"from": "reconstruct_from_representation", "to": "validate_reconstruction"}
+    ]
+  },
+  "provider_config": {
+    "anthropic": {
+      "tos_accepted": true,
+      "audit_enabled": true,
+      "restricted_use_acknowledged": true
+    },
+    "openai": {
+      "tos_accepted": true,
+      "audit_enabled": true,
+      "restricted_use_acknowledged": true
+    },
+    "mistral": {
+      "tos_accepted": true,
+      "audit_enabled": true,
+      "restricted_use_acknowledged": true
+    },
+    "mistral_mcp": {
+      "tos_accepted": true,
+      "audit_enabled": true,
+      "restricted_use_acknowledged": true
+    },
+    "ollama": {
+      "endpoint": "http://localhost:11434",
+      "tos_accepted": true,
+      "audit_enabled": true
+    },
+    "anthropic_ollama": {
+      "endpoint": "http://localhost:11434",
+      "tos_accepted": true,
+      "audit_enabled": true
+    },
+    "devstral_local": {
+      "tos_accepted": true,
+      "audit_enabled": true
+    }
+  }
+}

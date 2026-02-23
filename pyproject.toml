@@ -1,0 +1,119 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hillstar-orchestrator"
+version = "1.0.0-sprint1"
+description = "Security and reproducibility-first workflow orchestrator for research environments"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+  {name = "Julen Gamboa", email = "julen.gamboa.ds@gmail.com"}
+]
+keywords = [
+  "orchestration",
+  "workflow",
+  "llm",
+  "ai",
+  "multi-provider",
+  "dag",
+  "governance"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.url]
+Homepage = "https://github.com/jgamboa/hillstar-orchestrator"
+Repository = "https://github.com/jgamboa/hillstar-orchestrator"
+Documentation = "https://github.com/jgamboa/hillstar-orchestrator/tree/main/docs"
+"Issue Tracker" = "https://github.com/jgamboa/hillstar-orchestrator/issues"
+
+dependencies = [
+  "anthropic==0.79.0",
+  "openai==2.21.0",
+  "mistralai==1.12.2",
+  "google-generativeai==0.8.6",
+  "requests==2.32.4",
+  "urllib3==2.5.0",
+  "pydantic==2.12.5",
+  "cryptography==46.0.5",
+  "keyring==25.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==7.4.4",
+  "pytest-cov==4.1.0",
+  "pytest-html==4.1.1",
+  "ruff==0.3.0",
+]
+
+security = [
+  "pip-audit==2.6.1",
+  "bandit==1.7.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/evoclock/hillstar-orchestrator"
+Documentation = "https://github.com/evoclock/hillstar-orchestrator/tree/main/docs"
+Repository = "https://github.com/evoclock/hillstar-orchestrator.git"
+Issues = "https://github.com/evoclock/hillstar-orchestrator/issues"
+
+[project.scripts]
+hillstar = "cli:main"
+
+[tool.setuptools]
+packages = [
+  "config",
+  "execution",
+  "governance",
+  "models",
+  "workflows",
+  "utils",
+  "tests",
+]
+
+[tool.setuptools.package-data]
+"" = ["*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short --junit-xml=.test-results/junit/results.xml --html=.test-results/html/report.html --cov=. --cov-report=html:.test-results/coverage --cov-report=term"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "W191"]  # W191: tabs allowed per project standards
+
+[tool.ruff.format]
+
+[tool.pylance]
+pythonVersion = "3.10"
+pythonPath = "."
+typeCheckingMode = "basic"
+reportMissingImports = false
+reportUnusedImport = true
+
+[tool.pyright]
+pythonVersion = "3.10"
+pythonPath = "."
+typeCheckingMode = "basic"
+reportMissingImports = false
+reportUnusedImport = true

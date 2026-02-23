@@ -1,0 +1,1453 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-02-19",
+  "description": "Official Hillstar AI Provider Registry - Sourced from provider docs",
+  "source_docs": [
+    "https://platform.claude.com/docs/en/about-claude/pricing",
+    "https://platform.openai.com/docs/models",
+    "https://ai.google.dev/gemini-api/docs/models",
+    "https://mistral.ai/pricing"
+  ],
+  "providers": {
+    "anthropic": {
+      "display_name": "Anthropic (Claude)",
+      "type": "cloud_api",
+      "endpoint": "https://api.anthropic.com",
+      "auth_type": "bearer_token",
+      "auth_methods": [
+        "api_key"
+      ],
+      "auth_policy_url": "https://www.theregister.com/2026/02/20/anthropic_clarifies_ban_third_party_claude_access/",
+      "auth_policy_note": "API keys only. Third-party harness OAuth/subscription tokens prohibited.",
+      "env_vars": [
+        "ANTHROPIC_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://www.anthropic.com/legal/terms",
+        "data_residency": [
+          "US",
+          "EU"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance",
+          "autonomous_weapons"
+        ],
+        "rate_limit_per_minute": 50,
+        "audit_required": false,
+        "api_key_location": "ANTHROPIC_API_KEY"
+      },
+      "models": {
+        "claude-opus-4-6": {
+          "display_name": "Claude Opus 4.6",
+          "api_id": "claude-opus-4-6",
+          "context_window": 200000,
+          "max_output_tokens": 128000,
+          "pricing": {
+            "input_per_1m_usd": 5.0,
+            "output_per_1m_usd": 25.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "creative",
+            "complex_planning",
+            "research"
+          ],
+          "tier": "expensive",
+          "extended_thinking": true,
+          "default_temperature": null,
+          "note": "Cannot use temperature and top_p parameters simultaneously. Use temperature only for deterministic outputs.",
+          "default_sampling_params": {
+            "temperature": null,
+            "max_tokens": 128000
+          }
+        },
+        "claude-sonnet-4-6": {
+          "display_name": "Claude Sonnet 4.6",
+          "api_id": "claude-sonnet-4-6",
+          "context_window": 200000,
+          "max_output_tokens": 65536,
+          "pricing": {
+            "input_per_1m_usd": 3.0,
+            "output_per_1m_usd": 15.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "creative"
+          ],
+          "tier": "expensive",
+          "default_temperature": null,
+          "note": "Cannot use temperature and top_p parameters simultaneously. Use temperature only for deterministic outputs.",
+          "default_sampling_params": {
+            "temperature": null,
+            "max_tokens": 64000
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "display_name": "Claude Haiku 4.5",
+          "api_id": "claude-haiku-4-5-20251001",
+          "context_window": 200000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 1.0,
+            "output_per_1m_usd": 5.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing"
+          ],
+          "tier": "standard",
+          "default_temperature": null,
+          "note": "Cannot use temperature and top_p parameters simultaneously. Use temperature only for deterministic outputs.",
+          "default_sampling_params": {
+            "temperature": null,
+            "max_tokens": 64000
+          }
+        }
+      }
+    },
+    "anthropic_ollama": {
+      "display_name": "Anthropic models via Ollama (Messages API)",
+      "type": "local_proxy",
+      "endpoint": "http://localhost:11434",
+      "auth_type": "bearer_token",
+      "env_vars": [
+        "ANTHROPIC_AUTH_TOKEN",
+        "ANTHROPIC_BASE_URL"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": false,
+        "data_residency": [
+          "Ollama cloud"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "development",
+          "usage limits"
+        ],
+        "restricted_use_cases": [],
+        "rate_limit_per_minute": 0,
+        "audit_required": false,
+        "api_key_location": "ANTHROPIC_AUTH_TOKEN (set to 'ollama')"
+      },
+      "models": {
+        "devstral-2:123b-cloud": {
+          "display_name": "Devstral-2 123B (Cloud via Ollama)",
+          "context_window": 256000,
+          "max_output_tokens": 256000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.7,
+          "requires_ollama": true,
+          "ollama_model_name": "devstral-2:123b-cloud",
+          "default_sampling_params": {
+            "temperature": 0.3,
+            "max_tokens": 64000
+          }
+        },
+        "gpt-oss:120b-cloud": {
+          "display_name": "GPT-OSS 120B (Cloud via Ollama)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "requires_ollama": true,
+          "ollama_model_name": "gpt-oss:120b-cloud",
+          "default_sampling_params": {
+            "temperature": 0.3,
+            "max_tokens": 64000
+          }
+        },
+        "gemini-3-flash-preview:cloud": {
+          "display_name": "Gemini 3 Flash Preview (Cloud via Ollama)",
+          "context_window": 265000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multimodal"
+          ],
+          "tier": "free",
+          "default_temperature": 1.0,
+          "requires_ollama": true,
+          "ollama_model_name": "gemini-3-flash-preview:cloud",
+          "default_sampling_params": {
+            "temperature": 0.3,
+            "max_tokens": 64000
+          }
+        },
+        "minimax-m2.5:cloud": {
+          "display_name": "MiniMax M2.5 (Cloud via Ollama)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.7,
+          "requires_ollama": true,
+          "ollama_model_name": "minimax-m2.5:cloud",
+          "default_sampling_params": {
+            "temperature": 0.4,
+            "max_tokens": 64000
+          }
+        },
+        "mistral-large-3:675b-cloud": {
+          "display_name": "Mistral Large 3 (Cloud via Ollama)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multimodal"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "requires_ollama": true,
+          "ollama_model_name": "mistral-large-3:675b-cloud",
+          "default_sampling_params": {
+            "temperature": 0.3,
+            "max_tokens": 64000
+          }
+        }
+      }
+    },
+    "ollama": {
+      "display_name": "Ollama (Local Models)",
+      "type": "local",
+      "endpoint": "http://localhost:11434",
+      "auth_type": "none",
+      "env_vars": [],
+      "compliance": {
+        "requires_tos_acceptance": false,
+        "data_residency": [
+          "Ollama cloud"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "development"
+        ],
+        "restricted_use_cases": [],
+        "rate_limit_per_minute": 0,
+        "audit_required": false
+      },
+      "models": {
+        "devstral-2": {
+          "display_name": "Devstral-2 (Coding)",
+          "context_window": 126000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "devstral-2:123b-cloud"
+        },
+        "glm-4.7": {
+          "display_name": "GLM-4.7 (Multilingual)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multilingual"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "glm-4.7:cloud"
+        },
+        "glm-5": {
+          "display_name": "GLM-5 (Multilingual)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multilingual"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "glm-5:cloud"
+        },
+        "qwen3-coder-next": {
+          "display_name": "Qwen 3 Coder Next",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "coding",
+            "analysis",
+            "reasoning"
+          ],
+          "tier": "free",
+          "coding_focused": true,
+          "default_temperature": 0.3,
+          "ollama_model": "qwen3-coder-next:cloud"
+        },
+        "mistral": {
+          "display_name": "Mistral (General)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "mistral"
+        },
+        "neural-chat": {
+          "display_name": "Neural Chat (General)",
+          "context_window": 32000,
+          "max_output_tokens": 4096,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "analysis",
+            "writing"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "neural-chat"
+        },
+        "codeup": {
+          "display_name": "Codeup (Fast Code)",
+          "context_window": 16384,
+          "max_output_tokens": 2048,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "coding"
+          ],
+          "tier": "free",
+          "coding_focused": true,
+          "default_temperature": 0.3,
+          "ollama_model": "codeup"
+        },
+        "gpt-oss:20b-cloud": {
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "free"
+        },
+        "gpt-oss:120b-cloud": {
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "free"
+        },
+        "gemini-3-flash-preview:cloud": {
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "free"
+        },
+        "devstral-2:123b-cloud": {
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "free"
+        },
+        "Excellent for codebase analysis": {
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "free"
+        }
+      }
+    },
+    "devstral_local": {
+      "display_name": "Devstral Local (GPU Required)",
+      "type": "local",
+      "endpoint": "http://localhost:8080",
+      "auth_type": "none",
+      "env_vars": [],
+      "compliance": {
+        "requires_tos_acceptance": false,
+        "data_residency": [
+          "local"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "development",
+          "airgapped",
+          "commercial"
+        ],
+        "restricted_use_cases": [],
+        "rate_limit_per_minute": 0,
+        "audit_required": false
+      },
+      "models": {
+        "devstral-small-2-24b": {
+          "display_name": "Devstral Small 2 24B (GGUF)",
+          "context_window": 8192,
+          "max_output_tokens": 8192,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.5,
+          "requires_gpu": true,
+          "gpu_vram_min_gb": 16,
+          "default_sampling_params": {
+            "temperature": 0.0000073,
+            "max_tokens": 8192
+          }
+        }
+      }
+    },
+    "mistral": {
+      "display_name": "Mistral AI",
+      "type": "cloud_api",
+      "endpoint": "https://api.mistral.ai/v1",
+      "auth_type": "bearer_token",
+      "env_vars": [
+        "MISTRAL_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://mistral.ai/terms",
+        "data_residency": [
+          "EU",
+          "US"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance"
+        ],
+        "rate_limit_per_minute": 60,
+        "audit_required": false,
+        "api_key_location": "MISTRAL_API_KEY"
+      },
+      "models": {
+        "mistral-large-latest": {
+          "display_name": "Mistral Large (Latest)",
+          "context_window": 256000,
+          "max_output_tokens": 124000,
+          "pricing": {
+            "input_per_1m_usd": 0.5,
+            "output_per_1m_usd": 1.5,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "multimodal"
+          ],
+          "tier": "affordable",
+          "default_temperature": 0.7,
+          "default_sampling_params": {
+            "temperature": 0.3,
+            "max_tokens": 8192
+          }
+        },
+        "mistral-medium-latest": {
+          "display_name": "Mistral Medium (Latest)",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.4,
+            "output_per_1m_usd": 2.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multimodal"
+          ],
+          "tier": "affordable",
+          "default_temperature": 0.1
+        },
+        "ministral-3b-latest": {
+          "display_name": "Ministral 3B (Edge)",
+          "context_window": 3256000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.1,
+            "output_per_1m_usd": 0.1,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding"
+          ],
+          "tier": "affordable",
+          "default_temperature": 0.1
+        },
+        "ministral-8b-latest": {
+          "display_name": "Ministral 8B (Edge)",
+          "context_window": 256000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.15,
+            "output_per_1m_usd": 0.15,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "affordable",
+          "default_temperature": 0.1
+        },
+        "ministral-14b-latest": {
+          "display_name": "Ministral 14B (Edge)",
+          "context_window": 256000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 0.2,
+            "output_per_1m_usd": 0.2,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "affordable",
+          "default_temperature": 0.1
+        },
+        "devstral-medium-latest": {
+          "display_name": "Devstral 2 (Direct API)",
+          "context_window": 256000,
+          "max_output_tokens": 256000,
+          "pricing": {
+            "input_per_1m_usd": 0.4,
+            "output_per_1m_usd": 2.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "coding",
+            "analysis",
+            "reasoning"
+          ],
+          "tier": "affordable",
+          "coding_focused": true,
+          "default_temperature": 0.3
+        },
+        "magistral-medium-latest": {
+          "pricing": {
+            "input_per_1m_usd": 2.0,
+            "output_per_1m_usd": 5.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "standard"
+        },
+        "magistral-small-latest": {
+          "pricing": {
+            "input_per_1m_usd": 0.5,
+            "output_per_1m_usd": 1.5,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        },
+        "mistral-small-latest": {
+          "pricing": {
+            "input_per_1m_usd": 0.1,
+            "output_per_1m_usd": 0.3,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        }
+      }
+    },
+    "google_ai_studio": {
+      "display_name": "Google AI Studio (Gemini)",
+      "type": "cloud_api",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+      "auth_type": "api_key",
+      "env_vars": [
+        "GOOGLE_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://ai.google.dev/terms",
+        "data_residency": [
+          "US"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance"
+        ],
+        "rate_limit_per_minute": 60,
+        "audit_required": false,
+        "api_key_location": "GOOGLE_API_KEY"
+      },
+      "models": {
+        "gemini-3.1-pro-preview": {
+          "display_name": "Gemini 3.1 Pro",
+          "context_window": 1048576,
+          "max_output_tokens": 65536,
+          "pricing": {
+            "input_per_1m_usd": 4.00,
+            "output_per_1m_usd": 18.00,
+            "cached_input_per_1m_usd": 0.40,
+            "cache_storage_per_1m_per_hour_usd": 4.50
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "multimodal",
+            "complex_planning"
+          ],
+          "tier": "premium",
+          "note": "Keep temperature at default (1.0). Changing temperature causes looping or degraded performance on reasoning tasks.",
+          "default_sampling_params": {
+            "max_tokens": 65536
+          }
+        },
+        "gemini-3-flash-preview": {
+          "display_name": "Gemini 3 Flash",
+          "context_window": 1048576,
+          "max_output_tokens": 65536,
+          "pricing": {
+            "input_per_1m_usd": 0.5,
+            "output_per_1m_usd": 3.00,
+            "cached_input_per_1m_usd": 0.10,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "multimodal"
+          ],
+          "tier": "affordable",
+          "note": "Keep temperature at default (1.0). Changing temperature causes looping or degraded performance on reasoning tasks.",
+          "default_sampling_params": {
+            "max_tokens": 65536
+          }
+        },
+        "gemini-2.5-flash-lite": {
+          "display_name": "Gemini 2.5 Flash-Lite",
+          "context_window": 1048576,
+          "max_output_tokens": 65536,
+          "pricing": {
+            "input_per_1m_usd": 0.10,
+            "output_per_1m_usd": 0.40,
+            "cached_input_per_1m_usd": 0.01,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "affordable",
+          "note": "Keep temperature at default (1.0). Changing temperature causes looping or degraded performance on reasoning tasks.",
+          "default_sampling_params": {
+            "max_tokens": 65536
+          }
+        },
+        "gemini-2.5-computer-use-preview-10-2025": {
+          "display_name": "Gemini 2.5 Computer Use",
+          "context_window": 128000,
+          "max_output_tokens": 64000,
+          "pricing": {
+            "input_per_1m_usd": 2.50,
+            "output_per_1m_usd": 15.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "browser control",
+            "automation",
+            "UI",
+            "user interface"
+          ],
+          "tier": "expensive",
+          "note": "model designed for direct interface interaction, allowing Gemini to perceive and navigate digital environments. Gemini 2.5 Computer Use is best for browser automation, multi-step software tasks, and UI testing that requires visual reasoning and precise cursor control.",
+          "default_sampling_params": {
+            "max_tokens": 64000
+          }
+        }
+      }
+    },
+    "anthropic_mcp": {
+      "display_name": "Anthropic Claude (via MCP Server)",
+      "type": "mcp_server",
+      "endpoint": "stdio://mcp-server/anthropic_mcp_server.py",
+      "auth_type": "bearer_token",
+      "env_vars": [
+        "ANTHROPIC_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://www.anthropic.com/legal/terms",
+        "data_residency": [
+          "US",
+          "EU"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance",
+          "autonomous_weapons"
+        ],
+        "rate_limit_per_minute": 50,
+        "audit_required": false,
+        "api_key_location": "ANTHROPIC_API_KEY"
+      },
+      "models": {
+        "claude-opus-4-6": {
+          "display_name": "Claude Opus 4.6 (MCP)",
+          "pricing": {
+            "input_per_1m_usd": 5.00,
+            "output_per_1m_usd": 25.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "claude-sonnet-4-6": {
+          "display_name": "Claude Sonnet 4.6 (MCP)",
+          "pricing": {
+            "input_per_1m_usd": 3.00,
+            "output_per_1m_usd": 15.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "expensive"
+        },
+        "claude-haiku-4-5-20251001": {
+          "display_name": "Claude Haiku 4.5 (MCP)",
+          "pricing": {
+            "input_per_1m_usd": 1.00,
+            "output_per_1m_usd": 5.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "standard"
+        }
+      }
+    },
+    "openai_mcp": {
+      "display_name": "OpenAI GPT (via MCP Server)",
+      "type": "mcp_server",
+      "endpoint": "stdio://mcp-server/openai_mcp_server.py",
+      "auth_type": "bearer_token",
+      "env_vars": [
+        "OPENAI_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://openai.com/policies/terms-of-service",
+        "data_residency": [
+          "US"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance",
+          "medical_advice"
+        ],
+        "rate_limit_per_minute": 60,
+        "audit_required": false,
+        "api_key_location": "OPENAI_API_KEY"
+      },
+      "models": {
+        "gpt-5.2-2025-12-11": {
+          "display_name": "GPT-5.2",
+          "context_window": 400000,
+          "max_output_tokens": 128000,
+          "pricing": {
+            "input_per_1m_usd": 1.75,
+            "output_per_1m_usd": 14.0,
+            "cached_input_per_1m_usd": 0.175,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "multimodal"
+          ],
+          "tier": "expensive",
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported. Only default temperature (1) accepted.",
+          "default_sampling_params": {
+            "max_tokens": 128000
+          }
+        },
+        "gpt-5-2025-08-07": {
+          "display_name": "GPT-5.1",
+          "context_window": 400000,
+          "max_output_tokens": 128000,
+          "pricing": {
+            "input_per_1m_usd": 1.25,
+            "output_per_1m_usd": 10.00,
+            "cached_input_per_1m_usd": 0.125,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing"
+          ],
+          "tier": "expensive",
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported. Only default temperature (1) accepted.",
+          "default_sampling_params": {
+            "max_tokens": 128000
+          }
+        },
+        "gpt-5-mini-2025-08-07": {
+          "display_name": "GPT-5 Mini",
+          "context_window": 400000,
+          "max_output_tokens": 128000,
+          "pricing": {
+            "input_per_1m_usd": 0.25,
+            "output_per_1m_usd": 2.00,
+            "cached_input_per_1m_usd": 0.025,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "affordable",
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported. Only default temperature (1) accepted.",
+          "default_sampling_params": {
+            "max_tokens": 128000
+          }
+        },
+        "gpt-5-nano-2025-08-07": {
+          "display_name": "GPT-5 Nano",
+          "context_window": 400000,
+          "max_output_tokens": 128000,
+          "pricing": {
+            "input_per_1m_usd": 0.05,
+            "output_per_1m_usd": 0.40,
+            "cached_input_per_1m_usd": 0.005,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding"
+          ],
+          "tier": "affordable",
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported. Only default temperature (1) accepted.",
+          "default_sampling_params": {
+            "max_tokens": 128000
+          }
+        },
+        "o3-deep-research-2025-06-26": {
+          "display_name": "o3 (Advanced Reasoning)",
+          "context_window": 200000,
+          "max_output_tokens": 100000,
+          "pricing": {
+            "input_per_1m_usd": 10.0,
+            "output_per_1m_usd": 40.0,
+            "cached_input_per_1m_usd": 2.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "research",
+            "math",
+            "complex_planning"
+          ],
+          "tier": "premium",
+          "reasoning_model": true,
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported for reasoning models. Use reasoning_effort parameter instead.",
+          "default_sampling_params": {
+            "max_tokens": 100000
+          }
+        },
+        "o4-mini": {
+          "display_name": "o4-mini (Lightweight Reasoning)",
+          "context_window": 200000,
+          "max_output_tokens": 100000,
+          "pricing": {
+            "input_per_1m_usd": 2.00,
+            "output_per_1m_usd": 8.00,
+            "cached_input_per_1m_usd": 0.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "standard",
+          "reasoning_model": true,
+          "supports_temperature": false,
+          "note": "Temperature parameter not supported for reasoning models. Use reasoning_effort parameter instead.",
+          "default_sampling_params": {
+            "max_tokens": 100000
+          }
+        },
+        "gpt-4.1-2025-04-14": {
+          "display_name": "GPT-4.1 (Multimodal)",
+          "context_window": 1047575,
+          "max_output_tokens": 32768,
+          "pricing": {
+            "input_per_1m_usd": 2.00,
+            "output_per_1m_usd": 8.00,
+            "cached_input_per_1m_usd": 0.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis",
+            "writing",
+            "multimodal"
+          ],
+          "tier": "standard",
+          "default_temperature": 0.1,
+          "default_sampling_params": {
+            "temperature": 0.1,
+            "max_tokens": 32000
+          }
+        }
+      }
+    },
+    "mistral_mcp": {
+      "display_name": "Mistral AI (via MCP Server)",
+      "type": "mcp_server",
+      "endpoint": "stdio://mcp-server/mistral_mcp_server.py",
+      "auth_type": "bearer_token",
+      "env_vars": [
+        "MISTRAL_API_KEY"
+      ],
+      "compliance": {
+        "requires_tos_acceptance": true,
+        "tos_url": "https://mistral.ai/terms",
+        "data_residency": [
+          "EU",
+          "US"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "commercial",
+          "development"
+        ],
+        "restricted_use_cases": [
+          "harmful_content",
+          "surveillance"
+        ],
+        "rate_limit_per_minute": 60,
+        "audit_required": false,
+        "api_key_location": "MISTRAL_API_KEY"
+      },
+      "models": {
+        "mistral-large-2411": {
+          "display_name": "Mistral Large 2411 (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        },
+        "mistral-medium-latest": {
+          "display_name": "Mistral Medium (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        },
+        "devstral-2": {
+          "display_name": "Devstral 2 (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        }
+      }
+    },
+    "ollama_mcp": {
+      "display_name": "Ollama (via MCP Server)",
+      "type": "mcp_server",
+      "endpoint": "stdio://mcp-server/ollama_mcp_server.py",
+      "auth_type": "none",
+      "env_vars": [],
+      "compliance": {
+        "requires_tos_acceptance": false,
+        "data_residency": [
+          "local"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "development",
+          "airgapped"
+        ],
+        "restricted_use_cases": [],
+        "rate_limit_per_minute": 0,
+        "audit_required": false
+      },
+      "models": {
+        "devstral-2:123b-cloud": {
+          "display_name": "Devstral-2 (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        },
+        "minimax-m2.5:cloud": {
+          "display_name": "MiniMax M2.5 (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        },
+        "glm-4.7:cloud": {
+          "display_name": "GLM-4.7 (MCP)",
+          "pricing": {
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          }
+        }
+      }
+    },
+    "parameter": {
+      "display_name": "Parameter",
+      "models": {}
+    },
+    "openai": {
+      "display_name": "Openai",
+      "models": {
+        "GPT-5.2": {
+          "pricing": {
+            "input_per_1m_usd": 1.75,
+            "output_per_1m_usd": 14.00,
+            "cached_input_per_1m_usd": 0.175,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "expensive"
+        },
+        "GPT-5.1": {
+          "pricing": {
+            "input_per_1m_usd": 1.25,
+            "output_per_1m_usd": 10.00,
+            "cached_input_per_1m_usd": 0.125,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "expensive"
+        },
+        "o3": {
+          "pricing": {
+            "input_per_1m_usd": 10.0,
+            "output_per_1m_usd": 40.0,
+            "cached_input_per_1m_usd": 2.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "o4-mini": {
+          "pricing": {
+            "input_per_1m_usd": 2.00,
+            "output_per_1m_usd": 8.00,
+            "cached_input_per_1m_usd": 0.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "GPT-4.1": {
+          "pricing": {
+            "input_per_1m_usd": 2.00,
+            "output_per_1m_usd": 8.00,
+            "cached_input_per_1m_usd": 0.50,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "GPT-5-mini": {
+          "pricing": {
+            "input_per_1m_usd": 0.25,
+            "output_per_1m_usd": 2.00,
+            "cached_input_per_1m_usd": 0.025,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        },
+        "GPT-5-nano": {
+          "pricing": {
+            "input_per_1m_usd": 0.05,
+            "output_per_1m_usd": 0.40,
+            "cached_input_per_1m_usd": 0.005,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        }
+      }
+    },
+    "google": {
+      "display_name": "Google",
+      "models": {
+        "gemini-3.1-pro-preview": {
+          "pricing": {
+            "input_per_1m_usd": 4.00,
+            "output_per_1m_usd": 18.00,
+            "cached_input_per_1m_usd": 0.40,
+            "cache_storage_per_1m_per_hour_usd": 4.50
+          },
+          "tier": "premium"
+        },
+        "gemini-3-flash-preview": {
+          "pricing": {
+            "input_per_1m_usd": 0.50,
+            "output_per_1m_usd": 3.00,
+            "cached_input_per_1m_usd": 0.05,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "tier": "affordable"
+        },
+        "Best value in Gemini 3 line": {
+          "pricing": {
+            "input_per_1m_usd": 0.50,
+            "output_per_1m_usd": 3.00,
+            "cached_input_per_1m_usd": 0.05,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "tier": "affordable"
+        },
+        "gemini-2.5-pro": {
+          "pricing": {
+            "input_per_1m_usd": 2.50,
+            "output_per_1m_usd": 15.00,
+            "cached_input_per_1m_usd": 0.25,
+            "cache_storage_per_1m_per_hour_usd": 4.50
+          },
+          "tier": "expensive"
+        },
+        "gemini-2.5-flash": {
+          "pricing": {
+            "input_per_1m_usd": 0.30,
+            "output_per_1m_usd": 2.50,
+            "cached_input_per_1m_usd": 0.03,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "tier": "affordable"
+        },
+        "gemini-2.5-flash-lite": {
+          "pricing": {
+            "input_per_1m_usd": 0.02,
+            "output_per_1m_usd": 0.12,
+            "cached_input_per_1m_usd": 0.01,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "tier": "affordable"
+        },
+        "gemini-2.5-computer-user": {
+          "pricing": {
+            "input_per_1m_usd": 2.50,
+            "output_per_1m_usd": 15.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "deep-research-pro-preview": {
+          "pricing": {
+            "input_per_1m_usd": 4.00,
+            "output_per_1m_usd": 18.00,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "gemini-robotics-er-1.5": {
+          "pricing": {
+            "input_per_1m_usd": 0.30,
+            "output_per_1m_usd": 2.50,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "gemini-embedding-001": {
+          "pricing": {
+            "input_per_1m_usd": null,
+            "output_per_1m_usd": 0.15,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        },
+        "gemini-2.0-flash": {
+          "pricing": {
+            "input_per_1m_usd": 0.10,
+            "output_per_1m_usd": 0.40,
+            "cached_input_per_1m_usd": 0.025,
+            "cache_storage_per_1m_per_hour_usd": 1.00
+          },
+          "tier": "affordable"
+        },
+        "gemini-2.0-flash-lite": {
+          "pricing": {
+            "input_per_1m_usd": 0.075,
+            "output_per_1m_usd": 0.30,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        },
+        "Most budget-friendly Gemini model": {
+          "pricing": {
+            "input_per_1m_usd": 0.075,
+            "output_per_1m_usd": 0.30,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "affordable"
+        }
+      }
+    },
+    "local": {
+      "display_name": "Local",
+      "models": {}
+    },
+    "model": {
+      "display_name": "Model",
+      "models": {
+        "Migrate immediately": {
+          "pricing": {
+            "input_per_1m_usd": 20.0,
+            "output_per_1m_usd": 25.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "tier": "premium"
+        }
+      }
+    },
+    "preset": {
+      "display_name": "Preset",
+      "models": {}
+    },
+    "important": {
+      "display_name": "Important",
+      "models": {}
+    },
+    "implementation": {
+      "display_name": "Implementation",
+      "models": {}
+    }
+  },
+  "cost_tiers": {
+    "free": {
+      "max_per_1m_usd": 0,
+      "description": "Free to use (local or open-weight models)"
+    },
+    "affordable": {
+      "max_per_1m_usd": 4,
+      "description": "Budget-friendly for high-volume tasks"
+    },
+    "standard": {
+      "max_per_1m_usd": 8,
+      "description": "General purpose models"
+    },
+    "expensive": {
+      "max_per_1m_usd": 19,
+      "description": "High-performance reasoning models"
+    },
+    "premium": {
+      "max_per_1m_usd": 100,
+      "description": "State-of-the-art models for critical tasks"
+    }
+  },
+  "capability_tags": [
+    "reasoning",
+    "coding",
+    "analysis",
+    "writing",
+    "creative",
+    "math",
+    "multimodal",
+    "complex_planning",
+    "deep_thinking",
+    "research"
+  ],
+  "default_fallback_chain": {
+    "simple": [
+      "anthropic_ollama",
+      "ollama",
+      "anthropic",
+      "openai_mcp"
+    ],
+    "moderate": [
+      "anthropic",
+      "openai_mcp",
+      "anthropic_ollama",
+      "ollama"
+    ],
+    "complex": [
+      "anthropic",
+      "openai_mcp"
+    ],
+    "critical": [
+      "anthropic"
+    ]
+  },
+  "registry_auto_populated": true
+}

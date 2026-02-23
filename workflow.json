@@ -1,0 +1,26 @@
+{
+	"id": "example_workflow",
+	"description": "Example workflow for testing",
+	"graph": {
+		"nodes": {
+			"step_1": {
+				"tool": "model_call",
+				"provider": "anthropic",
+				"model": "claude-haiku-4-5-20251001",
+				"complexity": "simple",
+				"input": "What is 2 + 2?"
+			}
+		},
+		"edges": []
+	},
+	"permissions": {
+		"step_1": "always"
+	},
+	"provider_config": {
+		"compliance": {
+			"tos_accepted": true,
+			"audit_enabled": true,
+			"restricted_use_acknowledged": false
+		}
+	}
+}

@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+title: Hillstar - Security and Reproducibility-First Workflow Orchestrator
+message: >-
+  If you use this software, please cite it using the metadata from this file.
+type: software
+authors:
+  - family-names: Gamboa
+    given-names: Julen
+repository-code: 'https://github.com/jgamboa/hillstar-orchestrator'
+url: 'https://github.com/jgamboa/hillstar-orchestrator'
+abstract: >-
+  Hillstar is an open-source workflow orchestrator built for scientific research
+  labs and regulated environments where reproducibility and auditability are
+  non-negotiable. Designed with security and governance as first-class concerns,
+  Hillstar enables explicit, auditable coordination between multiple LLM
+  providers (Anthropic, OpenAI, Mistral, Ollama) and external agents via MCP
+  servers. Every decision is logged: which model was called, what parameters
+  were used, how much it cost, and whether review was required. Built for
+  research environments handling sensitive data—genomic studies, clinical trials,
+  proprietary research—where governance is the foundation, not an afterthought.
+keywords:
+  - LLM orchestration
+  - workflow management
+  - multi-provider coordination
+  - reproducibility
+  - auditability
+  - research automation
+  - governance
+  - security
+license: Apache-2.0
+version: 1.0.0-sprint1
+date-released: 2026-02-22

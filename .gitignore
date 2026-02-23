@@ -1,0 +1,140 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Obsidian workspace state (user-local)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+.chorus/
+*.log
+*.jsonl
+results/
+data/
+deprecated/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.test-results/
+
+# Credentials (never commit)
+.env
+*.key
+*.pem
+secrets.json
+auth.json
+
+# Development sprint tracking (local only)
+SPRINT.md
+
+# Hillstar execution artifacts (local execution environment - DO NOT COMMIT)
+# See HILLSTAR_IMPLEMENTATION_GUIDE.md for audit trail structure
+.hillstar/
+.hillstar/**/*.log
+mcp-server-logs/
+audit/
+# Development directory - local only, never tracked
+dev/
+# Code atrophy prevention framework - learning/reference only, local use
+dev/notes/code_atrophy_prevention/
+# Agent School - local learning system, never tracked
+.agent_school/
+# Mistral Vibe (legacy)
+.mistral_vibe/
+# Tools - keep ollama testing tool in version control (development/reference)
+# Other tool runtimes go in .gitignore as needed
+
+# Agent School learning system (local agent-specific lessons, not tracked)
+.agent_school/
+
+# Claude Code credentials and configuration
+.credentials.json
+CLAUDE.md
+
+# User-specific configurations (never commit)
+.claude/
+.ruff_cache/
+hooks/
+mcp-server-logs/
+
+# MCP Server artifacts (keep MCP servers but exclude build/cache)
+mcp-server/__pycache__/
+mcp-server/.ruff_cache/
+mcp-server/deprecated/
+mcp-server/TEST_REPORT.md
+
+# Development scripts directory (generators moved to python/)
+scripts/
+
+# Sprint test directory (local testing only, never tracked)
+python/hillstar/tests/sprint/
+
+# E2E troubleshooting directory (temporary debugging, never tracked)
+python/hillstar/tests/e2e/troubleshoot/docs/generate_api_reference.py
+.obsidian/app.json
+.obsidian/core-plugins.json
+.obsidian/appearance.json
+docs/DOCUMENTATION_GENERATOR.md
+docs/GENERATOR_SUMMARY.md
+docs/INDEX.md
+docs/Tool_suite_logos.md
+python/hillstar/tests/e2e/troubleshoot/test_anthropic_model.py
+python/hillstar/tests/e2e/troubleshoot/test_api_key_retrieval.py
+python/hillstar/tests/e2e/troubleshoot/test_env_comparison.py
+python/hillstar/tests/e2e/troubleshoot/test_env_loading.py
+python/hillstar/tests/e2e/troubleshoot/test_first_node.py
+python/hillstar/tests/e2e/troubleshoot/test_mcp_direct_verbose.py
+python/hillstar/tests/e2e/troubleshoot/test_mcp_direct.py
+python/hillstar/tests/e2e/troubleshoot/test_mistral_key.py
+docs/API_REFERENCE.md
+
+# Development guidance (local only, not for public repo)
+.claude/
+.agent_school/
+CLAUDE.md
+
+# linter
+.markdownlintrc
+.markdownlintrc.json
+
+# assets
+assets/img/*.png

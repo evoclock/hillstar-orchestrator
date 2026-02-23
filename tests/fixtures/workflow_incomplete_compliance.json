@@ -1,0 +1,22 @@
+{
+	"id": "test_incomplete_compliance",
+	"graph": {
+		"nodes": {
+			"node1": {
+				"tool": "model_call",
+				"complexity": "simple",
+				"provider": "anthropic",
+				"input": "test"
+			}
+		},
+		"edges": []
+	},
+	"permissions": {
+		"node1": "always"
+	},
+	"provider_config": {
+		"compliance": {
+			"tos_accepted": true
+		}
+	}
+}

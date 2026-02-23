@@ -1,0 +1,307 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agentic Orchestrator Workflow Schema",
+  "description": "Directed Acyclic Graph (DAG) workflow definition for research orchestration",
+  "type": "object",
+  "required": ["id", "graph", "provider_config"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique workflow identifier"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Workflow schema version"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable workflow description"
+    },
+    "model_config": {
+      "type": "object",
+      "description": "Workflow-level model selection and budget configuration",
+      "properties": {
+        "custom_providers": {
+          "type": "object",
+          "description": "Custom provider configurations (override user config)",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["endpoint", "model_name", "type"],
+            "properties": {
+              "endpoint": {
+                "type": "string",
+                "description": "HTTP endpoint (http://host:port) or wrapper script path"
+              },
+              "model_name": {
+                "type": "string",
+                "description": "Model identifier (format: name:tag, e.g., devstral-small-2:24b)"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["ollama", "llamacpp", "custom"],
+                "description": "Provider type: ollama, llamacpp, or custom wrapper script"
+              },
+              "auth_token": {
+                "type": "string",
+                "description": "Optional authorization token"
+              }
+            }
+          }
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["explicit", "auto", "preset"],
+          "default": "explicit",
+          "description": "Model selection mode: explicit (use node settings), auto (smart selection), preset (named strategy)"
+        },
+        "preset": {
+          "type": "string",
+          "enum": ["minimize_cost", "balanced", "maximize_quality", "local_only"],
+          "description": "Named preset strategy (only used when mode=preset)"
+        },
+        "budget": {
+          "type": "object",
+          "description": "Cost constraints for workflow execution",
+          "properties": {
+            "max_per_task_usd": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Maximum cost per single task call (USD)"
+            },
+            "max_workflow_usd": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Maximum total cost for entire workflow (USD)"
+            }
+          }
+        },
+        "provider_preferences": {
+          "type": "object",
+          "description": "Provider selection rules",
+          "properties": {
+            "priority": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+              },
+              "description": "Priority order for provider selection"
+            },
+            "allowlist": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+              },
+              "description": "Only use these providers"
+            },
+            "blocklist": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+              },
+              "description": "Never use these providers"
+            }
+          }
+        },
+        "sampling_params": {
+          "type": "object",
+          "description": "Default sampling parameters for model calls",
+          "properties": {
+            "temperature": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 2.0,
+              "description": "Default temperature for model sampling"
+            },
+            "max_tokens": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Default maximum tokens for model output"
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Default top_p for nucleus sampling"
+            }
+          }
+        },
+        "complexity_hints": {
+          "type": "object",
+          "description": "Override auto-detection for specific node complexity",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["simple", "moderate", "complex", "critical"]
+          }
+        },
+        "model_tier_constraints": {
+          "type": "object",
+          "description": "Model tier constraints",
+          "properties": {
+            "min_tier": {
+              "type": "string",
+              "enum": ["haiku", "sonnet", "opus"],
+              "description": "Minimum model tier (haiku < sonnet < opus)"
+            },
+            "max_tier": {
+              "type": "string",
+              "enum": ["haiku", "sonnet", "opus"],
+              "description": "Maximum model tier to control costs"
+            }
+          }
+        },
+        "explainability": {
+          "type": "object",
+          "description": "Enable detailed logging of model selection",
+          "properties": {
+            "log_selection_reasoning": {
+              "type": "boolean",
+              "default": false,
+              "description": "Log why each model was selected"
+            },
+            "log_cost_estimates": {
+              "type": "boolean",
+              "default": false,
+              "description": "Log estimated and actual costs"
+            }
+          }
+        }
+      }
+    },
+    "provider_config": {
+      "type": "object",
+      "description": "Provider-specific configurations and compliance acceptance",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "tos_accepted": {
+            "type": "boolean",
+            "description": "User accepts provider Terms of Service"
+          },
+          "audit_enabled": {
+            "type": "boolean",
+            "description": "Enable audit logging for this provider"
+          },
+          "restricted_use_acknowledged": {
+            "type": "boolean",
+            "description": "Acknowledge restricted use cases per provider ToS"
+          }
+        },
+        "required": ["tos_accepted", "audit_enabled", "restricted_use_acknowledged"]
+      }
+    },
+    "graph": {
+      "type": "object",
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {
+          "type": "object",
+          "description": "Workflow nodes (tasks)",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["tool"],
+            "properties": {
+              "task": {
+                "type": "string",
+                "description": "Optional human-readable task description (informational only)"
+              },
+              "tool": {
+                "type": "string",
+                "enum": ["model_call", "file_read", "file_write", "script_run", "checkpoint"]
+              },
+              "provider": {
+                "type": "string",
+                "enum": ["anthropic", "anthropic_mcp", "openai", "mistral", "google", "local", "devstral", "codex_messages", "codex_mcp"],
+                "description": "Model provider (if tool is model_call). codex_mcp uses Codex CLI as MCP server (no API key required). anthropic_mcp uses Claude API via MCP (no env var required)"
+              },
+              "model": {
+                "type": "string",
+                "description": "Model name to use"
+              },
+              "complexity": {
+                "type": "string",
+                "enum": ["simple", "moderate", "complex", "critical"],
+                "description": "Complexity hint for auto model selection (used when model_config.mode=auto)"
+              },
+              "input": {
+                "description": "Input to this node (can reference previous outputs)"
+              },
+              "parameters": {
+                "type": "object",
+                "description": "Tool-specific parameters",
+                "properties": {
+                  "system": {"type": "string", "description": "System prompt / developer instructions"},
+                  "max_tokens": {"type": "integer", "minimum": 1},
+                  "temperature": {"type": "number", "minimum": 0.0, "maximum": 2.0},
+                  "sandbox": {
+                    "type": "string",
+                    "enum": ["read-only", "workspace-write", "danger-full-access"],
+                    "description": "codex_mcp only: file access level"
+                  },
+                  "approval_policy": {
+                    "type": "string",
+                    "enum": ["untrusted", "on-failure", "on-request", "never"],
+                    "description": "codex_mcp only: bash command approval policy"
+                  },
+                  "cwd": {
+                    "type": "string",
+                    "description": "codex_mcp only: working directory for Codex session"
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "codex_mcp only: max seconds to wait for response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "description": "Directed edges between nodes (defines execution order)",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "Source node ID"
+              },
+              "to": {
+                "type": "string",
+                "description": "Target node ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "shared": {
+          "type": "object",
+          "description": "Shared state across workflow"
+        },
+        "checkpoints": {
+          "type": "array",
+          "description": "Nodes where checkpoints should be created",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Tool permissions for this workflow",
+      "additionalProperties": {
+        "enum": ["ask", "always", "never"]
+      }
+    }
+  }
+}

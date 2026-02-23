@@ -1,0 +1,26 @@
+{
+  "id": "simple_analysis_workflow",
+  "version": "1.0",
+  "description": "Simple single-provider workflow for basic analysis",
+  "graph": {
+    "nodes": {
+      "analyze": {
+        "tool": "model_call",
+        "provider": "anthropic",
+        "model": "claude-haiku-4-5-20251001",
+        "task": "Analyze this text and provide key insights: 'The Chimborazo Hillstar hummingbird engages in cooperative roosting and shares information about resources with other members of its species.'",
+        "parameters": {
+          "max_tokens": 512
+        }
+      }
+    },
+    "edges": []
+  },
+  "provider_config": {
+    "anthropic": {
+      "tos_accepted": true,
+      "audit_enabled": true,
+      "restricted_use_acknowledged": true
+    }
+  }
+}

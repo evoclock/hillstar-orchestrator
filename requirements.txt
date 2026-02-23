@@ -1,0 +1,27 @@
+# Hillstar MCP Servers - Exact Pinned Versions
+# Generated: 2026-02-16 05:45 UTC
+# IMPORTANT: Exact versions for reproducibility and security
+# DO NOT USE RANGES (>=, >, <) - use exact versions only
+
+# Core API Providers
+anthropic==0.79.0
+openai==2.21.0
+mistralai==1.12.2
+google-generativeai==0.8.6
+
+# Dependencies (with security CVE fixes)
+requests==2.32.4
+urllib3==2.5.0        # Fix CVE-2025-50182, CVE-2025-50181, CVE-2025-66418, CVE-2025-66471
+pydantic==2.12.5
+cryptography==46.0.5  # Fix CVE-2026-26007
+keyring==25.0.0
+
+# Development/Testing (optional)
+pytest==7.4.4
+pytest-cov==4.1.0
+pytest-html==4.1.1
+ruff==0.3.0
+
+# Security scanning
+pip-audit==2.6.1
+bandit==1.7.5
