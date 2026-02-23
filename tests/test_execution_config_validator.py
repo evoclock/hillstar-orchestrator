@@ -238,6 +238,7 @@ class TestEdgeCases:
         }
         validator = ConfigValidator(config, mock_graph, mock_trace_logger)
         api_key = validator.get_api_key_for_provider("anthropic")
+        assert api_key is not None
         assert "sk-ant-abc123" in api_key
 
     def test_very_long_api_key(self, mock_graph, mock_trace_logger):

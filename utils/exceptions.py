@@ -46,3 +46,8 @@ class ModelSelectionError(HillstarException):
 class ConfigurationError(HillstarException):
 	"""Raised when workflow configuration is invalid."""
 	pass
+
+
+class ExecutionError(HillstarException):
+	"""Raised when node execution fails."""
+	pass

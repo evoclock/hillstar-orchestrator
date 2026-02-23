@@ -141,18 +141,18 @@ class ModelFactory:
         if mode == "auto" and provider_preference:
             resolved_preference = self.resolve_provider_preference(provider_preference)
             # Use provider preference order (e.g., ["anthropic_mcp", "ollama", "local"])
-            # Try each provider in order
-            task_models = ModelSelector.TASK_COMPLEXITY.get(task_complexity, {})
+            # Try each provider in order using registry-based selection
             for pref_provider in resolved_preference:
-                if pref_provider in task_models:
-                    return (pref_provider, task_models[pref_provider])
+                # Use select_new with provider preference
+                provider, model = ModelSelector.select_new(
+                    task_complexity,
+                    provider_preference=pref_provider,
+                )
+                if provider == pref_provider:
+                    return (provider, model)
 
-        # Fallback to ModelSelector.select_with_config
-        provider, model = ModelSelector.select_with_config(
-            task_complexity,
-            self.model_config,
-            node_id,
-        )
+        # Fallback to registry-based selection without provider preference
+        provider, model = ModelSelector.select_new(task_complexity)
 
         return (provider, model)
 

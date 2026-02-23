@@ -14,6 +14,8 @@ Cost Manager: Handle cost estimation, budget checking, and cost tracking for wor
 Extracted from WorkflowRunner to enable modular unit testing and cost policy changes
 without affecting node execution or model selection logic.
 
+Pricing fetched from provider_registry.default.json (source of truth) via get_registry().
+
 Inputs
 ------
 model_config (dict): Model configuration with pricing and budget information
@@ -32,7 +34,7 @@ None (methods modify internal state): cumulative_cost_usd, node_costs dict
 
 Assumptions
 -----------
-- Pricing data is accurate and up-to-date
+- Pricing data is fetched from provider_registry.default.json (source of truth)
 - Budget constraints are coherent (max_per_task <= max_workflow)
 - Token estimates are reasonable approximations
 
@@ -42,9 +44,9 @@ None (per-workflow via model_config)
 
 Failure Modes
 -------------
-- Unknown model → Use fallback pricing
+- Unknown model → Return 0.0 (no pricing available)
 - Missing budget config → No budget enforcement
-- Negative costs → Treated as 0.0
+- Registry unavailable → Return 0.0 for cost estimation
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -54,10 +56,11 @@ Created
 
 Last Edited
 -----------
-2026-02-22
+2026-02-24
 """
 
 from utils import BudgetExceededError
+from config.provider_registry import get_registry
 
 
 class CostManager:
@@ -66,7 +69,7 @@ class CostManager:
     def __init__(self, model_config: dict):
         """
         Args:
-            model_config: Model configuration dict with pricing and budget info
+            model_config: Model configuration dict with budget info
         """
         self.model_config = model_config
         self.cumulative_cost_usd = 0.0
@@ -80,43 +83,48 @@ class CostManager:
         output_tokens: int,
     ) -> float:
         """
-        Estimate cost of a model call.
+        Estimate cost of a model call using provider_registry pricing.
 
         Args:
-            provider: Provider name (anthropic, openai, local, devstral)
-            model_name: Model name
+            provider: Provider name (anthropic, openai, local, devstral_local, etc.)
+            model_name: Model name/API ID
             input_tokens: Estimated input tokens
             output_tokens: Estimated output tokens
 
         Returns:
-            Estimated cost in USD
+            Estimated cost in USD (0.0 if pricing not available)
         """
-        # Pricing per 1M tokens
-        pricing = {
-            "claude-haiku-4-5": {"input": 0.80, "output": 4.0},
-            "claude-sonnet-4-5-20250929": {"input": 3.0, "output": 15.0},
-            "claude-opus-4-6": {"input": 15.0, "output": 75.0},
-            "gpt-3.5-turbo": {"input": 0.5, "output": 1.5},
-            "gpt-4-turbo": {"input": 10.0, "output": 30.0},
-            "gpt-4o": {"input": 5.0, "output": 15.0},
-        }
-
-        # Local/free models
-        if provider in ["devstral", "local", "ollama"]:
+        # Local/free models have no charge
+        if provider in ["devstral_local", "local", "ollama"]:
             return 0.0
 
-        # Get pricing for model
-        model_pricing = pricing.get(model_name)
-        if not model_pricing:
-            # Fallback pricing for unknown models
-            if provider == "openai":
-                model_pricing = {"input": 5.0, "output": 15.0}
-            else:
-                model_pricing = {"input": 3.0, "output": 15.0}
+        try:
+            # Get pricing from registry (source of truth)
+            registry = get_registry()
+            model_config = registry.get_model(provider, model_name)
 
-        input_cost = (input_tokens / 1_000_000) * model_pricing["input"]
-        output_cost = (output_tokens / 1_000_000) * model_pricing["output"]
-        return input_cost + output_cost
+            # If model not found in registry, return 0.0
+            if not model_config:
+                return 0.0
+
+            # Extract pricing from model config
+            pricing = model_config.get("pricing", {})
+            input_cost_per_1m = pricing.get("input_per_1m_usd")
+            output_cost_per_1m = pricing.get("output_per_1m_usd")
+
+            # If pricing not available, return 0.0
+            if input_cost_per_1m is None or output_cost_per_1m is None:
+                return 0.0
+
+            # Calculate cost based on tokens (pricing is per 1M tokens)
+            input_cost = (input_tokens / 1_000_000) * input_cost_per_1m
+            output_cost = (output_tokens / 1_000_000) * output_cost_per_1m
+            return input_cost + output_cost
+
+        except Exception:
+            # If registry is unavailable, return 0.0
+            # This allows execution to continue without cost tracking
+            return 0.0
 
     def check_budget(
         self,

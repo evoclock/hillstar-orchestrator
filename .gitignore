@@ -55,6 +55,7 @@ deprecated/
 .coverage
 htmlcov/
 .test-results/
+tmp_test/
 
 # Credentials (never commit)
 .env

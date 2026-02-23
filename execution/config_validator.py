@@ -174,9 +174,10 @@ class ConfigValidator:
         """Get API key for provider from config file or environment.
 
         Priority:
-        1. ~/.hillstar/provider_registry.json (user config)
-        2. Environment variable
-        3. Return None (let model handle error)
+        1. model_config parameter (for workflow-specific keys)
+        2. ~/.hillstar/provider_registry.json (user config)
+        3. Environment variable
+        4. Return None (let model handle error)
 
         Args:
             provider: Provider name (e.g., "anthropic")
@@ -189,7 +190,16 @@ class ConfigValidator:
         # Strip "_mcp" suffix if present (anthropic_mcp -> anthropic)
         base_provider = provider.replace("_mcp", "")
 
-        # Try config file first
+        # Try model_config first (workflow-specific configuration)
+        if self.model_config:
+            provider_config = self.model_config.get(base_provider)
+            if provider_config:
+                if isinstance(provider_config, dict):
+                    api_key = provider_config.get("api_key")
+                    if api_key:
+                        return api_key
+
+        # Try system config file second
         try:
             config = HillstarConfig()
             api_key = config.get_provider_key(base_provider)
