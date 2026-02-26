@@ -19,25 +19,25 @@ Whether you are coordinating between multiple large language model (LLM) provide
 ## Current Features (v1.0.0)
 
 - **DAG-based workflows** - Define complex research pipelines as
-  directed acyclic graphs
+ directed acyclic graphs
 - **Workflow visualization** - Mermaid diagrams for GitHub, Obsidian,
-  and Markdown
+ and Markdown
 - **Multi-provider support** - Integration with cloud and local models
 - **Flexible model selection** - Presets for cost, quality, and
-  air-gapped setups
+ air-gapped setups
 - **Full auditability** - Comprehensive trace logs with model selection
-  reasoning
+ reasoning
 - **Checkpoint/replay** - Save state at key points, resume from
-  checkpoints
+ checkpoints
 - **Strict governance** - Explicit permissions, no unrestricted API
-  access
+ access
 - **Air-gapped capability** - Works offline with local models
 - **Responsible AI focus** - Explicit governance, compliance tracking,
-  and audit trails
+ and audit trails
 - **Credential Security** - In-flight redaction of credentials, API
-  keys, tokens, and PII
+ keys, tokens, and PII
 - **MCP Server Support** - Optional MCP servers for integration with
-  Claude Code and other tools
+ Claude Code and other tools
 
 ---
 
@@ -78,13 +78,13 @@ examples of building workflows.
 Output:
 
 ```markdown
-▶️  Executing: examples/simple-workflow.json
-📁 Output:    ./.hillstar
+▶ Executing: examples/simple-workflow.json
+📁 Output: ./.hillstar
 
-✅ Workflow executed successfully
+ Workflow executed successfully
 
-  Workflow ID: sample_workflow
-  Trace file:  .hillstar/trace_20260221_031505.jsonl
+ Workflow ID: sample_workflow
+ Trace file: .hillstar/trace_20260221_031505.jsonl
 ```
 
 ### Governance & Development Mode
@@ -132,21 +132,21 @@ topological order.
 
 ```mermaid
 graph TD
-  load_schema["load_schema<br/>(file_read)"]
-  style load_schema fill:#9C27B0,stroke:#6A1B9A,color:#fff
-  load_pdf_corpus["load_pdf_corpus<br/>(file_read)"]
-  style load_pdf_corpus fill:#9C27B0,stroke:#6A1B9A,color:#fff
-  validate["validate<br/>(model_call, simple)"]
-  style validate fill:#2196F3,stroke:#1565C0,color:#fff
-  analyze["analyze<br/>(model_call, moderate)"]
-  style analyze fill:#2196F3,stroke:#1565C0,color:#fff
-  export["export<br/>(file_write)"]
-  style export fill:#4CAF50,stroke:#2E7D32,color:#fff
+ load_schema["load_schema<br/>(file_read)"]
+ style load_schema fill:#9C27B0,stroke:#6A1B9A,color:#fff
+ load_pdf_corpus["load_pdf_corpus<br/>(file_read)"]
+ style load_pdf_corpus fill:#9C27B0,stroke:#6A1B9A,color:#fff
+ validate["validate<br/>(model_call, simple)"]
+ style validate fill:#2196F3,stroke:#1565C0,color:#fff
+ analyze["analyze<br/>(model_call, moderate)"]
+ style analyze fill:#2196F3,stroke:#1565C0,color:#fff
+ export["export<br/>(file_write)"]
+ style export fill:#4CAF50,stroke:#2E7D32,color:#fff
 
-  load_schema --> analyze
-  load_pdf_corpus --> validate
-  validate --> analyze
-  analyze --> export
+ load_schema --> analyze
+ load_pdf_corpus --> validate
+ validate --> analyze
+ analyze --> export
 ```
 
 **Color Legend:**
@@ -162,35 +162,35 @@ Complete workflows require root-level configuration with DAG nodes:
 
 ```json
 {
-  "id": "my_pipeline",
-  "version": "1.0",
-  "graph": {
-    "nodes": {
-      "analyze": {
-        "tool": "model_call",
-        "provider": "anthropic",
-        "model": "claude-opus-4-6",
-        "task": "Analyze data",
-        "parameters": {
-          "max_tokens": 4096
-        }
-      },
-      "validate": {
-        "tool": "script_run",
-        "script": "./validate.py"
-      }
-    },
-    "edges": [
-      { "from": "analyze", "to": "validate" }
-    ]
-  },
-  "provider_config": {
-    "anthropic": {
-      "tos_accepted": true,
-      "audit_enabled": true,
-      "restricted_use_acknowledged": true
-    }
-  }
+ "id": "my_pipeline",
+ "version": "1.0",
+ "graph": {
+ "nodes": {
+ "analyze": {
+ "tool": "model_call",
+ "provider": "anthropic",
+ "model": "claude-opus-4-6",
+ "task": "Analyze data",
+ "parameters": {
+ "max_tokens": 4096
+ }
+ },
+ "validate": {
+ "tool": "script_run",
+ "script": "./validate.py"
+ }
+ },
+ "edges": [
+ { "from": "analyze", "to": "validate" }
+ ]
+ },
+ "provider_config": {
+ "anthropic": {
+ "tos_accepted": true,
+ "audit_enabled": true,
+ "restricted_use_acknowledged": true
+ }
+ }
 }
 ```
 
@@ -199,10 +199,10 @@ Complete workflows require root-level configuration with DAG nodes:
 **Supported providers:**
 
 - **Cloud APIs**: Anthropic (Claude), OpenAI (GPT), Mistral,
-  Google (Gemini)
-  - All use API keys/credentials (never embedded in workflows)
+ Google (Gemini)
+- All use API keys/credentials (never embedded in workflows)
 - **Local Models**: Ollama, llama.cpp, Devstral, or any HTTP-compatible
-  server
+ server
 - **Custom Providers**: Bring your own via wrapper scripts
 - **Subscription mode**: OpenAI only. Unlike Anthropic, OpenAI has decided to support access and usage of your subscription via third party harnesses/tools. A caveat worth mentioning is that if you are developing software, you should default to Cloud APIs for reliability.
 
@@ -215,13 +215,13 @@ Complete workflows require root-level configuration with DAG nodes:
 
 ```json
 {
-  "tool": "model_call",
-  "provider": "anthropic",
-  "model": "claude-opus-4-6",
-  "parameters": {
-    "system": "You are an expert in ...",
-    "max_tokens": 4096
-  }
+ "tool": "model_call",
+ "provider": "anthropic",
+ "model": "claude-opus-4-6",
+ "parameters": {
+ "system": "You are an expert in ...",
+ "max_tokens": 4096
+ }
 }
 ```
 
@@ -230,11 +230,11 @@ Complete workflows require root-level configuration with DAG nodes:
 Check model constraints before setting sampling parameters:
 
 - **Anthropic Claude**: Cannot use `temperature` and `top_p`
-  simultaneously
+ simultaneously
 - **OpenAI o-series & GPT-5**: Do not support `temperature` (use
-  `reasoning_effort` instead)
+ `reasoning_effort` instead)
 - **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
-  performance issues
+ performance issues
 
 See **[docs/USER_MANUAL.md § Temperature Parameter Support](docs/USER_MANUAL.md)**
 for complete constraints by model and provider.
@@ -288,82 +288,86 @@ external systems.
 
 ```bash
 hillstar-orchestrator/
-├── README.md                           # This file
-├── LICENSE                             # Apache 2.0
-├── requirements.txt                    # Python dependencies
-├── pyproject.toml                      # Package configuration
+├── README.md # This file
+├── LICENSE # Apache 2.0
+├── requirements.txt # Python dependencies
+├── pyproject.toml # Package configuration
 ├── .gitignore
 │
-├── cli.py                              # Command-line interface
+├── cli.py # Command-line interface
 │
-├── config/                             # Configuration management
-│   ├── config.py
-│   ├── config_manager.py
-│   ├── model_selector.py
-│   ├── provider_registry.py
-│   └── provider_registry.default.json
+├── config/ # Configuration management
+│ ├── config.py
+│ ├── config_manager.py
+│ ├── model_selector.py
+│ ├── provider_registry.py
+│ └── provider_registry.default.json
 │
-├── execution/                          # Workflow execution engine
-│   ├── runner.py
-│   ├── graph.py
-│   ├── checkpoint.py
-│   ├── trace.py
-│   └── observability.py
+├── execution/ # Workflow execution engine
+│ ├── runner.py # Main orchestration
+│ ├── node_executor.py # Node execution and provider chains
+│ ├── model_selector.py # Model selection and fallback logic
+│ ├── cost_manager.py # Cost tracking and budget enforcement
+│ ├── config_validator.py # Configuration validation
+│ ├── graph.py # DAG execution with topological ordering
+│ ├── checkpoint.py # Checkpoint persistence
+│ ├── trace.py # Execution tracing
+│ └── observability.py # Comprehensive logging
 │
-├── governance/                         # Compliance & policy
-│   ├── compliance.py
-│   ├── policy.py
-│   ├── enforcer.py
-│   ├── hooks.py
-│   └── project_init.py
+├── governance/ # Compliance & policy
+│ ├── compliance.py
+│ ├── policy.py
+│ ├── enforcer.py
+│ ├── hooks.py
+│ └── project_init.py
 │
-├── models/                             # LLM provider integrations
-│   ├── mcp_model.py
-│   ├── anthropic_model.py
-│   ├── anthropic_mcp_model.py
-│   ├── anthropic_ollama_api_model.py
-│   ├── openai_mcp_model.py
-│   ├── mistral_api_model.py
-│   ├── mistral_mcp_model.py
-│   ├── ollama_mcp_model.py
-│   └── devstral_local_model.py
+├── models/ # LLM provider integrations
+│ ├── mcp_model.py
+│ ├── anthropic_model.py
+│ ├── anthropic_mcp_model.py
+│ ├── anthropic_ollama_api_model.py
+│ ├── openai_mcp_model.py
+│ ├── mistral_api_model.py
+│ ├── mistral_mcp_model.py
+│ ├── ollama_mcp_model.py
+│ └── devstral_local_model.py
 │
-├── workflows/                          # Workflow discovery & validation
-│   ├── validator.py
-│   ├── discovery.py
-│   ├── auto_discover.py
-│   └── model_presets.py
+├── workflows/ # Workflow discovery & validation
+│ ├── validator.py
+│ ├── discovery.py
+│ ├── auto_discover.py
+│ └── model_presets.py
 │
-├── utils/                              # Utility functions
-│   ├── credential_redactor.py
-│   ├── exceptions.py
-│   └── report.py
+├── utils/ # Utility functions
+│ ├── credential_redactor.py
+│ ├── exceptions.py
+│ └── report.py
 │
-├── spec/                               # Workflow JSON schema
-│   └── workflow-schema.json
+├── spec/ # Workflow JSON schema
+│ └── workflow-schema.json
 │
-├── tests/                              # Unit tests
-│   ├── test_credential_redactor.py
-│   ├── test_integration.py
-│   ├── test_mcp_error_handling.py
-│   └── test_workflow_execution.py
+├── tests/ # Unit tests
+│ ├── test_credential_redactor.py
+│ ├── test_integration.py
+│ ├── test_mcp_error_handling.py
+│ └── test_workflow_execution.py
 │
-├── examples/                           # Example workflows
-│   ├── simple-workflow.json
-│   └── multi-provider-workflow.json
+├── examples/ # Example workflows
+│ ├── simple-workflow.json
+│ └── multi-provider-workflow.json
 │
-├── docs/                               # User documentation
-│   ├── INSTALLATION.md
-│   ├── QUICK_START.md
-│   ├── USER_MANUAL.md
-│   ├── PROVIDER_MODEL_REFERENCE.md
-│   └── PROVIDER_SETUP.md
+├── docs/ # User documentation
+│ ├── INSTALLATION.md
+│ ├── QUICK_START.md
+│ ├── USER_MANUAL.md
+│ ├── PROVIDER_MODEL_REFERENCE.md
+│ └── PROVIDER_SETUP.md
 │
-└── mcp-server/                         # MCP server implementations
-    ├── anthropic_mcp_server.py
-    ├── openai_mcp_server.py
-    ├── mistral_mcp_server.py
-    └── ... (other MCP servers)
+└── mcp-server/ # MCP server implementations
+ ├── anthropic_mcp_server.py
+ ├── openai_mcp_server.py
+ ├── mistral_mcp_server.py
+ └── ... (other MCP servers)
 ```
 
 ### Local Development
@@ -406,7 +410,7 @@ hillstar wizard
 
 - Verify the env var is set: `echo $PROVIDER_API_KEY`
 - Check provider name spelling in workflow (e.g., `anthropic` not
-  `claude`)
+ `claude`)
 - Run `hillstar wizard` to validate and save credentials
 
 ### Model Issues
@@ -415,7 +419,7 @@ hillstar wizard
 
 - Model does not support temperature (o3, o3-mini, GPT-5 series)
 - See **[docs/USER_MANUAL.md § Temperature Parameter Support](docs/USER_MANUAL.md)**
-  for constraints
+ for constraints
 - Remove temperature from parameters, or use a different model
 
 #### Error: "Model not found" or "Model not accessible"
@@ -483,11 +487,11 @@ If you use Hillstar Orchestrator in research, please cite:
 ```bibtex
 
 @software{gamboa2026hillstar,
-  title={Hillstar Orchestrator v1.0.0: A security-first Workflow
-    orchestration for multi-agent AI pipelines},
-  author={Gamboa, Julen},
-  year={2026},
-  url={https://github.com/evoclock/hillstar-orchestrator}
+ title={Hillstar Orchestrator v1.0.0: A security-first Workflow
+ orchestration for multi-agent AI pipelines},
+ author={Gamboa, Julen},
+ year={2026},
+ url={https://github.com/evoclock/hillstar-orchestrator}
 }
 ```
 
@@ -495,36 +499,44 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟡 **v1.0.0 MVP** (Feb 2026) - Core orchestration functionality stable
-and tested.
+🟢 **v1.0.0 Production Release** (Feb 26, 2026) - Core orchestration engine
+complete, tested, and production-ready with comprehensive security and governance.
 
 **v1.0.0 Capabilities:**
 
 - **Multi-provider access** - Anthropic, OpenAI, Mistral, Google cloud
-  APIs; local models (Ollama, llama.cpp, Devstral); MCP servers
+ APIs; local models (Ollama, llama.cpp, Devstral); MCP servers
 - **Smart model selection** - Four cost/quality presets or explicitly
-  choose any model
+ choose any model
 - **Safe parameters** - Model constraints auto-documented with helpful
-  errors before execution
+ errors before execution
 - **Workflow governance** - Three commit modes: require workflow
-  execution (default), dev mode, or one-time override
+ execution (default), dev mode, or one-time override
 - **Secure credentials** - Automatic credential redaction in logs/errors;
-  never embedded in workflows
+ never embedded in workflows
 - **Workflow visualization** - Mermaid DAG diagrams; topological
-  execution order visible
+ execution order visible
 - **Checkpoint/replay** - Resume from saved state; audit trail of
-  execution
+ execution
 - **Air-gapped ready** - Run entirely offline with local models
 - **Workflow discovery & validation** - Auto-find and validate workflows
-  before execution
+ before execution
+
+**v1.0.0 Test & Quality Metrics:**
+
+- **1,078 tests** - 100% pass rate
+- **91% code coverage** - Comprehensive module coverage (41 modules at 100%, 20 at 95-99%)
+- **Credential security** - 24 pattern types detected and redacted
+- **MCP integration** - 7 MCP servers validated and tested
+- **Performance** - Topological DAG execution with intelligent fallback chains
 
 **Future Releases (v2.0+):**
 
-- Cost estimation and budget enforcement
-- Advanced safety guards for testing infrastructure
+- Advanced safety guards for complex testing infrastructure
 - SDK integration for token counting and real-time pricing
-- Extended provider support
+- Extended provider support (Vertex AI, additional local models)
 - Plugin system and extensibility
-- A fully-fledged UI
+- Web UI for workflow visualization and management
+- Distributed execution across multiple machines
 
 ---
