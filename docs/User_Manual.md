@@ -1,11 +1,11 @@
-# Hillstar API Reference
+# Hillstar API Reference & User Manual
 **Package:** hillstar-orchestrator
-**Version:** 0.1.0
-**Description:** Research-grade workflow orchestration for multi-agent AI pipelines and classification tasks
-**Author:** Julen Gamboa (<j.a.r.gamboa@gmail.com>)
+**Version:** 1.0.0
+**Description:** Security and reproducibility-first workflow orchestrator for research environments
+**Author:** Julen Gamboa (<julen.gamboa.ds@gmail.com>)
 **License:** Apache-2.0
-**Repository:** <https://github.com/evoclock/agentic-orchestrator>
-**Python:** >=3.8
+**Repository:** <https://github.com/evoclock/hillstar-orchestrator>
+**Python:** >=3.10
 
 ## Table of Contents
 
@@ -39,13 +39,13 @@ Hillstar consists of several key components:
 
 ```text
 hillstar/
-├── config/          - Configuration management
-├── execution/       - Workflow execution engine
-├── governance/      - Compliance and policy enforcement
-├── models/          - LLM provider implementations
-├── utils/           - Utilities (logging, tracing, redaction)
-├── workflows/       - Workflow discovery and validation
-└── cli.py           - Command-line interface
+├── config/ - Configuration management
+├── execution/ - Workflow execution engine
+├── governance/ - Compliance and policy enforcement
+├── models/ - LLM provider implementations
+├── utils/ - Utilities (logging, tracing, redaction)
+├── workflows/ - Workflow discovery and validation
+└── cli.py - Command-line interface
 ```
 
 ## Module Structure
@@ -99,7 +99,6 @@ hillstar/
 - `hillstar-orchestrator.utils.credential_redactor`
 - `hillstar-orchestrator.utils.exceptions`
 - `hillstar-orchestrator.utils.json_output_viewer`
-- `hillstar-orchestrator.utils.openai_auth_resolver`
 - `hillstar-orchestrator.utils.report`
 
 ### Workflow Discovery & Validation
@@ -138,19 +137,19 @@ Command-line interface for workflow orchestration.
 
 Usage
 -----
-    hillstar discover [PATH]              Find workflows in current or specified directory
-    hillstar validate WORKFLOW_PATH       Validate a workflow
-    hillstar execute WORKFLOW_PATH [DIR]  Execute a workflow
-    hillstar presets                      List available presets
-    hillstar wizard                       Run interactive setup wizard
-    hillstar mode dev|normal              Set development mode for commits
-    hillstar enforce check|status|...     Governance enforcement
-    hillstar loon reduce WORKFLOW          Reduce workflow to Loon format
-    hillstar loon expand LOON              Expand Loon back to standard format
-    hillstar loon estimate WORKFLOW        Estimate token savings
-    hillstar execute-node WORKFLOW NODE   Execute a single node
-    hillstar --version                    Show version
-    hillstar --help                       Show this help message
+ hillstar discover [PATH] Find workflows in current or specified directory
+ hillstar validate WORKFLOW_PATH Validate a workflow
+ hillstar execute WORKFLOW_PATH [DIR] Execute a workflow
+ hillstar presets List available presets
+ hillstar wizard Run interactive setup wizard
+ hillstar mode dev|normal Set development mode for commits
+ hillstar enforce check|status|... Governance enforcement
+ hillstar loon reduce WORKFLOW Reduce workflow to Loon format
+ hillstar loon expand LOON Expand Loon back to standard format
+ hillstar loon estimate WORKFLOW Estimate token savings
+ hillstar execute-node WORKFLOW NODE Execute a single node
+ hillstar --version Show version
+ hillstar --help Show this help message
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -180,23 +179,23 @@ from .governance import GovernanceEnforcer, HookManager
 **Functions:**
 
 - `cmd_discover(args)`
-  Find workflows in a directory.
+ Find workflows in a directory.
 - `cmd_validate(args)`
-  Validate a workflow.
+ Validate a workflow.
 - `cmd_execute(args)`
-  Execute a workflow.
+ Execute a workflow.
 - `cmd_presets(args)`
-  List available presets.
+ List available presets.
 - `cmd_enforce(args)`
-  Governance enforcement commands.
+ Governance enforcement commands.
 - `cmd_wizard(args)`
-  Run setup wizard.
+ Run setup wizard.
 - `cmd_mode(args)`
-  Set development mode for development commits.
+ Set development mode for development commits.
 - `main()`
-  Main CLI entry point.
+ Main CLI entry point.
 - `cmd_execute_node(args)`
-  Execute a single node from a workflow.
+ Execute a single node from a workflow.
 
 ### Configuration & Provider Registry
 
@@ -271,107 +270,107 @@ API key management. Provides methods for:
 *Methods:*
 
 - `__init__(self)`
-  Initialize HillstarConfig with user and default configurations.
+ Initialize HillstarConfig with user and default configurations.
 - `set_provider_key(self, provider: str, api_key: str) -> None`
-  Store API key for a provider.
+ Store API key for a provider.
 
 Args:
-  provider: Provider name (e.g., 'anthropic', 'openai')
-  api_key: API key value
+ provider: Provider name (e.g., 'anthropic', 'openai')
+ api_key: API key value
 
 Raises:
-  ValueError: If provider name or api_key is empty
+ ValueError: If provider name or api_key is empty
 
 - `get_provider_key(self, provider: str) -> Optional[str]`
-  Retrieve API key for a provider.
+ Retrieve API key for a provider.
 
 Args:
-  provider: Provider name
+ provider: Provider name
 
 Returns:
-  API key if configured, None otherwise
+ API key if configured, None otherwise
 
 - `list_configured_providers(self) -> list[str]`
-  List providers that have API keys configured.
+ List providers that have API keys configured.
 
 Returns:
-  List of provider names with keys configured
+ List of provider names with keys configured
 
 - `list_missing_providers(self, all_providers: Optional[list[str]] = None) -> list[str]`
-  List providers not yet configured.
+ List providers not yet configured.
 
 Args:
-  all_providers: List of provider names to check against.
-                If None, uses default provider list.
+ all_providers: List of provider names to check against.
+ If None, uses default provider list.
 
 Returns:
-  List of provider names without keys configured
+ List of provider names without keys configured
 
 - `validate_key(self, provider: str, api_key: str) -> bool`
-  Validate that an API key is non-empty and reasonably formatted.
+ Validate that an API key is non-empty and reasonably formatted.
 
 This is basic validation (non-empty, reasonable length).
 Full validation (API call) deferred to runtime.
 
 Args:
-  provider: Provider name
-  api_key: API key to validate
+ provider: Provider name
+ api_key: API key to validate
 
 Returns:
-  True if key passes basic validation, False otherwise
+ True if key passes basic validation, False otherwise
 
 - `save_config(self) -> None`
-  Write configuration to ~/.hillstar/provider_registry.json.
+ Write configuration to ~/.hillstar/provider_registry.json.
 
 Creates the directory if it doesn't exist.
 
 Raises:
-  IOError: If unable to write file
+ IOError: If unable to write file
 
 - `load_config(self) -> None`
-  Load configuration from ~/.hillstar/provider_registry.json.
+ Load configuration from ~/.hillstar/provider_registry.json.
 
 Creates empty config if file doesn't exist.
 
 - `get_merged_registry(self) -> ProviderRegistry`
-  Get the complete registry with user overrides applied.
+ Get the complete registry with user overrides applied.
 - `validate_provider_config(self, provider: str, config: dict[(str, Any)]) -> list[str]`
-  Validate provider configuration against registry.
+ Validate provider configuration against registry.
 
 Args:
-  provider: Provider name
-  config: Provider configuration dict
+ provider: Provider name
+ config: Provider configuration dict
 
 Returns:
-  List of validation error messages (empty if valid)
+ List of validation error messages (empty if valid)
 
 - `check_compliance(self, provider: str, config: dict[(str, Any)]) -> tuple[(bool, list[str])]`
-  Check compliance requirements for a provider.
+ Check compliance requirements for a provider.
 
 Args:
-  provider: Provider name
-  config: Provider configuration
+ provider: Provider name
+ config: Provider configuration
 
 Returns:
-  (is_compliant: bool, issues: List[str])
+ (is_compliant: bool, issues: List[str])
 
 - `get_provider_info(self, provider: str) -> Optional[dict[(str, Any)]]`
-  Get full provider configuration from registry.
+ Get full provider configuration from registry.
 - `list_available_providers(self) -> list[str]`
-  List all available providers from registry.
+ List all available providers from registry.
 - `list_available_models(self, provider: str) -> list[str]`
-  List all available models for a provider.
+ List all available models for a provider.
 - `merge_configs(self, user_config: dict[(str, Any)], workflow_config: dict[(str, Any)]) -> dict[(str, Any)]`
-  Merge user configuration with workflow configuration.
+ Merge user configuration with workflow configuration.
 
 Workflow configuration takes precedence over user config.
 
 Args:
-  user_config: User provider configuration overrides
-  workflow_config: Workflow-specific model configuration
+ user_config: User provider configuration overrides
+ workflow_config: Workflow-specific model configuration
 
 Returns:
-  Merged configuration dictionary
+ Merged configuration dictionary
 
 #### Module: `hillstar-orchestrator.config.model_selector`
 
@@ -423,8 +422,8 @@ TEMPERATURE_DEFAULT: Default temperature (0.00000073 to minimize hallucination)
 Failure Modes
 -------------
 
-- No credentials available → ValueError
-- Unknown task type → defaults to Haiku
+- No credentials available ValueError
+- Unknown task type defaults to Haiku
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -446,23 +445,23 @@ Cost-optimized model selection based on task complexity.
 *Methods:*
 
 - `select(task_complexity: str = 'moderate', provider_preference: Optional[str] = None) -> Tuple[(str, str)]`
-  Select model based on task complexity and preferences.
+ Select model based on task complexity and preferences.
 
 Args:
-    task_complexity: "simple", "moderate", "complex", or "critical"
-    provider_preference: Prefer specific provider (anthropic, openai, local, devstral)
+ task_complexity: "simple", "moderate", "complex", or "critical"
+ provider_preference: Prefer specific provider (anthropic, openai, local, devstral)
 
 Returns:
-    (provider, model_name) tuple
+ (provider, model_name) tuple
 
 Example:
-    provider, model = ModelSelector.select("moderate", provider_preference="anthropic")
-    # Returns ("anthropic", "claude-sonnet-4-5-20250929")
+ provider, model = ModelSelector.select("moderate", provider_preference="anthropic")
+ # Returns ("anthropic", "claude-sonnet-4-5-20250929")
 
 - `get_temperature() -> float`
-  Get default temperature (minimizes hallucination).
+ Get default temperature (minimizes hallucination).
 - `select_with_config(task_complexity: str = 'moderate', config: Optional[Dict[(str, Any)]] = None, node_id: str = '') -> Tuple[(str, str)]`
-  Select model using workflow configuration.
+ Select model using workflow configuration.
 
 Implements three-layer priority:
 
@@ -474,20 +473,20 @@ Note: All cloud providers use API key authentication for compliance.
 Local providers use direct HTTP access to local model servers.
 
 Args:
-    task_complexity: Task complexity hint
-    config: Model config dict from workflow.json
-    node_id: Node ID for complexity_hints lookup
+ task_complexity: Task complexity hint
+ config: Model config dict from workflow.json
+ node_id: Node ID for complexity_hints lookup
 
 Returns:
-    (provider, model_name) tuple
+ (provider, model_name) tuple
 
 Example:
-    config = {
-        "mode": "preset",
-        "preset": "minimize_cost",
-        "sampling_params": {"temperature": 0.0}
-    }
-    provider, model = ModelSelector.select_with_config("moderate", config)
+ config = {
+ "mode": "preset",
+ "preset": "minimize_cost",
+ "sampling_params": {"temperature": 0.0}
+ }
+ provider, model = ModelSelector.select_with_config("moderate", config)
 
 #### Module: `hillstar-orchestrator.config.provider_registry`
 
@@ -530,9 +529,9 @@ None (per-query)
 Failure Modes
 -------------
 
-- Missing default registry → FileNotFoundError
-- Malformed JSON → JSONDecodeError
-- Invalid provider/model → Returns None
+- Missing default registry FileNotFoundError
+- Malformed JSON JSONDecodeError
+- Invalid provider/model Returns None
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -559,109 +558,109 @@ The registry is loaded from:
 *Properties:*
 
 - `version` -> str
-  Get registry version.
+ Get registry version.
 - `last_updated` -> str
-  Get last update timestamp.
+ Get last update timestamp.
 
 *Methods:*
 
 - `__init__(self, custom_registry_path: Optional[str] = None)`
-  Initialize the provider registry.
+ Initialize the provider registry.
 
 Args:
-    custom_registry_path: Optional path to a custom registry file.
-        If provided, this takes precedence over both default and user override.
+ custom_registry_path: Optional path to a custom registry file.
+ If provided, this takes precedence over both default and user override.
 
 - `list_providers(self, provider_type: Optional[str] = None) -> List[str]`
-  List available providers, optionally filtered by type.
+ List available providers, optionally filtered by type.
 
 Args:
-    provider_type: Optional filter: "cloud_api", "local", "local_proxy"
+ provider_type: Optional filter: "cloud_api", "local", "local_proxy"
 
 Returns:
-    List of provider names
+ List of provider names
 
 - `get_provider(self, provider_name: str) -> Optional[Dict[(str, Any)]]`
-  Get full provider configuration.
+ Get full provider configuration.
 - `get_provider_compliance(self, provider_name: str) -> Optional[Dict[(str, Any)]]`
-  Get compliance rules for a provider.
+ Get compliance rules for a provider.
 - `get_model(self, provider_name: str, model_id: str) -> Optional[Dict[(str, Any)]]`
-  Get model configuration.
+ Get model configuration.
 
 Args:
-    provider_name: Provider identifier (e.g., "anthropic")
-    model_id: Model identifier (e.g., "claude-opus-4-6")
+ provider_name: Provider identifier (e.g., "anthropic")
+ model_id: Model identifier (e.g., "claude-opus-4-6")
 
 Returns:
-    Model configuration dict or None
+ Model configuration dict or None
 
 - `find_models(self, capabilities: Optional[List[str]] = None, max_tier: Optional[str] = None, provider_type: Optional[str] = None, require_ollama: Optional[bool] = None) -> List[Dict[(str, Any)]]`
-  Find models matching criteria.
+ Find models matching criteria.
 
 Args:
-    capabilities: List of required capabilities (e.g., ["coding", "reasoning"])
-    max_tier: Maximum cost tier (e.g., "cheap", "standard")
-    provider_type: Filter by provider type (e.g., "cloud_api", "local")
-    require_ollama: If True, only return models requiring Ollama
+ capabilities: List of required capabilities (e.g., ["coding", "reasoning"])
+ max_tier: Maximum cost tier (e.g., "cheap", "standard")
+ provider_type: Filter by provider type (e.g., "cloud_api", "local")
+ require_ollama: If True, only return models requiring Ollama
 
 Returns:
-    List of matching model configs with provider context
+ List of matching model configs with provider context
 
 - `get_cheapest_model(self, capabilities: Optional[List[str]] = None, provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Get the cheapest model matching criteria, respecting provider preference.
+ Get the cheapest model matching criteria, respecting provider preference.
 
 Args:
-    capabilities: Required capabilities
-    provider_preference: Preferred provider order (e.g., ["anthropic", "openai"])
+ capabilities: Required capabilities
+ provider_preference: Preferred provider order (e.g., ["anthropic", "openai"])
 
 Returns:
-    Tuple of (provider, model_id, model_config) or None
+ Tuple of (provider, model_id, model_config) or None
 
 - `estimate_cost(self, provider_name: str, model_id: str, input_tokens: int, output_tokens: int) -> float`
-  Estimate cost for a model call.
+ Estimate cost for a model call.
 
 Args:
-    provider_name: Provider identifier
-    model_id: Model identifier
-    input_tokens: Number of input tokens
-    output_tokens: Number of output tokens
+ provider_name: Provider identifier
+ model_id: Model identifier
+ input_tokens: Number of input tokens
+ output_tokens: Number of output tokens
 
 Returns:
-    Estimated cost in USD
+ Estimated cost in USD
 
 - `get_fallback_chain(self, complexity: str, provider_preference: Optional[List[str]] = None) -> List[str]`
-  Get provider fallback chain for a complexity level.
+ Get provider fallback chain for a complexity level.
 
 Args:
-    complexity: Task complexity ("simple", "moderate", "complex", "critical")
-    provider_preference: Preferred providers (highest priority first)
+ complexity: Task complexity ("simple", "moderate", "complex", "critical")
+ provider_preference: Preferred providers (highest priority first)
 
 Returns:
-    List of providers in fallback order
+ List of providers in fallback order
 
 - `is_usage_compliant(self, provider_name: str, use_case: str) -> Tuple[(bool, str)]`
-  Check if a use case is compliant for a provider.
+ Check if a use case is compliant for a provider.
 
 Args:
-    provider_name: Provider identifier
-    use_case: Intended use case (e.g., "research", "commercial")
+ provider_name: Provider identifier
+ use_case: Intended use case (e.g., "research", "commercial")
 
 Returns:
-    Tuple of (is_compliant, reason)
+ Tuple of (is_compliant, reason)
 
 - `get_model_sampling_params(self, provider_name: str, model_id: str) -> Dict[(str, Any)]`
-  Get default sampling parameters for a model.
+ Get default sampling parameters for a model.
 - `get_all_models_flat(self) -> Dict[(Tuple[(str, str)], Dict[(str, Any)])]`
-  Get a flat dictionary of all (provider, model_id) -> model_config.
+ Get a flat dictionary of all (provider, model_id) -> model_config.
 - `describe(self) -> str`
-  Get a human-readable description of the registry.
+ Get a human-readable description of the registry.
 
 **Functions:**
 
 - `get_registry() -> 'ProviderRegistry'`
-  Get the global registry instance.
+ Get the global registry instance.
 - `reset_registry() -> None`
-  Reset the global registry instance (useful for testing).
+ Reset the global registry instance (useful for testing).
 
 #### Module: `hillstar-orchestrator.config.setup_wizard`
 
@@ -725,12 +724,12 @@ Interactive wizard for Hillstar provider configuration.
 
 - `__init__(self)`
 - `run(self) -> None`
-  Run the setup wizard.
+ Run the setup wizard.
 
 **Functions:**
 
 - `main()`
-  Entry point for setup wizard.
+ Entry point for setup wizard.
 
 ### Deprecated
 
@@ -803,10 +802,10 @@ None (per-workflow)
 Failure Modes
 -------------
 
-- Invalid workflow JSON → json.JSONDecodeError
-- Missing model credentials → ValueError
-- Node execution error → Exception logged and re-raised
-- Timeout on model call → requests.exceptions.Timeout
+- Invalid workflow JSON json.JSONDecodeError
+- Missing model credentials ValueError
+- Node execution error Exception logged and re-raised
+- Timeout on model call requests.exceptions.Timeout
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -828,25 +827,25 @@ Execute research workflows with full auditability and smart model selection.
 *Methods:*
 
 - `__init__(self, workflow_path: str, output_dir: str = './.hillstar')`
-  Args:
-    workflow_path: Path to workflow.json file
-    output_dir: Directory for traces and checkpoints
+ Args:
+ workflow_path: Path to workflow.json file
+ output_dir: Directory for traces and checkpoints
 - `get_model(self, provider: str, model_name: str, **kwargs)`
-  Get or create model instance with smart selection.
+ Get or create model instance with smart selection.
 
 Args:
-    provider: Provider name.
-    model_name: Model identifier.
-    **kwargs: Provider-specific options (e.g., sandbox, approval_policy
-        for codex_mcp).
+ provider: Provider name.
+ model_name: Model identifier.
+ **kwargs: Provider-specific options (e.g., sandbox, approval_policy
+ for codex_mcp).
 
 - `execute_node(self, node_id: str, node: dict, inputs: Any) -> dict[(str, Any)]`
-  Execute a single node.
+ Execute a single node.
 - `execute(self, resume_from: str = None) -> dict[(str, Any)]`
-  Execute the workflow, optionally resuming from a checkpoint.
+ Execute the workflow, optionally resuming from a checkpoint.
 
 Args:
-    resume_from: Checkpoint file path or node_id to resume from
+ resume_from: Checkpoint file path or node_id to resume from
 
 ### Dev
 
@@ -912,11 +911,11 @@ from typing import Dict, Any, Optional
 **Functions:**
 
 - `load_auth_json(path: Optional[str] = None) -> Dict[(str, Any)]`
-  Load auth.json from repo root or OpenAI config directory.
+ Load auth.json from repo root or OpenAI config directory.
 - `analyze_tokens(auth_data: Dict[(str, Any)], output_file: Path) -> None`
-  Analyze available tokens in auth.json and write to file.
+ Analyze available tokens in auth.json and write to file.
 - `main()`
-  Main entry point.
+ Main entry point.
 
 ### Docs
 
@@ -1001,9 +1000,9 @@ Builds cross-references between modules, classes, and functions.
 
 - `__init__(self, modules_data: Dict[(str, DocModule)])`
 - `get_module_dependencies(self, module_name: str) -> List[str]`
-  Get modules that a module depends on.
+ Get modules that a module depends on.
 - `find_related_types(self, type_name: str) -> List[Tuple[(str, str)]]`
-  Find modules and items using or returning a type.
+ Find modules and items using or returning a type.
 
 ##### `class ASTAnalyzer(ast.NodeVisitor)` {#hillstar-orchestrator-docs-doc_generator-astanalyzer}
 
@@ -1013,25 +1012,25 @@ Analyzes Python AST to extract documentation information.
 
 - `__init__(self, module_name: str, source_path: str)`
 - `get_decorator_names(self, node: Any) -> List[str]`
-  Extract decorator names from a node.
+ Extract decorator names from a node.
 - `get_type_annotation(self, annotation: Optional[Any]) -> str`
-  Convert annotation AST node to string.
+ Convert annotation AST node to string.
 - `get_default_value(self, default: Optional[Any]) -> Optional[str]`
-  Convert default value AST node to string.
+ Convert default value AST node to string.
 - `visit_Module(self, node: ast.Module) -> None`
-  Visit module node.
+ Visit module node.
 - `visit_Import(self, node: ast.Import) -> None`
-  Visit import statement.
+ Visit import statement.
 - `visit_ImportFrom(self, node: ast.ImportFrom) -> None`
-  Visit from...import statement.
+ Visit from...import statement.
 - `visit_ClassDef(self, node: ast.ClassDef) -> None`
-  Visit class definition.
+ Visit class definition.
 - `visit_FunctionDef(self, node: ast.FunctionDef) -> None`
-  Visit function definition.
+ Visit function definition.
 - `visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None`
-  Visit async function definition.
+ Visit async function definition.
 - `visit_Assign(self, node: ast.Assign) -> None`
-  Visit assignment (constants/globals).
+ Visit assignment (constants/globals).
 
 ##### `class DocumentationGenerator` {#hillstar-orchestrator-docs-doc_generator-documentationgenerator}
 
@@ -1041,18 +1040,18 @@ Generates comprehensive markdown documentation from Python packages.
 
 - `__init__(self, package_path: str, setup_py_path: str)`
 - `analyze_package(self) -> None`
-  Analyze all Python files in package.
+ Analyze all Python files in package.
 - `extract_setup_metadata(self) -> Dict[(str, Any)]`
-  Extract metadata from setup.py.
+ Extract metadata from setup.py.
 - `generate_markdown(self) -> str`
-  Generate comprehensive markdown documentation.
+ Generate comprehensive markdown documentation.
 - `save_documentation(self, output_path: str) -> None`
-  Save generated documentation to file.
+ Save generated documentation to file.
 
 **Functions:**
 
 - `generate_user_manual(package_path: str = '/home/jgamboa/hillstar-orchestrator', setup_py_path: str = '/home/jgamboa/agentic-orchestrator/python/setup.py', output_path: str = '/home/jgamboa/hillstar-orchestrator/docs/User_Manual.md') -> None`
-  Generate User Manual documentation for Hillstar package.
+ Generate User Manual documentation for Hillstar package.
 
 ### Workflow Execution
 
@@ -1112,9 +1111,9 @@ None (per-node checkpointing)
 Failure Modes
 -------------
 
-- No write permissions → IOError
-- Corrupt checkpoint file → json.JSONDecodeError
-- Missing checkpoint → FileNotFoundError
+- No write permissions IOError
+- Corrupt checkpoint file json.JSONDecodeError
+- Missing checkpoint FileNotFoundError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1136,37 +1135,37 @@ Manage workflow checkpoints for replay and recovery.
 *Methods:*
 
 - `__init__(self, output_dir: str)`
-  Args:
-    output_dir: Directory to store checkpoints
+ Args:
+ output_dir: Directory to store checkpoints
 - `create(self, node_id: str, state: Dict[(str, Any)]) -> str`
-  Create a checkpoint after node execution.
+ Create a checkpoint after node execution.
 
 Args:
-    node_id: Node that just completed
-    state: Workflow state to save
+ node_id: Node that just completed
+ state: Workflow state to save
 
 Returns:
-    Path to checkpoint file
+ Path to checkpoint file
 
 - `list_checkpoints(self) -> Dict[(str, str)]`
-  List all available checkpoints.
+ List all available checkpoints.
 - `load(self, checkpoint_file: str) -> Dict[(str, Any)]`
-  Load a checkpoint.
+ Load a checkpoint.
 
 Args:
-    checkpoint_file: Path to checkpoint file
+ checkpoint_file: Path to checkpoint file
 
 Returns:
-    Checkpoint data
+ Checkpoint data
 
 - `get_latest_checkpoint(self, node_id: Optional[str] = None) -> Optional[str]`
-  Get most recent checkpoint.
+ Get most recent checkpoint.
 
 Args:
-    node_id: Optionally filter by node (get all if None)
+ node_id: Optionally filter by node (get all if None)
 
 Returns:
-    Path to latest checkpoint or None
+ Path to latest checkpoint or None
 
 #### Module: `hillstar-orchestrator.execution.config_validator`
 
@@ -1214,11 +1213,11 @@ None (per-workflow via model_config and graph)
 Failure Modes
 -------------
 
-- Invalid mode/preset combination → ConfigurationError
-- Budget constraints incoherent → ConfigurationError
-- Allowlist/blocklist overlap → ConfigurationError
-- API key not found → Return None (model handles error)
-- .env file missing → Silently ignore
+- Invalid mode/preset combination ConfigurationError
+- Budget constraints incoherent ConfigurationError
+- Allowlist/blocklist overlap ConfigurationError
+- API key not found Return None (model handles error)
+- .env file missing Silently ignore
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1240,20 +1239,20 @@ Validate model configuration and manage API key retrieval.
 *Methods:*
 
 - `__init__(self, model_config: dict, graph: WorkflowGraph, trace_logger: TraceLogger)`
-  Args:
-    model_config: Model configuration dict to validate
-    graph: WorkflowGraph instance for accessing workflow schema
-    trace_logger: TraceLogger instance for logging warnings
+ Args:
+ model_config: Model configuration dict to validate
+ graph: WorkflowGraph instance for accessing workflow schema
+ trace_logger: TraceLogger instance for logging warnings
 - `load_env_file() -> None`
-  Load .env file from repo root to ensure API keys are available.
+ Load .env file from repo root to ensure API keys are available.
 - `validate_model_config(self) -> None`
-  Validate model configuration for coherence.
+ Validate model configuration for coherence.
 
 Raises:
-    ConfigurationError: If configuration is invalid
+ ConfigurationError: If configuration is invalid
 
 - `get_api_key_for_provider(self, provider: str) -> Optional[str]`
-  Get API key for provider from config file or environment.
+ Get API key for provider from config file or environment.
 
 Priority:
 
@@ -1262,10 +1261,10 @@ Priority:
 3. Return None (let model handle error)
 
 Args:
-    provider: Provider name (e.g., "anthropic")
+ provider: Provider name (e.g., "anthropic")
 
 Returns:
-    API key string or None if not found
+ API key string or None if not found
 
 #### Module: `hillstar-orchestrator.execution.cost_manager`
 
@@ -1316,9 +1315,9 @@ None (per-workflow via model_config)
 Failure Modes
 -------------
 
-- Unknown model → Use fallback pricing
-- Missing budget config → No budget enforcement
-- Negative costs → Treated as 0.0
+- Unknown model Use fallback pricing
+- Missing budget config No budget enforcement
+- Negative costs Treated as 0.0
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1340,32 +1339,32 @@ Manage cost estimation, budget enforcement, and cost tracking for models.
 *Methods:*
 
 - `__init__(self, model_config: dict)`
-  Args:
-    model_config: Model configuration dict with pricing and budget info
+ Args:
+ model_config: Model configuration dict with pricing and budget info
 - `estimate_cost(self, provider: str, model_name: str, input_tokens: int, output_tokens: int) -> float`
-  Estimate cost of a model call.
+ Estimate cost of a model call.
 
 Args:
-    provider: Provider name (anthropic, openai, local, devstral)
-    model_name: Model name
-    input_tokens: Estimated input tokens
-    output_tokens: Estimated output tokens
+ provider: Provider name (anthropic, openai, local, devstral)
+ model_name: Model name
+ input_tokens: Estimated input tokens
+ output_tokens: Estimated output tokens
 
 Returns:
-    Estimated cost in USD
+ Estimated cost in USD
 
 - `check_budget(self, estimated_cost: float, node_id: str) -> None`
-  Check if cost would exceed budget limits.
+ Check if cost would exceed budget limits.
 
 Args:
-    estimated_cost: Estimated cost of this call in USD
-    node_id: Node ID for logging
+ estimated_cost: Estimated cost of this call in USD
+ node_id: Node ID for logging
 
 Raises:
-    BudgetExceededError: If budget would be exceeded
+ BudgetExceededError: If budget would be exceeded
 
 - `record_cost(self, node_id: str, cost: float) -> None`
-  Record actual cost for a node.
+ Record actual cost for a node.
 
 #### Module: `hillstar-orchestrator.execution.graph`
 
@@ -1410,9 +1409,9 @@ None (class-based)
 Failure Modes
 -------------
 
-- Cycle detected in graph → ValueError
-- Invalid node reference → KeyError
-- Missing required node → ValueError
+- Cycle detected in graph ValueError
+- Invalid node reference KeyError
+- Missing required node ValueError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1434,23 +1433,23 @@ Directed Acyclic Graph (DAG) workflow executor.
 *Methods:*
 
 - `__init__(self, workflow_json: Dict[(str, Any)])`
-  Args:
-    workflow_json: Workflow definition (nodes + edges)
+ Args:
+ workflow_json: Workflow definition (nodes + edges)
 - `get_node_inputs(self, node_id: str) -> Any`
-  Resolve node inputs, substituting references to previous outputs.
+ Resolve node inputs, substituting references to previous outputs.
 - `execute_node(self, node_id: str, executor_fn) -> Any`
-  Execute a single node.
+ Execute a single node.
 - `get_execution_order(self) -> List[str]`
-  Return the order in which nodes should execute.
+ Return the order in which nodes should execute.
 - `get_checkpoint_nodes(self) -> List[str]`
-  Return nodes where checkpoints should be created.
+ Return nodes where checkpoints should be created.
 - `export_state(self) -> Dict[(str, Any)]`
-  Export complete execution state.
+ Export complete execution state.
 - `import_state(self, state: Dict[(str, Any)]) -> None`
-  Import execution state from checkpoint for resumption.
+ Import execution state from checkpoint for resumption.
 
 Args:
-    state: State dictionary from checkpoint
+ state: State dictionary from checkpoint
 
 #### Module: `hillstar-orchestrator.execution.model_selector`
 
@@ -1501,10 +1500,10 @@ None (per-workflow via model_config)
 Failure Modes
 -------------
 
-- Unknown provider → ValueError
-- Missing API key → Model handles error
-- Ollama unavailable → Check fails, other providers tried
-- Local tool missing → Marked unavailable
+- Unknown provider ValueError
+- Missing API key Model handles error
+- Ollama unavailable Check fails, other providers tried
+- Local tool missing Marked unavailable
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1526,34 +1525,34 @@ Factory for creating and caching model instances with provider resolution.
 *Methods:*
 
 - `__init__(self, model_config: dict, trace_logger: TraceLogger, config_validator: ConfigValidator)`
-  Args:
-    model_config: Model configuration with provider preferences
-    trace_logger: Logger for provider resolution and events
-    config_validator: ConfigValidator for API key retrieval
+ Args:
+ model_config: Model configuration with provider preferences
+ trace_logger: Logger for provider resolution and events
+ config_validator: ConfigValidator for API key retrieval
 - `select_model(self, node_id: str, node: dict) -> tuple`
-  Select model for a node using three-layer priority.
+ Select model for a node using three-layer priority.
 
 Layer 1: Explicit node settings (provider/model)
 Layer 2: Config-based selection (task_type/complexity + provider_preference)
 Layer 3: Fallback defaults
 
 Returns:
-    (provider, model_name) tuple
+ (provider, model_name) tuple
 
 - `resolve_provider_preference(self, provider_preference: list[str]) -> list[str]`
-  Resolve provider preference list based on availability checks.
+ Resolve provider preference list based on availability checks.
 - `provider_is_available(self, provider: str) -> bool`
-  Check if a provider appears available based on local tools/endpoints.
+ Check if a provider appears available based on local tools/endpoints.
 - `ollama_available(self) -> bool`
-  Check if Ollama is available via CLI or HTTP.
+ Check if Ollama is available via CLI or HTTP.
 - `get_model(self, provider: str, model_name: str, **kwargs)`
-  Get or create model instance with smart selection.
+ Get or create model instance with smart selection.
 
 Args:
-    provider: Provider name.
-    model_name: Model identifier.
-    **kwargs: Provider-specific options (e.g., sandbox, approval_policy
-        for codex_mcp).
+ provider: Provider name.
+ model_name: Model identifier.
+ **kwargs: Provider-specific options (e.g., sandbox, approval_policy
+ for codex_mcp).
 
 #### Module: `hillstar-orchestrator.execution.node_executor`
 
@@ -1603,11 +1602,11 @@ None (per-node via node definition)
 Failure Modes
 -------------
 
-- Model call fails → Fallback to next provider
-- File not found → Return error dict
-- Script timeout → Return timeout error
-- Git commit fails → Return git error
-- Unknown tool → Return unknown tool error
+- Model call fails Fallback to next provider
+- File not found Return error dict
+- Script timeout Return timeout error
+- Git commit fails Return git error
+- Unknown tool Return unknown tool error
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1629,13 +1628,13 @@ Execute individual workflow nodes with comprehensive error handling.
 *Methods:*
 
 - `__init__(self, model_factory: ModelFactory, cost_manager: CostManager, trace_logger: TraceLogger, model_config: dict)`
-  Args:
-    model_factory: ModelFactory for model instantiation
-    cost_manager: CostManager for cost tracking
-    trace_logger: TraceLogger for execution logging
-    model_config: Model configuration dict
+ Args:
+ model_factory: ModelFactory for model instantiation
+ cost_manager: CostManager for cost tracking
+ trace_logger: TraceLogger for execution logging
+ model_config: Model configuration dict
 - `execute_node(self, node_id: str, node: dict, inputs: Any) -> dict[(str, Any)]`
-  Execute a single node.
+ Execute a single node.
 
 #### Module: `hillstar-orchestrator.execution.observability`
 
@@ -1682,8 +1681,8 @@ Parameters
 Failure Modes
 -------------
 
-- No write permissions → IOError
-- Disk full → IOError
+- No write permissions IOError
+- Disk full IOError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1712,20 +1711,20 @@ while preserving colored/animated bar on stdout/stderr for real-time viewing.
 *Methods:*
 
 - `__init__(self, log_file_path: Path, audit_log_file_path: Path)`
-  Initialize wrapper with log file paths.
+ Initialize wrapper with log file paths.
 
 Args:
-    log_file_path: Backwards-compat log file location
-    audit_log_file_path: Audit directory log file location
+ log_file_path: Backwards-compat log file location
+ audit_log_file_path: Audit directory log file location
 
 - `write(self, text: str)`
-  Write text to log files (with ANSI stripped) and original stderr.
+ Write text to log files (with ANSI stripped) and original stderr.
 
 Args:
-    text: Raw text from tqdm (may contain ANSI escape codes)
+ text: Raw text from tqdm (may contain ANSI escape codes)
 
 - `flush(self)`
-  Flush the original stderr.
+ Flush the original stderr.
 
 ##### `class ExecutionObserver` {#hillstar-orchestrator-execution-observability-executionobserver}
 
@@ -1734,26 +1733,26 @@ Real-time monitoring and logging of workflow execution.
 *Methods:*
 
 - `__init__(self, workflow_id: str, output_dir: str, total_nodes: int, use_tqdm: bool = True)`
-  Initialize execution observer.
+ Initialize execution observer.
 
 Args:
-    workflow_id: Workflow identifier
-    output_dir: Base output directory
-    total_nodes: Total nodes in workflow
-    use_tqdm: Use tqdm progress bars
+ workflow_id: Workflow identifier
+ output_dir: Base output directory
+ total_nodes: Total nodes in workflow
+ use_tqdm: Use tqdm progress bars
 
 - `node_start(self, node_id: str, node_index: int)`
-  Record node execution start.
+ Record node execution start.
 - `node_success(self, node_id: str, duration_seconds: float, output_hash: Optional[str] = None, output_summary: Optional[Dict] = None)`
-  Record node execution success.
+ Record node execution success.
 - `node_failure(self, node_id: str, error_msg: str, duration_seconds: float)`
-  Record node execution failure.
+ Record node execution failure.
 - `workflow_complete(self, cumulative_cost_usd: float = 0.0)`
-  Record workflow completion.
+ Record workflow completion.
 - `workflow_error(self, error_msg: str)`
-  Record workflow error.
+ Record workflow error.
 - `hash_output(data: Any) -> str`
-  Generate SHA256 hash of output for auditability.
+ Generate SHA256 hash of output for auditability.
 
 #### Module: `hillstar-orchestrator.execution.runner`
 
@@ -1798,9 +1797,9 @@ None (via WorkflowRunner constructor)
 Failure Modes
 -------------
 
-- Invalid workflow JSON → JSONDecodeError
-- Missing required nodes → ExecutionError
-- API key unavailable → APIKeyError
+- Invalid workflow JSON JSONDecodeError
+- Missing required nodes ExecutionError
+- API key unavailable APIKeyError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1822,11 +1821,11 @@ Execute research workflows with full auditability and smart model selection.
 *Methods:*
 
 - `__init__(self, workflow_path: str, output_dir: str = './.hillstar')`
-  Args:
-    workflow_path: Path to workflow.json file
-    output_dir: Directory for traces and checkpoints
+ Args:
+ workflow_path: Path to workflow.json file
+ output_dir: Directory for traces and checkpoints
 - `execute(self, resume_from: Optional[str] = None) -> dict[(str, Any)]`
-  Execute the workflow, optionally resuming from a checkpoint.
+ Execute the workflow, optionally resuming from a checkpoint.
 
 #### Module: `hillstar-orchestrator.execution.trace`
 
@@ -1868,8 +1867,8 @@ None (append-only logging)
 Failure Modes
 -------------
 
-- No write permissions → IOError
-- Disk full → IOError
+- No write permissions IOError
+- Disk full IOError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -1897,24 +1896,24 @@ Log all workflow executions for auditability and reproducibility.
 *Methods:*
 
 - `__init__(self, output_dir: str)`
-  Args:
-    output_dir: Directory to store trace files (will use output_dir/traces/)
+ Args:
+ output_dir: Directory to store trace files (will use output_dir/traces/)
 - `log(self, event: Dict[(str, Any)]) -> None`
-  Log a single event.
+ Log a single event.
 
 Args:
-    event: Event dictionary (will be timestamped if not present)
+ event: Event dictionary (will be timestamped if not present)
 
 - `finalize(self) -> str`
-  Finalize trace and return file path.
+ Finalize trace and return file path.
 
 Returns:
-    Path to trace file
+ Path to trace file
 
 - `get_events(self) -> List[Dict]`
-  Get all logged events.
+ Get all logged events.
 - `get_cost_summary(self) -> Dict[(str, Any)]`
-  Extract cost summary from logged events.
+ Extract cost summary from logged events.
 
 ### Compliance & Governance
 
@@ -2029,22 +2028,22 @@ Enforce Hillstar's compliance architecture.
 
 - `__init__(self)`
 - `check_provider_class(self, provider_name: str, provider_class: Any) -> bool`
-  Check a provider class for compliance violations.
+ Check a provider class for compliance violations.
 - `check_all_providers(self) -> bool`
-  Check all provider implementations for compliance.
+ Check all provider implementations for compliance.
 - `check_model_selector(self) -> bool`
-  Check ModelSelector for compliance violations.
+ Check ModelSelector for compliance violations.
 - `verify_compliance(self) -> bool`
-  Run all compliance checks.
+ Run all compliance checks.
 - `get_violations(self) -> List[str]`
-  Get list of compliance violations.
+ Get list of compliance violations.
 - `print_compliance_report(self) -> None`
-  Print compliance verification report.
+ Print compliance verification report.
 
 **Functions:**
 
 - `verify_hillstar_compliance() -> None`
-  Verify Hillstar compliance at import time.
+ Verify Hillstar compliance at import time.
 
 #### Module: `hillstar-orchestrator.governance.enforcer`
 
@@ -2119,20 +2118,20 @@ Enforce workflow-driven development before git commits.
 
 - `__init__(self, hillstar_dir: str = '.hillstar', policy: GovernancePolicy | None = None)`
 - `check(self, dev_mode: bool = False) -> tuple[(bool, str)]`
-  Check whether the current state is compliant for a git commit.
+ Check whether the current state is compliant for a git commit.
 
 Args:
-    dev_mode: If True (or HILLSTAR_DEV_MODE=1 in env), skip governance check.
+ dev_mode: If True (or HILLSTAR_DEV_MODE=1 in env), skip governance check.
 
 Returns:
-    (compliant, reason): compliant=True means commit is allowed.
+ (compliant, reason): compliant=True means commit is allowed.
 
 - `write_marker(self, workflow_id: str, workflow_file: str, summary: str = '') -> None`
-  Write commit_ready marker after successful workflow execution.
+ Write commit_ready marker after successful workflow execution.
 - `clear_marker(self) -> None`
-  Clear the commit_ready marker (e.g. after commit completes).
+ Clear the commit_ready marker (e.g. after commit completes).
 - `status(self) -> dict`
-  Return full status dictionary for display.
+ Return full status dictionary for display.
 
 #### Module: `hillstar-orchestrator.governance.hooks`
 
@@ -2198,7 +2197,7 @@ import os
 
 **Constants:**
 
-- `PRE_COMMIT_TEMPLATE` = '#!/usr/bin/env bash\n# Hillstar governance pre-commit hook\n# Auto-installed by: hillstar enforce install\n# DO NOT EDIT — managed by Hillstar governance module\n\nset -euo pipefail\n\n# Check if development mode is active\nDEV_MODE_FLAG=""\nif [[ "${HILLSTAR_DEV_MODE:-0}" == "1" ]]; then\n    DEV_MODE_FLAG="--dev"\nfi\n\n# Allow bypass with env var\nif [[ "${HILLSTAR_FORCE_COMMIT:-0}" == "1" ]]; then\n    echo "[hillstar] Force commit override active. Skipping governance check."\n    exit 0\nfi\n\n# Check if hillstar is available\nif ! command -v hillstar &> /dev/null; then\n    echo "[hillstar] WARNING: hillstar not found on PATH, skipping governance check."\n    exit 0\nfi\n\n# Run governance check (with --dev flag if HILLSTAR_DEV_MODE=1)\necho "[hillstar] Checking workflow execution compliance..."\nif hillstar enforce check $DEV_MODE_FLAG; then\n    echo "[hillstar] Governance check passed."\n    exit 0\nelse\n    echo ""\n    echo "[hillstar] Commit blocked: no recent Hillstar workflow execution found."\n    echo "[hillstar] Run: hillstar execute <workflow.json>"\n    echo "[hillstar] Or use development mode: HILLSTAR_DEV_MODE=1 git commit ..."\n    exit 1\nfi\n'
+- `PRE_COMMIT_TEMPLATE` = '#!/usr/bin/env bash\n# Hillstar governance pre-commit hook\n# Auto-installed by: hillstar enforce install\n# DO NOT EDIT — managed by Hillstar governance module\n\nset -euo pipefail\n\n# Check if development mode is active\nDEV_MODE_FLAG=""\nif [[ "${HILLSTAR_DEV_MODE:-0}" == "1" ]]; then\n DEV_MODE_FLAG="--dev"\nfi\n\n# Allow bypass with env var\nif [[ "${HILLSTAR_FORCE_COMMIT:-0}" == "1" ]]; then\n echo "[hillstar] Force commit override active. Skipping governance check."\n exit 0\nfi\n\n# Check if hillstar is available\nif ! command -v hillstar &> /dev/null; then\n echo "[hillstar] WARNING: hillstar not found on PATH, skipping governance check."\n exit 0\nfi\n\n# Run governance check (with --dev flag if HILLSTAR_DEV_MODE=1)\necho "[hillstar] Checking workflow execution compliance..."\nif hillstar enforce check $DEV_MODE_FLAG; then\n echo "[hillstar] Governance check passed."\n exit 0\nelse\n echo ""\n echo "[hillstar] Commit blocked: no recent Hillstar workflow execution found."\n echo "[hillstar] Run: hillstar execute <workflow.json>"\n echo "[hillstar] Or use development mode: HILLSTAR_DEV_MODE=1 git commit ..."\n exit 1\nfi\n'
 
 **Classes:**
 
@@ -2210,22 +2209,22 @@ Manage git hooks for Hillstar governance enforcement.
 
 - `__init__(self, project_dir: str = '.')`
 - `is_git_repo(self) -> bool`
-  Check if project_dir is a git repository.
+ Check if project_dir is a git repository.
 - `is_installed(self) -> bool`
-  Check if the Hillstar pre-commit hook is installed.
+ Check if the Hillstar pre-commit hook is installed.
 - `install(self, force: bool = False) -> tuple[(bool, str)]`
-  Install the pre-commit hook.
+ Install the pre-commit hook.
 
 Args:
-    force: Overwrite existing hook without prompting.
+ force: Overwrite existing hook without prompting.
 
 Returns:
-    (success, message)
+ (success, message)
 
 - `uninstall(self) -> tuple[(bool, str)]`
-  Remove the Hillstar pre-commit hook.
+ Remove the Hillstar pre-commit hook.
 - `status(self) -> dict`
-  Return hook installation status.
+ Return hook installation status.
 
 #### Module: `hillstar-orchestrator.governance.policy`
 
@@ -2256,7 +2255,7 @@ Assumptions
 -----------
 
 - Policy is loaded from .hillstar/governance_policy.json if present,
-  otherwise defaults apply.
+ otherwise defaults apply.
 
 Parameters
 ----------
@@ -2292,9 +2291,9 @@ Policy configuration for workflow enforcement.
 *Methods:*
 
 - `load(cls, hillstar_dir: str) -> 'GovernancePolicy'`
-  Load policy from .hillstar/governance_policy.json, or return defaults.
+ Load policy from .hillstar/governance_policy.json, or return defaults.
 - `save(self, hillstar_dir: str) -> None`
-  Persist policy to .hillstar/governance_policy.json.
+ Persist policy to .hillstar/governance_policy.json.
 
 #### Module: `hillstar-orchestrator.governance.project_init`
 
@@ -2335,8 +2334,8 @@ Parameters
 Failure Modes
 -------------
 
-- No write permissions → PermissionError
-- Invalid path → FileNotFoundError
+- No write permissions PermissionError
+- Invalid path FileNotFoundError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -2359,7 +2358,7 @@ from typing import Optional
 **Functions:**
 
 - `initialize_project_structure(project_path: Optional[str] = None) -> dict`
-  Initialize recommended directory structure for Hillstar projects.
+ Initialize recommended directory structure for Hillstar projects.
 
 Creates:
 
@@ -2367,10 +2366,10 @@ Creates:
 - workflows/ with subdirectories (core, infrastructure)
 
 Args:
-    project_path: Project root directory (defaults to current directory)
+ project_path: Project root directory (defaults to current directory)
 
 Returns:
-    Dictionary with created directories and initialization status
+ Dictionary with created directories and initialization status
 
 ### Mcp-Server
 
@@ -2397,7 +2396,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python anthropic_mcp_server.py
+ python anthropic_mcp_server.py
 
 Registered in ~/.claude.json under "anthropic" provider.
 
@@ -2444,7 +2443,7 @@ Anthropic Claude models via official SDK.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via Anthropic API.
+ Execute task via Anthropic API.
 
 **Functions:**
 
@@ -2480,9 +2479,9 @@ PROTOCOL METHODS
 USAGE
 ------
 This is a base class. Individual provider servers extend it:
-    class AnthropicMCPServer(BaseMCPServer):
-        def call_tool(self, tool_name, arguments):
-            # Provider-specific implementation
+ class AnthropicMCPServer(BaseMCPServer):
+ def call_tool(self, tool_name, arguments):
+ # Provider-specific implementation
 
 LOGGING
 --------
@@ -2516,15 +2515,15 @@ Base MCP server - all providers inherit from this.
 
 - `__init__(self, provider_name: str)`
 - `initialize(self) -> Dict[(str, Any)]`
-  MCP initialization.
+ MCP initialization.
 - `list_tools(self) -> Dict[(str, Any)]`
-  List available tools.
+ List available tools.
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute a tool. Subclasses override this.
+ Execute a tool. Subclasses override this.
 - `handle_request(self, request: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Route MCP requests.
+ Route MCP requests.
 - `run(self)`
-  Main MCP event loop.
+ Main MCP event loop.
 
 #### Module: `hillstar-orchestrator.mcp-server.claude_ollama_bridge_server`
 
@@ -2551,7 +2550,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python claude_ollama_bridge_server.py
+ python claude_ollama_bridge_server.py
 
 This server is registered in ~/.claude.json and invoked by Claude Code when
 the user selects an Ollama cloud model as the execution provider.
@@ -2559,11 +2558,11 @@ the user selects an Ollama cloud model as the execution provider.
 MODEL ALIASES (from tools/ollama/models.config)
 ------------------------------------------------
 
-- minimax → minimax-m2.5:cloud (recommended for code)
-- devstral-2 → devstral-2:123b-cloud (recommended for code)
-- gpt-oss → gpt-oss:120b-cloud (deterministic, low temp)
-- mistral-large-3 → mistral-large-3:675b-cloud (deterministic, low temp)
-- gemini → gemini-3-flash-preview:cloud (creative, high temp)
+- minimax minimax-m2.5:cloud (recommended for code)
+- devstral-2 devstral-2:123b-cloud (recommended for code)
+- gpt-oss gpt-oss:120b-cloud (deterministic, low temp)
+- mistral-large-3 mistral-large-3:675b-cloud (deterministic, low temp)
+- gemini gemini-3-flash-preview:cloud (creative, high temp)
 
 Author: Julen Gamboa
 <julen.gamboa.ds@gmail.com>
@@ -2590,7 +2589,7 @@ MCP Server wrapper for Ollama cloud models via claude-ollama CLI.
 This server bridges Claude Code with Ollama cloud models when Claude API
 is rate-limited or unavailable. It wraps the claude-ollama CLI which:
 
-1. Resolves model aliases (minimax → minimax-m2.5:cloud)
+1. Resolves model aliases (minimax minimax-m2.5:cloud)
 2. Launches a nested Claude Code session with that model
 3. Executes the task and returns results
 
@@ -2612,18 +2611,18 @@ Process Flow:
 
 - `__init__(self)`
 - `initialize(self) -> Dict[(str, Any)]`
-  Initialize the MCP server.
+ Initialize the MCP server.
 - `list_tools(self) -> Dict[(str, Any)]`
-  List available tools.
+ List available tools.
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute a tool (task dispatch to minimax).
+ Execute a tool (task dispatch to minimax).
 - `handle_request(self, request: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Route incoming MCP requests.
+ Route incoming MCP requests.
 
 **Functions:**
 
 - `main()`
-  Main MCP server loop (stdio protocol).
+ Main MCP server loop (stdio protocol).
 
 #### Module: `hillstar-orchestrator.mcp-server.devstral_local_mcp_server`
 
@@ -2647,11 +2646,11 @@ ARCHITECTURE
 
 USAGE
 ------
-    1. Start llama.cpp server with Devstral model:
-       ./llama-server -m devstral-small-2-24b.gguf -ngl 99 -t 8
+ 1. Start llama.cpp server with Devstral model:
+ ./llama-server -m devstral-small-2-24b.gguf -ngl 99 -t 8
 
-    2. Run this MCP server:
-       python devstral_local_mcp_server.py
+ 2. Run this MCP server:
+ python devstral_local_mcp_server.py
 
 Registered in ~/.claude.json under "devstral_local" provider.
 
@@ -2695,7 +2694,7 @@ Devstral Small 2 24B via llama.cpp HTTP server.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via devstral_server.sh HTTP API.
+ Execute task via devstral_server.sh HTTP API.
 
 **Functions:**
 
@@ -2725,7 +2724,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python file_operations_mcp_server.py
+ python file_operations_mcp_server.py
 
 Registered in ~/.claude.json under "file_operations" provider.
 
@@ -2767,7 +2766,7 @@ File operations server - allows agents to write/update files safely.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute file operation.
+ Execute file operation.
 
 #### Module: `hillstar-orchestrator.mcp-server.google_ai_studio_mcp_server`
 
@@ -2792,7 +2791,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python google_ai_studio_mcp_server.py
+ python google_ai_studio_mcp_server.py
 
 Registered in ~/.claude.json under "google_ai_studio" provider.
 
@@ -2842,7 +2841,7 @@ Google Gemini models via official SDK.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via Google Gemini API.
+ Execute task via Google Gemini API.
 
 **Functions:**
 
@@ -2871,7 +2870,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python mistral_mcp_server.py
+ python mistral_mcp_server.py
 
 Registered in ~/.claude.json under "mistral" provider.
 
@@ -2922,7 +2921,7 @@ Mistral AI models via official SDK.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via Mistral API.
+ Execute task via Mistral API.
 
 **Functions:**
 
@@ -2951,14 +2950,14 @@ ARCHITECTURE
 
 USAGE
 ------
-    1. Install and start Ollama server:
-       ollama serve
+ 1. Install and start Ollama server:
+ ollama serve
 
-    2. Pull model (optional, auto-downloads on first use):
-       ollama pull llama2  # or any supported model
+ 2. Pull model (optional, auto-downloads on first use):
+ ollama pull llama2 # or any supported model
 
-    3. Run this MCP server:
-       python ollama_mcp_server.py
+ 3. Run this MCP server:
+ python ollama_mcp_server.py
 
 Registered in ~/.claude.json under "ollama" provider.
 
@@ -3019,7 +3018,7 @@ Ollama local models via HTTP API.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via Ollama HTTP API.
+ Execute task via Ollama HTTP API.
 
 **Functions:**
 
@@ -3048,7 +3047,7 @@ ARCHITECTURE
 
 USAGE
 ------
-    python openai_mcp_server.py
+ python openai_mcp_server.py
 
 Registered in ~/.claude.json under "openai_mcp" provider.
 
@@ -3085,12 +3084,12 @@ AUTHENTICATION
 Supports dual authentication modes (subscription-first priority):
 
 1. Subscription tokens (preferred):
-   - Set OPENAI_API_KEY to access_token from $CODEX_HOME/auth.json
-   - Token auto-refreshes via Claude/Codex infrastructure
+ - Set OPENAI_API_KEY to access_token from $CODEX_HOME/auth.json
+ - Token auto-refreshes via Claude/Codex infrastructure
 
 2. API keys (fallback):
-   - Set OPENAI_API_KEY to sk-proj-... from platform.openai.com/api-keys
-   - Requires manual refresh when expired
+ - Set OPENAI_API_KEY to sk-proj-... from platform.openai.com/api-keys
+ - Requires manual refresh when expired
 
 Both modes use OPENAI_API_KEY env variable for transport.
 
@@ -3124,7 +3123,7 @@ OpenAI GPT models via official SDK with subscription-first auth.
 
 - `__init__(self)`
 - `call_tool(self, tool_name: str, arguments: Dict[(str, Any)]) -> Dict[(str, Any)]`
-  Execute task via OpenAI API.
+ Execute task via OpenAI API.
 
 **Functions:**
 
@@ -3141,12 +3140,12 @@ Implements three-tier logging:
 3. MEMORY - In-memory debugging (never persisted to disk)
 
 Usage:
-    from secure_logger import get_logger
-    logger = get_logger(**name**)
+ from secure_logger import get_logger
+ logger = get_logger(**name**)
 
-    logger.audit("Task completed successfully")
-    logger.debug_redacted("Response", len(response))
-    logger.memory_only("Full prompt details", prompt[:100])
+ logger.audit("Task completed successfully")
+ logger.debug_redacted("Response", len(response))
+ logger.memory_only("Full prompt details", prompt[:100])
 *
 
 **Imports:**
@@ -3168,58 +3167,58 @@ Custom logger that prevents accidental sensitive data logging.
 
 - `__init__(self, name)`
 - `audit(self, message, *args, **kwargs)`
-  Log safe audit information.
+ Log safe audit information.
 
 Use for: actions, status, error codes, model names
 NEVER: prompts, responses, API keys, full exceptions
 
 - `debug_redacted(self, label, *redacted_values, **kwargs)`
-  Log debug info with redacted sensitive values.
+ Log debug info with redacted sensitive values.
 
 Example:
-    logger.debug_redacted("Response", len(response), "bytes")
-    # Output: [DEBUG] Response: 342 bytes
+ logger.debug_redacted("Response", len(response), "bytes")
+ # Output: [DEBUG] Response: 342 bytes
 
 NOT:
-    logger.debug_redacted("Response", response)  # Would include full data
+ logger.debug_redacted("Response", response) # Would include full data
 
 - `memory_only(self, label, value)`
-  Log to memory ONLY (for debugging during execution).
+ Log to memory ONLY (for debugging during execution).
 
 NOT written to disk. Only available while process is running.
 Useful for development/debugging to see full values.
 
 Example:
-    logger.memory_only("Prompt", prompt)  # Full prompt in memory only
+ logger.memory_only("Prompt", prompt) # Full prompt in memory only
 
 - `error_safe(self, message, exception = None)`
-  Log errors without exposing exception details.
+ Log errors without exposing exception details.
 
 Use this instead of:
-    logger.error(f"Error: {e}")  # BAD - e might contain API key
+ logger.error(f"Error: {e}") # BAD - e might contain API key
 
 Use instead:
-    logger.error_safe("API call failed", e)  # GOOD - exception hidden
+ logger.error_safe("API call failed", e) # GOOD - exception hidden
 
 **Functions:**
 
 - `setup_secure_logging(log_dir = None, debug = False)`
-  Set up secure logging for all MCP servers.
+ Set up secure logging for all MCP servers.
 
 Args:
-    log_dir: Directory for audit logs (default: ~/.hillstar/mcp-logs)
-    debug: Enable debug logging (default: False)
+ log_dir: Directory for audit logs (default: ~/.hillstar/mcp-logs)
+ debug: Enable debug logging (default: False)
 
 - `get_logger(name)`
-  Get a secure logger instance.
+ Get a secure logger instance.
 
 Usage:
-    from secure_logger import get_logger
-    logger = get_logger(**name**)
+ from secure_logger import get_logger
+ logger = get_logger(**name**)
 
-    logger.audit("Task started")
-    logger.debug_redacted("Response size", len(response), "bytes")
-    logger.error_safe("API failed", exception)
+ logger.audit("Task started")
+ logger.debug_redacted("Response size", len(response), "bytes")
+ logger.error_safe("API failed", exception)
 
 ### LLM Model Providers
 
@@ -3326,11 +3325,11 @@ Anthropic Claude models via MCP server.
 *Methods:*
 
 - `__init__(self, model_name: str, api_key: str | None = None)`
-  Initialize Anthropic MCP model.
+ Initialize Anthropic MCP model.
 
 Args:
-    model_name: Claude model identifier
-    api_key: Optional API key (else uses ANTHROPIC_API_KEY env var)
+ model_name: Claude model identifier
+ api_key: Optional API key (else uses ANTHROPIC_API_KEY env var)
 
 #### Module: `hillstar-orchestrator.models.anthropic_model`
 
@@ -3350,12 +3349,12 @@ Anthropic Claude Model Integration: Call Claude models via API.
 
 IMPORTANT COMPLIANCE NOTICE
 ---------------------------
-  This implementation uses API key authentication ONLY.
-  Do NOT modify to add CLI, SDK, or Pro subscription access.
-  Such modifications violate Anthropic's Terms of Service and may result in:
-    - Immediate termination of API access
-    - Legal consequences
-    - Violation of Hillstar's compliance architecture
+ This implementation uses API key authentication ONLY.
+ Do NOT modify to add CLI, SDK, or Pro subscription access.
+ Such modifications violate Anthropic's Terms of Service and may result in:
+ - Immediate termination of API access
+ - Legal consequences
+ - Violation of Hillstar's compliance architecture
 
 Default temperature 0.00000073 minimizes hallucination for research tasks.
 
@@ -3384,9 +3383,9 @@ system: Optional system prompt
 Failure Modes
 -------------
 
-- API key missing → ValueError
-- SDK not installed → ImportError
-- API rate limit → requests.exceptions.RequestException
+- API key missing ValueError
+- SDK not installed ImportError
+- API rate limit requests.exceptions.RequestException
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -3409,45 +3408,45 @@ Supports multiple Claude model versions with simple selector syntax.
 
 Model Options (use short names or full identifiers):
 
-- "haiku" → claude-haiku-4-5-20251001 (recommended, fast & cheap)
-- "sonnet" → claude-sonnet-4-6 (balanced performance)
-- "opus" → claude-opus-4-6 (most capable, higher cost)
+- "haiku" claude-haiku-4-5-20251001 (recommended, fast & cheap)
+- "sonnet" claude-sonnet-4-6 (balanced performance)
+- "opus" claude-opus-4-6 (most capable, higher cost)
 - Full identifier: "claude-haiku-4-5-20251001" (use as-is)
 
 Examples:
-    # Using short names (recommended)
-    haiku = AnthropicModel(model="haiku")
-    sonnet = AnthropicModel(model="sonnet")
+ # Using short names (recommended)
+ haiku = AnthropicModel(model="haiku")
+ sonnet = AnthropicModel(model="sonnet")
 
-    # Using full identifiers (for custom versions)
-    custom = AnthropicModel(model="claude-haiku-4-5-20251001")
+ # Using full identifiers (for custom versions)
+ custom = AnthropicModel(model="claude-haiku-4-5-20251001")
 
 *Methods:*
 
 - `__init__(self, model: str = 'haiku', api_key: str | None = None)`
-  Initialize Anthropic Claude model.
+ Initialize Anthropic Claude model.
 
 Args:
-    model: Model to use. Can be:
-        - Short name: "haiku", "sonnet", "opus"
-        - Full identifier: "claude-haiku-4-5-20251001"
-    api_key: Explicit API key (else uses ANTHROPIC_API_KEY env var)
+ model: Model to use. Can be:
+ - Short name: "haiku", "sonnet", "opus"
+ - Full identifier: "claude-haiku-4-5-20251001"
+ api_key: Explicit API key (else uses ANTHROPIC_API_KEY env var)
 
 Raises:
-    ValueError: If ANTHROPIC_API_KEY not set and not provided
-    ImportError: If anthropic SDK not installed
+ ValueError: If ANTHROPIC_API_KEY not set and not provided
+ ImportError: If anthropic SDK not installed
 
 - `call(self, prompt: str, max_tokens: int = 4096, temperature: float | None = None, system: str | None = None) -> dict[(str, Any)]`
-  Call Claude model.
+ Call Claude model.
 
 Args:
-    prompt: Input prompt
-    max_tokens: Maximum tokens to generate
-    temperature: Ignored (Anthropic API doesn't support temperature)
-    system: System prompt
+ prompt: Input prompt
+ max_tokens: Maximum tokens to generate
+ temperature: Ignored (Anthropic API doesn't support temperature)
+ system: System prompt
 
 Returns:
-    Dictionary with response and metadata
+ Dictionary with response and metadata
 
 #### Module: `hillstar-orchestrator.models.anthropic_ollama_api_model`
 
@@ -3498,10 +3497,10 @@ max_retries: Retry transient failures (default 2)
 Failure Modes
 -------------
 
-- Ollama not running → error dict with details
-- Model not available → error dict
-- Timeout waiting for response → error dict
-- Invalid API key → 401 error
+- Ollama not running error dict with details
+- Model not available error dict
+- Timeout waiting for response error dict
+- Invalid API key 401 error
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -3523,23 +3522,23 @@ Anthropic models via Ollama's Anthropic-compatible API.
 *Methods:*
 
 - `__init__(self, model_name: str = 'minimax-m2.5:cloud', base_url: str | None = None, api_key: str | None = None, max_retries: int = 2)`
-  Initialize Anthropic Ollama API provider.
+ Initialize Anthropic Ollama API provider.
 
 Args:
-    model_name: Ollama model identifier (local or cloud)
-    base_url: Ollama endpoint URL (defaults to env var ANTHROPIC_BASE_URL or localhost)
-    api_key: API key for authentication (defaults to env var ANTHROPIC_AUTH_TOKEN)
-    max_retries: Number of retries for transient failures
+ model_name: Ollama model identifier (local or cloud)
+ base_url: Ollama endpoint URL (defaults to env var ANTHROPIC_BASE_URL or localhost)
+ api_key: API key for authentication (defaults to env var ANTHROPIC_AUTH_TOKEN)
+ max_retries: Number of retries for transient failures
 
 - `call(self, prompt: str, **kwargs) -> dict[(str, Any)]`
-  Call model via Ollama's Anthropic-compatible API.
+ Call model via Ollama's Anthropic-compatible API.
 
 Args:
-    prompt: Input prompt text
-    **kwargs: Additional parameters (max_tokens, temperature, system, etc.)
+ prompt: Input prompt text
+ **kwargs: Additional parameters (max_tokens, temperature, system, etc.)
 
 Returns:
-    Dictionary with response and metadata
+ Dictionary with response and metadata
 
 #### Module: `hillstar-orchestrator.models.devstral_local_model`
 
@@ -3555,7 +3554,7 @@ python/hillstar/models/devstral_local_model.py
 
 Purpose
 -------
-  LOCAL DEVSTRAL-SMALL-2 MODEL - OPTIONAL ADVANCED SETUP
+ LOCAL DEVSTRAL-SMALL-2 MODEL - OPTIONAL ADVANCED SETUP
 
 Integrates Devstral-Small-2 via local llama.cpp HTTP server.
 This is an OPTIONAL setup for power users with appropriate hardware.
@@ -3566,10 +3565,10 @@ Free, local execution on GPU. Default temperature 0.00000073 minimizes hallucina
 
 HARDWARE REQUIREMENTS (MANDATORY)
 -----------------------------------
-  Minimum: 16GB VRAM GPU (RTX 4080, RTX 4090, A100, etc.)
-  Model: Quantized GGUF format (~14GB) from HuggingFace
-  Setup: Requires devstral_server.sh running on port 8080
-  NOT suitable for CPU-only systems
+ Minimum: 16GB VRAM GPU (RTX 4080, RTX 4090, A100, etc.)
+ Model: Quantized GGUF format (~14GB) from HuggingFace
+ Setup: Requires devstral_server.sh running on port 8080
+ NOT suitable for CPU-only systems
 
 Setup Instructions
 ------------------
@@ -3606,17 +3605,17 @@ system: Optional system prompt
 Failure Modes
 -------------
 
-- Server not running → error "llama.cpp server not responding"
-- Insufficient VRAM → server crashes or OOM errors
-- Model not loaded → server connection fails
-- Timeout → requests.exceptions.Timeout
-- Model file missing → server startup failure
+- Server not running error "llama.cpp server not responding"
+- Insufficient VRAM server crashes or OOM errors
+- Model not loaded server connection fails
+- Timeout requests.exceptions.Timeout
+- Model file missing server startup failure
 
 When NOT to Use This
 --------------------
- No GPU or GPU < 16GB VRAM → Use Ollama cloud models instead
- Need reliability/uptime → Use cloud API providers
- Learning/exploration → Start with Ollama local models
+ No GPU or GPU < 16GB VRAM Use Ollama cloud models instead
+ Need reliability/uptime Use cloud API providers
+ Learning/exploration Start with Ollama local models
 
 Alternative: Use claude-ollama --model devstral-2:123b-cloud via Ollama
 
@@ -3640,7 +3639,7 @@ Last Edited
 Status
 ------
  OPTIONAL ADVANCED SETUP
-   Users must explicitly configure and understand GPU requirements
+ Users must explicitly configure and understand GPU requirements
 *
 
 **Classes:**
@@ -3654,27 +3653,27 @@ OPTIONAL - Requires 16GB+ VRAM GPU and quantized GGUF model
 *Methods:*
 
 - `__init__(self, model_name: str = 'devstral', endpoint: str = 'http://127.0.0.1:8080')`
-  Args:
-    model_name: Model identifier (llama.cpp accepts any value)
-    endpoint: llama.cpp server endpoint (OpenAI-compatible)
+ Args:
+ model_name: Model identifier (llama.cpp accepts any value)
+ endpoint: llama.cpp server endpoint (OpenAI-compatible)
 
 Warning:
-    Requires 16GB+ VRAM GPU and running devstral_server.sh
+ Requires 16GB+ VRAM GPU and running devstral_server.sh
 
 - `call(self, prompt: str, max_tokens: int = 2048, temperature: float | None = None, system: str | None = None) -> dict[(str, Any)]`
-  Call Devstral via llama.cpp OpenAI-compatible chat completions endpoint.
+ Call Devstral via llama.cpp OpenAI-compatible chat completions endpoint.
 
 Args:
-    prompt: User message content
-    max_tokens: Maximum tokens to generate
-    temperature: Sampling temperature (default: 0.00000073)
-    system: System prompt
+ prompt: User message content
+ max_tokens: Maximum tokens to generate
+ temperature: Sampling temperature (default: 0.00000073)
+ system: System prompt
 
 Returns:
-    Dictionary with response and metadata
+ Dictionary with response and metadata
 
 Note:
-    Requires devstral_server.sh running on localhost:8080
+ Requires devstral_server.sh running on localhost:8080
 
 #### Module: `hillstar-orchestrator.models.mcp_model`
 
@@ -3716,9 +3715,9 @@ Assumptions
 Failure Modes
 -------------
 
-- Process spawn fails → RuntimeError
-- MCP server crashes → RuntimeError (EOF on stdout)
-- Invalid JSON response → json.JSONDecodeError
+- Process spawn fails RuntimeError
+- MCP server crashes RuntimeError (EOF on stdout)
+- Invalid JSON response json.JSONDecodeError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -3740,30 +3739,30 @@ Base class for MCP-based model providers.
 *Methods:*
 
 - `__init__(self, provider: str, model_name: str, server_script: str, api_key: str | None = None)`
-  Initialize MCP model.
+ Initialize MCP model.
 
 Args:
-    provider: Provider name (e.g., "anthropic_mcp")
-    model_name: Model identifier (e.g., "claude-opus-4-6")
-    server_script: Path to MCP server script (relative to repo root)
-    api_key: Optional API key (else reads from environment)
+ provider: Provider name (e.g., "anthropic_mcp")
+ model_name: Model identifier (e.g., "claude-opus-4-6")
+ server_script: Path to MCP server script (relative to repo root)
+ api_key: Optional API key (else reads from environment)
 
 - `call(self, prompt: str, max_tokens: int = 4096, temperature: float | None = None, system: str | None = None) -> dict[(str, Any)]`
-  Execute task via MCP server.
+ Execute task via MCP server.
 
 Matches AnthropicModel.call() interface for compatibility.
 
 Args:
-    prompt: Input prompt
-    max_tokens: Maximum tokens to generate
-    temperature: Sampling temperature (unused for MCP servers)
-    system: System prompt (unused for MCP servers)
+ prompt: Input prompt
+ max_tokens: Maximum tokens to generate
+ temperature: Sampling temperature (unused for MCP servers)
+ system: System prompt (unused for MCP servers)
 
 Returns:
-    Dictionary with response and metadata
+ Dictionary with response and metadata
 
 - `__del__(self)`
-  Cleanup subprocess on deletion.
+ Cleanup subprocess on deletion.
 
 #### Module: `hillstar-orchestrator.models.mistral_api_model`
 
@@ -3809,10 +3808,10 @@ MISTRAL_MODEL: Model identifier
 Failure Modes
 -------------
 
-- Missing API key → ComplianceError
-- Invalid model → API error
-- Rate limit exceeded → error dict
-- Timeout → error dict
+- Missing API key ComplianceError
+- Invalid model API error
+- Rate limit exceeded error dict
+- Timeout error dict
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -3823,7 +3822,7 @@ Created
 Status
 ------
  PLACEHOLDER - Not yet implemented
-   Ready for implementation in Phase 2
+ Ready for implementation in Phase 2
 *
 
 **Classes:**
@@ -3836,11 +3835,11 @@ Supports multiple Mistral model options from budget-friendly to high-capability.
 
 Model Options (use short names or full identifiers):
 
-- "small" → mistral-medium-latest (recommended, good balance, cheap)
-- "medium" → mistral-large-2411 (most capable, standard pricing)
-- "mini" → ministral-3b (cheapest, edge deployment)
-- "code" → codestral-2508 (coding-focused, cheap)
-- "devstral" → devstral-2 (coding-focused, cheap)
+- "small" mistral-medium-latest (recommended, good balance, cheap)
+- "medium" mistral-large-2411 (most capable, standard pricing)
+- "mini" ministral-3b (cheapest, edge deployment)
+- "code" codestral-2508 (coding-focused, cheap)
+- "devstral" devstral-2 (coding-focused, cheap)
 - Full identifier: "mistral-large-2411" (use as-is)
 
 Pricing Guide:
@@ -3852,41 +3851,41 @@ Pricing Guide:
 - mistral-large-2411: $3.0 input / $15.0 output per 1M tokens (most capable)
 
 Examples:
-    # Using short names (recommended)
-    small = MistralAPIModel(model="small")
-    code = MistralAPIModel(model="code")
+ # Using short names (recommended)
+ small = MistralAPIModel(model="small")
+ code = MistralAPIModel(model="code")
 
-    # Using full identifiers
-    custom = MistralAPIModel(model="mistral-large-2411")
+ # Using full identifiers
+ custom = MistralAPIModel(model="mistral-large-2411")
 
 *Methods:*
 
 - `__init__(self, model: str = 'small', api_key: Optional[str] = None, base_url: str = 'https://api.mistral.ai/v1')`
-  Initialize Mistral API provider.
+ Initialize Mistral API provider.
 
 Args:
-    model: Model to use. Can be:
-        - Short name: "small", "medium", "mini", "code", "devstral"
-        - Full identifier: "mistral-large-2411"
-    api_key: API key (defaults to MISTRAL_API_KEY env var)
-    base_url: API endpoint base URL
+ model: Model to use. Can be:
+ - Short name: "small", "medium", "mini", "code", "devstral"
+ - Full identifier: "mistral-large-2411"
+ api_key: API key (defaults to MISTRAL_API_KEY env var)
+ base_url: API endpoint base URL
 
 Raises:
-    ValueError: If API key not provided
+ ValueError: If API key not provided
 
 - `call(self, prompt: str, messages: Optional[List[Dict[(str, str)]]] = None, **kwargs) -> Dict[(str, Any)]`
-  Call Mistral API (placeholder - not implemented).
+ Call Mistral API (placeholder - not implemented).
 
 Args:
-    prompt: User prompt
-    messages: Message history
-    **kwargs: Additional parameters
+ prompt: User prompt
+ messages: Message history
+ **kwargs: Additional parameters
 
 Returns:
-    Dictionary with response (not implemented)
+ Dictionary with response (not implemented)
 
 Status:
-     PLACEHOLDER - raises NotImplementedError
+ PLACEHOLDER - raises NotImplementedError
 
 #### Module: `hillstar-orchestrator.models.mistral_mcp_model`
 
@@ -3932,11 +3931,11 @@ Mistral AI models via MCP server.
 *Methods:*
 
 - `__init__(self, model_name: str, api_key: str | None = None)`
-  Initialize Mistral MCP model.
+ Initialize Mistral MCP model.
 
 Args:
-    model_name: Mistral model identifier
-    api_key: Optional API key (else uses MISTRAL_API_KEY env var)
+ model_name: Mistral model identifier
+ api_key: Optional API key (else uses MISTRAL_API_KEY env var)
 
 #### Module: `hillstar-orchestrator.models.ollama_mcp_model`
 
@@ -3982,10 +3981,10 @@ Ollama local models via MCP server.
 *Methods:*
 
 - `__init__(self, model_name: str)`
-  Initialize Ollama MCP model.
+ Initialize Ollama MCP model.
 
 Args:
-    model_name: Ollama model identifier (e.g., "devstral-small-2:24b")
+ model_name: Ollama model identifier (e.g., "devstral-small-2:24b")
 
 #### Module: `hillstar-orchestrator.models.openai_mcp_model`
 
@@ -4025,29 +4024,30 @@ Last Edited
 
 ```python
 from .mcp_model import MCPModel
-from utils.openai_auth_resolver import OpenAIAuthResolver
 ```
 
 **Classes:**
 
 ##### `class OpenAIMCPModel(MCPModel)` {#hillstar-orchestrator-models-openai_mcp_model-openaimcpmodel}
 
-OpenAI GPT models via MCP server with subscription-first auth.
+OpenAI GPT models via MCP server with transparent dual authentication.
+
+The MCP server (`openai_mcp_server.py`) handles all authentication internally.
 
 *Methods:*
 
 - `__init__(self, model_name: str, api_key: str | None = None)`
-  Initialize OpenAI MCP model with auth resolution.
+ Initialize OpenAI MCP model.
 
 Args:
-    model_name: OpenAI model identifier
-    api_key: Optional API key (else resolves via CODEX_HOME or env var)
+ model_name: OpenAI model identifier
+ api_key: Optional API key (else reads from OPENAI_API_KEY env var)
 
-Auth resolution (subscription-first):
+Auth handled by MCP server (subscription-first):
 
-  1. $CODEX_HOME/auth.json (subscription tokens)
-  2. OPENAI_API_KEY env var (API key)
-  3. Raises error if neither available
+ 1. OPENAI_CHATGPT_LOGIN_MODE=true: Uses codex exec with subscription tokens from ~/.config/openai/codex-home/auth.json
+ 2. OPENAI_API_KEY env var (fallback): Uses direct OpenAI SDK
+ 3. Auto-detects which mode to use
 
 ### Utilities
 
@@ -4129,64 +4129,64 @@ Detect and redact sensitive credentials from strings.
 *Methods:*
 
 - `redact(text: Optional[str], include_patterns: Optional[list] = None) -> str`
-  Redact all detected credentials from text.
+ Redact all detected credentials from text.
 
 Args:
-    text: String potentially containing credentials (returns empty string if None)
-    include_patterns: List of pattern names to apply (default: all)
+ text: String potentially containing credentials (returns empty string if None)
+ include_patterns: List of pattern names to apply (default: all)
 
 Returns:
-    String with credentials redacted as [REDACTED:TYPE]
+ String with credentials redacted as [REDACTED:TYPE]
 
 Examples:
-    >>> redactor = CredentialRedactor()
-    >>> redactor.redact("My key is sk-ant-abc123def456")
-    'My key is [REDACTED:anthropic_key]'
+ >>> redactor = CredentialRedactor()
+ >>> redactor.redact("My key is sk-ant-abc123def456")
+ 'My key is [REDACTED:anthropic_key]'
 
-    >>> redactor.redact('api_key = "secret-value"')
-    'api_key = [REDACTED:api_key_generic]'
+ >>> redactor.redact('api_key = "secret-value"')
+ 'api_key = [REDACTED:api_key_generic]'
 
 - `contains_credentials(text: Optional[str]) -> bool`
-  Check if text contains any detected credentials.
+ Check if text contains any detected credentials.
 
 Args:
-    text: String to check (returns False if None)
+ text: String to check (returns False if None)
 
 Returns:
-    True if any credentials detected, False otherwise
+ True if any credentials detected, False otherwise
 
 - `get_redaction_types(text: str) -> list`
-  Identify which credential types are present in text.
+ Identify which credential types are present in text.
 
 Args:
-    text: String to analyze
+ text: String to analyze
 
 Returns:
-    List of pattern names detected
+ List of pattern names detected
 
 Example:
-    >>> redactor.get_redaction_types("key=sk-ant-123")
-    ['anthropic_key', 'api_key_generic']
+ >>> redactor.get_redaction_types("key=sk-ant-123")
+ ['anthropic_key', 'api_key_generic']
 
 **Functions:**
 
 - `redact(text: Optional[str]) -> str`
-  Convenience function to redact credentials from a string.
+ Convenience function to redact credentials from a string.
 
 Args:
-    text: String potentially containing credentials (returns empty string if None)
+ text: String potentially containing credentials (returns empty string if None)
 
 Returns:
-    String with credentials redacted
+ String with credentials redacted
 
 - `contains_credentials(text: Optional[str]) -> bool`
-  Convenience function to check if string contains credentials.
+ Convenience function to check if string contains credentials.
 
 Args:
-    text: String to check (returns False if None)
+ text: String to check (returns False if None)
 
 Returns:
-    True if credentials detected
+ True if credentials detected
 
 #### Module: `hillstar-orchestrator.utils.exceptions`
 
@@ -4273,22 +4273,22 @@ Features
 Usage
 -----
 View all outputs from file:
-    python json_output_viewer.py /path/to/outputs.json
+ python json_output_viewer.py /path/to/outputs.json
 
 View specific node:
-    python json_output_viewer.py /path/to/outputs.json --key node_name
+ python json_output_viewer.py /path/to/outputs.json --key node_name
 
 View with line numbers:
-    python json_output_viewer.py /path/to/outputs.json --key node_name --lines
+ python json_output_viewer.py /path/to/outputs.json --key node_name --lines
 
 View summary only:
-    python json_output_viewer.py /path/to/outputs.json --summary
+ python json_output_viewer.py /path/to/outputs.json --summary
 
 View raw JSON:
-    python json_output_viewer.py /path/to/outputs.json --raw
+ python json_output_viewer.py /path/to/outputs.json --raw
 
 Validation report:
-    python json_output_viewer.py /path/to/outputs.json --validate
+ python json_output_viewer.py /path/to/outputs.json --validate
 
 Programmatic Usage
 ------------------
@@ -4296,11 +4296,11 @@ from json_output_viewer import JSONOutputViewer
 
 viewer = JSONOutputViewer('/path/to/outputs.json')
 if viewer.load_and_validate():
-    viewer.print_all_outputs()
-    summary = viewer.get_summary()
+ viewer.print_all_outputs()
+ summary = viewer.get_summary()
 
-    # Access data directly
-    all_data = viewer.data
+ # Access data directly
+ all_data = viewer.data
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -4328,104 +4328,28 @@ Generic parser and display tool for JSON output files.
 *Methods:*
 
 - `__init__(self, output_file: Path)`
-  Initialize viewer with output file path.
+ Initialize viewer with output file path.
 - `load_and_validate(self) -> bool`
-  Load and validate the JSON output file.
+ Load and validate the JSON output file.
 - `get_summary(self) -> Dict[(str, Any)]`
-  Get summary statistics about the outputs.
+ Get summary statistics about the outputs.
 - `print_summary(self) -> None`
-  Print summary of all outputs.
+ Print summary of all outputs.
 - `print_all_outputs(self, with_lines: bool = False) -> None`
-  Print all outputs in full.
+ Print all outputs in full.
 - `print_key(self, key: str, with_lines: bool = False) -> None`
-  Print a specific key's output in full.
+ Print a specific key's output in full.
 - `print_raw_json(self) -> None`
-  Print raw JSON with formatting.
+ Print raw JSON with formatting.
 - `print_validation_report(self) -> None`
-  Print validation report.
+ Print validation report.
 - `export_markdown(self, output_path: Optional[Path] = None) -> Path`
-  Export all outputs to a markdown file.
+ Export all outputs to a markdown file.
 
 **Functions:**
 
 - `main()`
-  CLI entry point.
-
-#### Module: `hillstar-orchestrator.utils.openai_auth_resolver`
-
--
-
-Script
-------
-openai_auth_resolver.py
-
-Path
-----
-utils/openai_auth_resolver.py
-
-Purpose
--------
-Resolve OpenAI authentication with subscription-first priority.
-
-**OpenAI-Only:** This module implements dual authentication for OpenAI MCP provider
-only. Other providers (Anthropic, Mistral, Google) use API keys only.
-
-Supports dual authentication modes:
-
-1. Subscription mode: tokens from $CODEX_HOME/auth.json (preferred)
-   - Automatic token refresh via Codex infrastructure
-   - Requires: CODEX_HOME env var + codex login
-2. API key mode: OPENAI_API_KEY environment variable (fallback)
-   - Manual token management
-   - Requires: OPENAI_API_KEY env var
-
-Auth resolution priority:
-
-  1. $CODEX_HOME/auth.json (subscription tokens)
-  2. OPENAI_API_KEY env var (API key)
-  3. Raise error if neither available
-
-Never logs token contents (credentials redacted).
-See: docs/CLAUDE_OPENAI_AUTH_SWITCH.md
-
-Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
-
-Created
--------
-2026-02-22
-
-Last Edited
------------
-2026-02-22
-*
-
-**Imports:**
-
-```python
-import json
-import os
-from pathlib import Path
-from typing import Tuple, Optional
-```
-
-**Classes:**
-
-##### `class OpenAIAuthResolver` {#hillstar-orchestrator-utils-openai_auth_resolver-openaiauthresolver}
-
-Resolve OpenAI authentication with subscription-first priority.
-
-*Methods:*
-
-- `resolve() -> Tuple[(str, str)]`
-  Resolve OpenAI authentication.
-
-Returns:
-    Tuple of (auth_type, auth_value) where:
-    - auth_type: "subscription_token" or "api_key"
-    - auth_value: The actual token or API key
-
-Raises:
-    ValueError: If no authentication method is available
+ CLI entry point.
 
 #### Module: `hillstar-orchestrator.utils.report`
 
@@ -4469,9 +4393,9 @@ Assumptions
 Failure Modes
 -------------
 
-- Missing workflow file → ValueError with clear message
-- Missing trace file → Skip post-execution metrics gracefully
-- Invalid workflow structure → Raise with helpful error
+- Missing workflow file ValueError with clear message
+- Missing trace file Skip post-execution metrics gracefully
+- Invalid workflow structure Raise with helpful error
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -4493,42 +4417,42 @@ Generate professional workflow execution reports.
 *Methods:*
 
 - `__init__(self, workflow_path: str)`
-  Initialize with workflow file path.
+ Initialize with workflow file path.
 - `generate_pre_execution_report(self) -> str`
-  Generate pre-execution report with estimated costs and metadata.
+ Generate pre-execution report with estimated costs and metadata.
 
 Returns:
-    Markdown string ready for display or file output
+ Markdown string ready for display or file output
 
 - `generate_post_execution_report(self, trace_path: str) -> str`
-  Generate post-execution report with actual execution metrics.
+ Generate post-execution report with actual execution metrics.
 
 Args:
-    trace_path: Path to trace JSONL file from execution
+ trace_path: Path to trace JSONL file from execution
 
 Returns:
-    Markdown string with execution results
+ Markdown string with execution results
 
 **Functions:**
 
 - `generate_pre_execution_report(workflow_path: str) -> str`
-  Generate pre-execution report for a workflow.
+ Generate pre-execution report for a workflow.
 
 Args:
-    workflow_path: Path to workflow JSON file
+ workflow_path: Path to workflow JSON file
 
 Returns:
-    Markdown string with report
+ Markdown string with report
 
 - `generate_post_execution_report(workflow_path: str, trace_path: str) -> str`
-  Generate post-execution report for a workflow.
+ Generate post-execution report for a workflow.
 
 Args:
-    workflow_path: Path to workflow JSON file
-    trace_path: Path to trace JSONL file
+ workflow_path: Path to workflow JSON file
+ trace_path: Path to trace JSONL file
 
 Returns:
-    Markdown string with report including execution metrics
+ Markdown string with report including execution metrics
 
 ### Workflow Discovery & Validation
 
@@ -4590,9 +4514,9 @@ None (per-operation)
 Failure Modes
 -------------
 
-- No workflows found → Empty list
-- Invalid task description → Return all workflows
-- Directory not found → False
+- No workflows found Empty list
+- Invalid task description Return all workflows
+- Directory not found False
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -4614,92 +4538,92 @@ Auto-detect Hillstar projects and suggest workflows.
 *Methods:*
 
 - `is_hillstar_project(start_dir: str = '.') -> bool`
-  Detect if a directory is a Hillstar project.
+ Detect if a directory is a Hillstar project.
 
 Args:
-    start_dir: Directory to check (default: current)
+ start_dir: Directory to check (default: current)
 
 Returns:
-    True if Hillstar project indicators found
+ True if Hillstar project indicators found
 
 Indicators:
-    - python/hillstar/ directory (source or pip installation)
-    - .hillstar/ directory (runtime artifacts)
-    - workflow.json in current or subdirectories (workflow definition)
+ - python/hillstar/ directory (source or pip installation)
+ - .hillstar/ directory (runtime artifacts)
+ - workflow.json in current or subdirectories (workflow definition)
 
 - `get_project_info(start_dir: str = '.') -> Dict[(str, Any)]`
-  Get Hillstar project information.
+ Get Hillstar project information.
 
 Args:
-    start_dir: Directory to analyze
+ start_dir: Directory to analyze
 
 Returns:
-    Dictionary with:
-    - is_hillstar: bool
-    - has_schema: bool
-    - has_artifacts: bool
-    - has_workflows: bool
-    - workflow_count: int
-    - schema_path: str or None
+ Dictionary with:
+ - is_hillstar: bool
+ - has_schema: bool
+ - has_artifacts: bool
+ - has_workflows: bool
+ - workflow_count: int
+ - schema_path: str or None
 
 - `classify_task(task_description: str) -> Dict[(str, float)]`
-  Classify task by keywords to infer requirements.
+ Classify task by keywords to infer requirements.
 
 Args:
-    task_description: Natural language task description
+ task_description: Natural language task description
 
 Returns:
-    Dictionary with task type scores:
-    - planning: float (0.0-1.0)
-    - implementation: float
-    - testing: float
-    - quality: float
-    - budget_conscious: float
-    - local_only: float
-    - speed_critical: float
+ Dictionary with task type scores:
+ - planning: float (0.0-1.0)
+ - implementation: float
+ - testing: float
+ - quality: float
+ - budget_conscious: float
+ - local_only: float
+ - speed_critical: float
 
 - `get_preset_suggestions(task_scores: Dict[(str, float)]) -> List[Tuple[(str, float)]]`
-  Suggest presets based on task classification.
+ Suggest presets based on task classification.
 
 Args:
-    task_scores: Task classification scores
+ task_scores: Task classification scores
 
 Returns:
-    List of (preset_name, confidence) tuples, sorted by confidence
+ List of (preset_name, confidence) tuples, sorted by confidence
 
 - `suggest_workflows(task_description: str, workflows: List[Dict[(str, Any)]], top_k: int = 3) -> List[Dict[(str, Any)]]`
-  Suggest workflows based on task description.
+ Suggest workflows based on task description.
 
 Args:
-    task_description: Natural language task
-    workflows: Available workflow metadata
-    top_k: Return top K matches
+ task_description: Natural language task
+ workflows: Available workflow metadata
+ top_k: Return top K matches
 
 Returns:
-    List of suggested workflows with relevance scores, sorted best-first
+ List of suggested workflows with relevance scores, sorted best-first
 
 - `get_recommendations(task_description: str, workflows: List[Dict[(str, Any)]]) -> Dict[(str, Any)]`
-  Get comprehensive recommendations for a task.
+ Get comprehensive recommendations for a task.
 
 Args:
-    task_description: Natural language task
-    workflows: Available workflows
+ task_description: Natural language task
+ workflows: Available workflows
 
 Returns:
-    Dictionary with:
-    - task_classification: Task type scores
-    - suggested_presets: List of (preset, confidence) tuples
-    - suggested_workflows: List of matching workflows
-    - recommendation_text: Human-readable summary
+ Dictionary with:
+ - task_classification: Task type scores
+ - suggested_presets: List of (preset, confidence) tuples
+ - suggested_workflows: List of matching workflows
+ - recommendation_text: Human-readable summary
 
 - `format_recommendations(recommendations: Dict[(str, Any)]) -> str`
-  Format recommendations as human-readable text.
+ Format recommendations as human-readable text.
 
 Args:
-    recommendations: Output from get_recommendations()
+ recommendations: Output from get_recommendations()
 
 Returns:
-    Formatted text suitable for display to user
+ Formatted text suitable for display to user
 
 #### Module: `hillstar-orchestrator.workflows.discovery`
 
@@ -4742,9 +4666,9 @@ None (per-workflow)
 Failure Modes
 -------------
 
-- Invalid JSON → ValueError
-- Missing required fields → KeyError
-- Unreadable files → IOError
+- Invalid JSON ValueError
+- Missing required fields KeyError
+- Unreadable files IOError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -4766,40 +4690,40 @@ Find and analyze Hillstar workflows in a directory tree.
 *Methods:*
 
 - `find_workflows(start_path: str = '.', max_depth: int = 5) -> List[str]`
-  Find all workflow.json files in directory tree.
+ Find all workflow.json files in directory tree.
 
 Args:
-        start_path: Directory to search from
-        max_depth: Maximum directory depth to search
+ start_path: Directory to search from
+ max_depth: Maximum directory depth to search
 
 Returns:
-        List of absolute paths to workflow.json files
+ List of absolute paths to workflow.json files
 
 - `get_workflow_info(workflow_path: str) -> Dict[(str, Any)]`
-  Extract metadata from a workflow file.
+ Extract metadata from a workflow file.
 
 Args:
-        workflow_path: Absolute path to workflow.json
+ workflow_path: Absolute path to workflow.json
 
 Returns:
-        Dictionary with workflow metadata
+ Dictionary with workflow metadata
 
 Raises:
-        ValueError: If workflow is invalid
-        IOError: If file cannot be read
+ ValueError: If workflow is invalid
+ IOError: If file cannot be read
 
 - `get_all_workflow_info(start_path: str = '.', max_depth: int = 5) -> List[Dict[(str, Any)]]`
-  Find all workflows and return their metadata.
+ Find all workflows and return their metadata.
 
 Args:
-        start_path: Directory to search from
-        max_depth: Maximum directory depth
+ start_path: Directory to search from
+ max_depth: Maximum directory depth
 
 Returns:
-        List of workflow metadata dictionaries
+ List of workflow metadata dictionaries
 
 - `find_in_current_project() -> List[Dict[(str, Any)]]`
-  Find all workflows in current project (with .hillstar/ or spec/ indicators).
+ Find all workflows in current project (with .hillstar/ or spec/ indicators).
 
 #### Module: `hillstar-orchestrator.workflows.model_presets`
 
@@ -4817,7 +4741,7 @@ ARCHITECTURE
 -------------
 
 - PresetResolver: resolves (preset, complexity) to
-  (provider, model, suggested_parameters)
+ (provider, model, suggested_parameters)
 - Data-driven tier assignment based on pricing formulas (not hardcoded)
 - Parameter support inference with fallback logic for registry gaps
 - Non-negotiable temperature constraints enforced per model class
@@ -4826,12 +4750,12 @@ ARCHITECTURE
 USAGE
 ------
 resolver = PresetResolver(
-    preset_name="balanced",
-    configured_providers=["openai", "anthropic"]
+ preset_name="balanced",
+ configured_providers=["openai", "anthropic"]
 )
 provider, model_id, params = resolver.resolve(
-    complexity="moderate",
-    use_case="code_writing"
+ complexity="moderate",
+ use_case="code_writing"
 )
 
 CONSTRAINTS (Non-Negotiable)
@@ -4873,16 +4797,16 @@ and enforces all non-negotiable temperature rules per model class.
 *Methods:*
 
 - `__init__(self, preset_name: str, configured_providers: List[str], registry_path: Optional[str] = None)`
-  Initialize resolver with preset and available providers.
+ Initialize resolver with preset and available providers.
 
 Args:
-    preset_name: One of cost_saver, balanced, quality_first, premium
-    configured_providers: List of provider names in preference order
-    registry_path: Optional path to provider_registry.default.json
-                  (defaults to standard location)
+ preset_name: One of cost_saver, balanced, quality_first, premium
+ configured_providers: List of provider names in preference order
+ registry_path: Optional path to provider_registry.default.json
+ (defaults to standard location)
 
 - `resolve(self, complexity: str = 'moderate', use_case: Optional[str] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Resolve (preset, complexity) to (provider, model, suggested_parameters).
+ Resolve (preset, complexity) to (provider, model, suggested_parameters).
 
 Enforces all non-negotiable temperature constraints:
 
@@ -4894,19 +4818,19 @@ Enforces all non-negotiable temperature constraints:
 - devstral-small-2 (local): CRITICAL cap <= 0.15
 
 Args:
-    complexity: simple, moderate, complex, critical
-    use_case: Optional use case context
-             (general, codebase_exploration, code_writing, etc.)
+ complexity: simple, moderate, complex, critical
+ use_case: Optional use case context
+ (general, codebase_exploration, code_writing, etc.)
 
 Returns:
-    Tuple of (provider, model_id, suggested_parameters) or None
+ Tuple of (provider, model_id, suggested_parameters) or None
 
-    suggested_parameters contains:
-    - temperature (if supported by model)
-    - reasoning_effort or thinking (if reasoning model)
-    - max_tokens
-    - context_window
-    - supports_temperature, supports_thinking, supports_reasoning_effort
+ suggested_parameters contains:
+ - temperature (if supported by model)
+ - reasoning_effort or thinking (if reasoning model)
+ - max_tokens
+ - context_window
+ - supports_temperature, supports_thinking, supports_reasoning_effort
 
 ##### `class ModelPresets` {#hillstar-orchestrator-workflows-model_presets-modelpresets}
 
@@ -4920,78 +4844,78 @@ Presets are dynamically generated from the ProviderRegistry.
 *Methods:*
 
 - `select(preset_name: str, complexity: str = 'moderate', provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Select model from a preset strategy (legacy).
+ Select model from a preset strategy (legacy).
 
 Args:
-    preset_name: One of "minimize_cost", "balanced", "maximize_quality", "local_only"
-    complexity: Task complexity ("simple", "moderate", "complex", "critical")
-    provider_preference: Optional list of preferred providers in order
+ preset_name: One of "minimize_cost", "balanced", "maximize_quality", "local_only"
+ complexity: Task complexity ("simple", "moderate", "complex", "critical")
+ provider_preference: Optional list of preferred providers in order
 
 Returns:
-    Tuple of (provider, model_id, model_config), or None if no model available
+ Tuple of (provider, model_id, model_config), or None if no model available
 
 - `select_simple(preset_name: str, provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Select model for simple tasks using a preset.
+ Select model for simple tasks using a preset.
 - `select_moderate(preset_name: str, provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Select model for moderate tasks using a preset.
+ Select model for moderate tasks using a preset.
 - `select_complex(preset_name: str, provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Select model for complex tasks using a preset.
+ Select model for complex tasks using a preset.
 - `select_critical(preset_name: str, provider_preference: Optional[List[str]] = None) -> Optional[Tuple[(str, str, Dict[(str, Any)])]]`
-  Select model for critical tasks using a preset.
+ Select model for critical tasks using a preset.
 - `get_available_presets() -> List[str]`
-  Get list of available preset names.
+ Get list of available preset names.
 - `describe_preset(preset_name: str) -> Dict`
-  Get description of a preset strategy.
+ Get description of a preset strategy.
 - `get_preset_for_use_case(use_case: str, has_local_gpu: bool = False, budget_constraint: bool = False) -> str`
-  Get recommended preset based on use case and constraints.
+ Get recommended preset based on use case and constraints.
 
 Args:
-    use_case: One of "research", "production", "experimentation", "publication"
-    has_local_gpu: Whether the user has a local GPU available
-    budget_constraint: Whether budget is a primary concern
+ use_case: One of "research", "production", "experimentation", "publication"
+ has_local_gpu: Whether the user has a local GPU available
+ budget_constraint: Whether budget is a primary concern
 
 Returns:
-    Preset name recommendation
+ Preset name recommendation
 
 - `get_fallback_chain(preset_name: str, complexity: str, provider_preference: Optional[List[str]] = None) -> List[str]`
-  Get provider fallback chain for a preset.
+ Get provider fallback chain for a preset.
 
 Args:
-    preset_name: Preset name
-    complexity: Task complexity
-    provider_preference: Preferred providers
+ preset_name: Preset name
+ complexity: Task complexity
+ provider_preference: Preferred providers
 
 Returns:
-    List of providers in fallback order
+ List of providers in fallback order
 
 **Functions:**
 
 - `parse_price_field(price_str: str) -> float`
-  Convert markdown price field (e.g., '$0.12', '$0', '$8') to float.
+ Convert markdown price field (e.g., '$0.12', '$0', '$8') to float.
 
 Args:
-    price_str: Price string from markdown table
+ price_str: Price string from markdown table
 
 Returns:
-    Float price per 1M tokens
+ Float price per 1M tokens
 
 Raises:
-    ValueError: If price string cannot be parsed
+ ValueError: If price string cannot be parsed
 
 - `derive_tier_for_model(input_price: float, output_price: float) -> str`
-  Derive tier name based on effective cost.
+ Derive tier name based on effective cost.
 
 Effective cost = (input_price + output_price) / 2 per 1M tokens
 
 Args:
-    input_price: Price per 1M input tokens
-    output_price: Price per 1M output tokens
+ input_price: Price per 1M input tokens
+ output_price: Price per 1M output tokens
 
 Returns:
-    Tier name (TIER_0_COST through TIER_4_MAX_QUALITY)
+ Tier name (TIER_0_COST through TIER_4_MAX_QUALITY)
 
 - `parse_model_reference(markdown_path: str) -> Dict[(str, Any)]`
-  Parse PROVIDER_MODEL_REFERENCE markdown to extract model metadata.
+ Parse PROVIDER_MODEL_REFERENCE markdown to extract model metadata.
 
 Extracts pricing (including cached input + cache storage), context windows,
 parameter support flags, and temperature guidance from the markdown file.
@@ -5004,35 +4928,35 @@ Handles pricing columns:
 - cache_storage: Cache storage cost (Google models)
 
 Args:
-    markdown_path: Path to PROVIDER_MODEL_REFERENCE.md
+ markdown_path: Path to PROVIDER_MODEL_REFERENCE.md
 
 Returns:
-    Dict with structure: {provider: {model_name: {pricing, context, flags, ...}}}
+ Dict with structure: {provider: {model_name: {pricing, context, flags, ...}}}
 
 - `build_provider_tiers(registry_path: str) -> Dict[(str, Dict[(str, List[str])])]`
-  Build PROVIDER_TIERS mapping from registry: {provider: {tier: [models]}}.
+ Build PROVIDER_TIERS mapping from registry: {provider: {tier: [models]}}.
 
 Args:
-    registry_path: Path to provider_registry.default.json
+ registry_path: Path to provider_registry.default.json
 
 Returns:
-    Dict mapping providers to tier-to-models mapping
+ Dict mapping providers to tier-to-models mapping
 
 - `parse_and_update_registry(reference_path: Optional[str] = None, registry_path: Optional[str] = None) -> Tuple[(int, int)]`
-  Parse reference markdown and update provider registry.
+ Parse reference markdown and update provider registry.
 
 This is the main entry point for populating the registry from
 the authoritative PROVIDER_MODEL_REFERENCE markdown file.
 
 Args:
-    reference_path: Path to PROVIDER_MODEL_REFERENCE.md
-                    (defaults to docs/PROVIDER_MODEL_REFERENCE.md)
-    registry_path: Path to provider_registry.default.json
-                   (defaults to python/hillstar/config/
-                    provider_registry.default.json)
+ reference_path: Path to PROVIDER_MODEL_REFERENCE.md
+ (defaults to docs/PROVIDER_MODEL_REFERENCE.md)
+ registry_path: Path to provider_registry.default.json
+ (defaults to python/hillstar/config/
+ provider_registry.default.json)
 
 Returns:
-    Tuple of (models_added, models_updated)
+ Tuple of (models_added, models_updated)
 
 #### Module: `hillstar-orchestrator.workflows.validator`
 
@@ -5103,82 +5027,82 @@ Validate Hillstar workflows against schema, registry, and constraints.
 *Methods:*
 
 - `__init__(self, registry: Optional[ProviderRegistry] = None)`
-  Initialize validator with optional registry.
+ Initialize validator with optional registry.
 - `load_schema(self) -> dict[(str, Any)]`
-  Load the workflow schema (from installed package or dev environment).
+ Load the workflow schema (from installed package or dev environment).
 - `validate_schema(self, workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Validate workflow against JSON schema.
+ Validate workflow against JSON schema.
 
 Args:
-    workflow: Workflow dictionary
+ workflow: Workflow dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_model_config(self, model_config: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Validate model_config section for coherence.
+ Validate model_config section for coherence.
 
 Args:
-    model_config: The model_config dictionary
+ model_config: The model_config dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_graph_connectivity(self, workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Validate workflow graph connectivity (no disconnected components).
+ Validate workflow graph connectivity (no disconnected components).
 
 Args:
-    workflow: Workflow dictionary
+ workflow: Workflow dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_providers(self, workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Validate all referenced providers and models against registry.
+ Validate all referenced providers and models against registry.
 
 Args:
-    workflow: Workflow dictionary
+ workflow: Workflow dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_compliance(self, workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Validate compliance requirements for all providers.
+ Validate compliance requirements for all providers.
 
 Args:
-    workflow: Workflow dictionary
+ workflow: Workflow dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_complete(self, workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Run all validations.
+ Run all validations.
 
 Args:
-    workflow: Workflow dictionary
+ workflow: Workflow dictionary
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_file(workflow_path: str) -> Tuple[(bool, list[str])]`
-  Validate a workflow file.
+ Validate a workflow file.
 
 Args:
-    workflow_path: Path to workflow.json
+ workflow_path: Path to workflow.json
 
 Returns:
-    (valid: bool, errors: List[str])
+ (valid: bool, errors: List[str])
 
 - `validate_schema_static(workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Static wrapper for validate_schema.
+ Static wrapper for validate_schema.
 - `validate_model_config_static(model_config: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Static wrapper for validate_model_config.
+ Static wrapper for validate_model_config.
 - `validate_providers_static(workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Static wrapper for validate_providers.
+ Static wrapper for validate_providers.
 - `validate_complete_static(workflow: dict[(str, Any)]) -> Tuple[(bool, list[str])]`
-  Static wrapper for validate_complete.
+ Static wrapper for validate_complete.
 - `validate_file_static(workflow_path: str) -> Tuple[(bool, list[str])]`
-  Static wrapper for file validation.
+ Static wrapper for file validation.
 
 ## Class Index
 
@@ -5352,10 +5276,6 @@ Returns:
 ### hillstar-orchestrator.utils.json_output_viewer
 
 - [JSONOutputViewer](#hillstar-orchestrator-utils-json_output_viewer-jsonoutputviewer)
-
-### hillstar-orchestrator.utils.openai_auth_resolver
-
-- [OpenAIAuthResolver](#hillstar-orchestrator-utils-openai_auth_resolver-openaiauthresolver)
 
 ### hillstar-orchestrator.utils.report
 
