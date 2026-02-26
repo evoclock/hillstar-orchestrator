@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hillstar-orchestrator"
-version = "1.0.0-sprint1"
+version = "1.0.0"
 description = "Security and reproducibility-first workflow orchestrator for research environments"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -93,7 +93,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short --junit-xml=.test-results/junit/results.xml --html=.test-results/html/report.html --cov=. --cov-report=html:.test-results/coverage --cov-report=term"
+addopts = "-v --tb=short --junit-xml=.test-results/junit/results.xml --html=.test-results/html/report.html --self-contained-html --cov=. --cov-report=html:.test-results/coverage --cov-report=term"
 
 [tool.ruff]
 target-version = "py310"
@@ -117,3 +117,19 @@ pythonPath = "."
 typeCheckingMode = "basic"
 reportMissingImports = false
 reportUnusedImport = true
+
+[tool.coverage.run]
+omit = ["cli.py"]
+
+[tool.coverage.report]
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]

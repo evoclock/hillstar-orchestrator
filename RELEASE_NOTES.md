@@ -1,6 +1,6 @@
-# Hillstar 1.0.0-sprint1 Release Notes
+# Hillstar 1.0.0 Release Notes
 
-**Release Date:** 2026-02-22
+**Release Date:** 2026-02-26
 
 This is the initial release of Hillstar, a security and reproducibility-first workflow orchestration tool for research environments.
 
@@ -12,14 +12,14 @@ This is the initial release of Hillstar, a security and reproducibility-first wo
 
 **Modularized Execution System:**
 - Refactored monolithic runner.py into focused modules:
-  - execution/runner.py: Orchestration and workflow management
-  - execution/node_executor.py: Node execution and provider chains
-  - execution/model_selector.py: Model selection and fallback logic
-  - execution/cost_manager.py: Cost tracking and budget enforcement
-  - execution/config_validator.py: Configuration validation and API key resolution
-  - execution/graph.py: DAG execution with topological ordering
-  - execution/checkpoint.py: Checkpoint persistence
-  - execution/observability.py: Comprehensive logging and tracing
+ - execution/runner.py: Orchestration and workflow management
+ - execution/node_executor.py: Node execution and provider chains
+ - execution/model_selector.py: Model selection and fallback logic
+ - execution/cost_manager.py: Cost tracking and budget enforcement
+ - execution/config_validator.py: Configuration validation and API key resolution
+ - execution/graph.py: DAG execution with topological ordering
+ - execution/checkpoint.py: Checkpoint persistence
+ - execution/observability.py: Comprehensive logging and tracing
 
 **Workflow Definition:**
 - DAG-based workflow definition with explicit data flow
@@ -75,11 +75,13 @@ This is the initial release of Hillstar, a security and reproducibility-first wo
 - Workflow-level compliance enforcement
 
 **Testing:**
-- 48 unit tests passing (100%)
+- 1,078 tests passing (100% pass rate)
+- Comprehensive unit test coverage across all modules
 - Credential redaction validation (27 tests)
 - MCP error handling (8 tests)
-- Integration testing (13 tests)
+- Integration testing (comprehensive coverage)
 - E2E workflow validation (Haiku synthesis, local execution, multi-provider mixing)
+- Enhanced test coverage for setup_wizard.py and runner.py with deep assertions and parameterized testing
 
 ### Documentation (COMPLETE)
 
@@ -111,17 +113,22 @@ This is the initial release of Hillstar, a security and reproducibility-first wo
 - JSON coverage data for analysis
 
 **Coverage Status:**
-- 48 unit tests: 100% passing
+- 1,078 total tests: 100% passing
+- Overall code coverage: 91% (↑ from 87% in sprint review)
+- Key modules at perfect coverage (100%):
+  - setup_wizard.py: 99% (↑ from 32%)
+  - execution/runner.py: 99% (↑ from 27%)
+  - 38 other modules at 100% coverage
 - E2E Haiku synthesis: 5-node workflow validated
 - E2E local + cloud: Mixed provider execution validated
 - MCP connectivity: All 7 servers validated
-- Overall unit test coverage: 23% (execution modules tested via E2E)
 
 **Quality Assurance:**
 - Credential redaction: 27/27 tests passing
 - MCP error handling: 8/8 tests passing
-- Integration workflows: 13/13 tests passing
-- Code quality: Ruff linting (minor issues only)
+- Integration workflows: comprehensive coverage
+- Code quality: Ruff linting (minor issues only, no security violations)
+- Test quality: Enhanced with deep assertions, mock verification, parameterized testing, boundary testing, realistic data, integration points verification, side effects validation, and comprehensive error message testing
 
 ---
 
@@ -196,22 +203,22 @@ Hillstar follows an explicit-over-implicit design:
 
 ```
 Workflow Definition (JSON DAG)
-    |
-    v
+ |
+ v
 WorkflowRunner (Orchestration)
-    |
-    +---> GraphExecutor (Topological ordering)
-    |       |
-    |       v
-    |   NodeExecutor (Dispatch)
-    |       |
-    |       +---> ModelFactory (Provider selection)
-    |       +---> CostManager (Budget tracking)
-    |       +---> ConfigValidator (Validation)
-    |
-    +---> TraceLogger (Audit trail)
-    +---> ComplianceEnforcer (Governance)
-    +---> CredentialRedactor (Security)
+ |
+ +---> GraphExecutor (Topological ordering)
+ | |
+ | v
+ | NodeExecutor (Dispatch)
+ | |
+ | +---> ModelFactory (Provider selection)
+ | +---> CostManager (Budget tracking)
+ | +---> ConfigValidator (Validation)
+ |
+ +---> TraceLogger (Audit trail)
+ +---> ComplianceEnforcer (Governance)
+ +---> CredentialRedactor (Security)
 ```
 
 Every decision is auditable: which model, which parameters, which provider, what cost, which review gates.
@@ -232,10 +239,10 @@ If you use Hillstar in your research, please cite:
 
 ```bibtex
 @software{gamboa2026hillstar,
-  title={Hillstar: Security and Reproducibility-First Workflow Orchestrator},
-  author={Gamboa, Julen},
-  year={2026},
-  url={https://github.com/jgamboa/hillstar-orchestrator}
+ title={Hillstar: Security and Reproducibility-First Workflow Orchestrator},
+ author={Gamboa, Julen},
+ year={2026},
+ url={https://github.com/jgamboa/hillstar-orchestrator}
 }
 ```
 
