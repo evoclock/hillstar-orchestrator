@@ -238,7 +238,7 @@ Check model constraints before setting sampling parameters:
 - **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
  performance issues
 
-See **[docs/User_Manual.md § Temperature Parameter Support](docs/User_Manual.md)**
+See **[docs/PROVIDER_MODEL_REFERENCE.md](docs/PROVIDER_MODEL_REFERENCE.md)**
 for complete constraints by model and provider.
 
 ### Model Selection & Presets
@@ -420,7 +420,7 @@ hillstar wizard
 #### Error: "Unsupported parameter: 'temperature' not supported..."
 
 - Model does not support temperature (o3, o3-mini, GPT-5 series)
-- See **[docs/User_Manual.md § Temperature Parameter Support](docs/User_Manual.md)**
+- See **[docs/PROVIDER_MODEL_REFERENCE.md](docs/PROVIDER_MODEL_REFERENCE.md)**
  for constraints
 - Remove temperature from parameters, or use a different model
 
