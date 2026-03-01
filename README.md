@@ -2,6 +2,8 @@
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
+**[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
+
 ## A security and reproducibility-first workflow orchestration tool
 
 Hillstar is an open-source workflow orchestrator built for scientific research labs and any environment where reproducibility and auditability are non-negotiable. Most worflow management tools in this space are designed for data/software engineering teams. Hillstar keeps the underlying rigor, but is built for researchers, analysts, and teams in regulated environments who need to prove what happened, when, and why—without requiring a background in DevOps.
@@ -72,7 +74,7 @@ hillstar validate examples/simple-workflow.json
 hillstar execute examples/simple-workflow.json
 ```
 
-See **[docs/USER_MANUAL.md](docs/USER_MANUAL.md)** for step-by-step
+See **[docs/User_Manual.md](docs/User_Manual.md)** for step-by-step
 examples of building workflows.
 
 Output:
@@ -209,7 +211,7 @@ Complete workflows require root-level configuration with DAG nodes:
 **Further information on subscription mode support can be found through the following links:**
 
 - **[docs/MCP_TOPOLOGY.md](docs/MCP_TOPOLOGY.md)**
-- **[docs/CLAUDE_OPENAI_AUTH_SWITCH.md](docs/CLAUDE_OPENAI_AUTH_SWITCH.md)**
+- **[docs/OPENAI_HILLSTAR_SETUP.md](docs/OPENAI_HILLSTAR_SETUP.md)**
 
 **Model specification in workflows:**
 
@@ -236,7 +238,7 @@ Check model constraints before setting sampling parameters:
 - **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
  performance issues
 
-See **[docs/USER_MANUAL.md § Temperature Parameter Support](docs/USER_MANUAL.md)**
+See **[docs/User_Manual.md § Temperature Parameter Support](docs/User_Manual.md)**
 for complete constraints by model and provider.
 
 ### Model Selection & Presets
@@ -418,7 +420,7 @@ hillstar wizard
 #### Error: "Unsupported parameter: 'temperature' not supported..."
 
 - Model does not support temperature (o3, o3-mini, GPT-5 series)
-- See **[docs/USER_MANUAL.md § Temperature Parameter Support](docs/USER_MANUAL.md)**
+- See **[docs/User_Manual.md § Temperature Parameter Support](docs/User_Manual.md)**
  for constraints
 - Remove temperature from parameters, or use a different model
 
