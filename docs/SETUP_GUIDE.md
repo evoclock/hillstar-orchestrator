@@ -5,12 +5,12 @@ Complete instructions for configuring each LLM provider.
 ## Quick Setup
 
 ```bash
-# Interactive setup wizard (recommended for first-time users)
+# Interactive setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Manual setup - set environment variables
+# Or set environment variables (CI/CD or temporary use)
 export ANTHROPIC_API_KEY="sk-ant-..."
-export OPENAI_API_KEY="sk-..."
+export OPENAI_API_KEY="sk-proj-..."
 export MISTRAL_API_KEY="..."
 ```
 
@@ -21,68 +21,76 @@ export MISTRAL_API_KEY="..."
 ### Anthropic (Claude)
 
 **Get API Key:**
-1. Visit https://console.anthropic.com
+
+1. Visit <https://console.anthropic.com>
 2. Sign up or log in
 3. Navigate to API Keys
 4. Create new key, copy it
 
 **Configure:**
-```bash
-# Option 1: Environment variable
-export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Option 2: Setup wizard
+```bash
+# Option 1: Setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Option 3: Manual config file
-mkdir -p ~/.hillstar
-cat > ~/.hillstar/provider_registry.json << 'EOF'
-{
-  "providers": {
-    "anthropic": {
-      "api_key": "sk-ant-..."
-    }
-  }
-}
-EOF
+# Option 2: Environment variable (for CI/CD or temporary use)
+export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
 **Verify:**
+
 ```bash
 hillstar presets  # Should list Claude models
 ```
 
 **Model Options:**
-- `claude-opus-4-6` (best quality, most expensive)
-- `claude-sonnet-4-5` (balanced)
-- `claude-haiku-4-5` (fastest, cheapest)
 
-**Important:** Cannot use `temperature` and `top_p` simultaneously. Use temperature only for deterministic outputs.
+- `claude-opus-4-6` (best quality, adaptive thinking, building agents, coding)
+- `claude-sonnet-4-6` (balanced speed and intelligence, agentic tasks)
+- `claude-haiku-4-5-20251001` (fastest with near-frontier intelligence)
+
+**Important:** Use `effort` parameter ("low", "medium", "high") for reasoning control, not temperature. Do not adjust temperature with Claude models.
 
 ---
 
 ### OpenAI (GPT)
 
 **Get API Key:**
-1. Visit https://platform.openai.com/api-keys
+
+1. Visit <https://platform.openai.com/api-keys>
 2. Sign up or log in
 3. Create new secret key
 4. Copy immediately (won't be shown again)
 
 **Configure:**
+
 ```bash
-export OPENAI_API_KEY="sk-..."
+# Option 1: Setup wizard (recommended - uses secure keyring storage)
+hillstar wizard
+
+# Option 2: Environment variable (for CI/CD or temporary use)
+export OPENAI_API_KEY="sk-proj-..."
 ```
 
 **Model Options:**
-- `gpt-5.2-pro` (best quality)
-- `gpt-5.2` (balanced)
-- `gpt-4o` (multimodal)
-- `o3` / `o3-mini` (reasoning models - no temperature support)
 
-**Important:** GPT-5 series do not support temperature parameter. Use `reasoning_effort` for o-series models instead.
+Agentic & Reasoning (use reasoning_effort):
+
+- `gpt-5.2` (primary coding model, agentic tasks)
+- `gpt-5.1` (coding, previous generation)
+- `o3` (deep complex reasoning, math, research)
+- `o3-mini` (faster reasoning alternative)
+
+Standard (use temperature + top_p):
+
+- `gpt-4.1` (instruction following, tool use, knowledge)
+- `gpt-5-mini` (lightweight reasoning, quick tasks)
+- `gpt-5-nano` (ultra-lightweight, classification)
+
+**Important:** GPT-5 and o-series do not support temperature. Use `reasoning_effort` ("low", "medium", "high") instead.
 
 **Verify:**
+
 ```bash
 hillstar presets  # Should list GPT models
 ```
@@ -92,41 +100,69 @@ hillstar presets  # Should list GPT models
 ### Mistral
 
 **Get API Key:**
-1. Visit https://console.mistral.ai/api-keys
+
+1. Visit <https://console.mistral.ai/api-keys>
 2. Create new key
 3. Copy it
 
 **Configure:**
+
 ```bash
-export MISTRAL_API_KEY="..."
+# Option 1: Setup wizard (recommended - uses secure keyring storage)
+hillstar wizard
+
+# Option 2: Environment variable (for CI/CD or temporary use)
+export MISTRAL_API_KEY="your-api-key"
 ```
 
 **Model Options:**
-- `mistral-large-2411` (best quality)
-- `mistral-medium-latest` (balanced)
-- `codestral-2508` (coding-focused)
+
+- `magistral-medium-1.2` (multimodal reasoning, agentic tasks)
+- `mistral-large-3` (general purpose, cost-effective)
+- `devstral-2` (coding agent, codebase exploration, software engineering)
+- `mistral-medium-3.1` (multimodal, general tasks)
+- `codestral` (code completion, code generation, low-latency)
+- `mistral-small-3.2` (lightweight general purpose)
+- `ministral-8b` / `ministral-3b` (small tasks, edge deployment)
+
+**Parameter Support:** Mistral fully supports temperature and top_p tuning. Recommended: fix temperature, then adjust top_p for exploration.
 
 ---
 
 ### Google Gemini
 
 **Get API Key:**
-1. Visit https://ai.google.dev
+
+1. Visit <https://ai.google.dev>
 2. Click "Get API key"
 3. Create new key for free tier
 4. Copy it
 
 **Configure:**
+
 ```bash
+# Option 1: Setup wizard (recommended - uses secure keyring storage)
+hillstar wizard
+
+# Option 2: Environment variable (for CI/CD or temporary use)
 export GOOGLE_API_KEY="AIza..."
 ```
 
 **Model Options:**
-- `gemini-3-pro` (best quality)
-- `gemini-3-flash` (fast)
-- `gemini-1.5-pro` (legacy, still works)
 
-**Important:** Gemini 3 models - keep temperature at default (1.0). Changing temperature causes performance degradation on reasoning tasks.
+Frontier Models (Gemini 3.x):
+
+- `gemini-3.1-pro-preview` (best overall, multimodal, context-aware pricing)
+- `gemini-3-flash-preview` (price-performance multimodal)
+
+Advanced Reasoning (Gemini 2.5):
+
+- `gemini-2.5-pro` (SOTA thinking for code, math, STEM, codebases)
+- `gemini-2.5-flash` (fast multimodal inference)
+- `gemini-2.5-flash-lite` (cost-efficient)
+- `gemini-2.5-computer-user` (agentic browser automation, UI testing)
+
+**Important:** Keep temperature at default (1.0). Changing temperature causes performance degradation on reasoning tasks. Use thinking mode for complex problems.
 
 ---
 
@@ -135,6 +171,7 @@ export GOOGLE_API_KEY="AIza..."
 ### Ollama (Recommended for local testing)
 
 **Install:**
+
 ```bash
 # macOS or Linux
 curl -fsSL https://ollama.ai/install.sh | sh
@@ -143,6 +180,7 @@ curl -fsSL https://ollama.ai/install.sh | sh
 ```
 
 **Start Ollama Server:**
+
 ```bash
 # In one terminal
 ollama serve
@@ -153,6 +191,7 @@ ollama pull neural-chat
 ```
 
 **Configure Hillstar:**
+
 ```bash
 # Ollama runs on localhost:11434 by default
 # No API key needed
@@ -162,6 +201,7 @@ hillstar presets  # Should show ollama provider
 ```
 
 **Available Models (via ollama pull):**
+
 - `mistral` - Fast, general purpose
 - `neural-chat` - Conversational
 - `devstral-2:123b-cloud` - Coding-focused (if available)
@@ -172,6 +212,7 @@ hillstar presets  # Should show ollama provider
 ### llama.cpp (For C++ performance)
 
 **Install:**
+
 ```bash
 git clone https://github.com/ggerganov/llama.cpp
 cd llama.cpp
@@ -179,6 +220,7 @@ make
 ```
 
 **Run Server:**
+
 ```bash
 ./server -m /path/to/model.gguf -ngl 99
 # -ngl 99: Offload layers to GPU (adjust based on your GPU)
@@ -186,6 +228,7 @@ make
 
 **Configure Hillstar:**
 Edit `~/.hillstar/provider_registry.json`:
+
 ```json
 {
   "providers": {
@@ -202,10 +245,12 @@ Edit `~/.hillstar/provider_registry.json`:
 ### Devstral Local (GPU Required)
 
 **Requirements:**
+
 - NVIDIA GPU with 16GB+ VRAM (for 24B model)
 - CUDA toolkit installed
 
 **Setup:**
+
 ```bash
 # Using vLLM
 pip install vllm
@@ -218,6 +263,7 @@ python -m vllm.entrypoints.openai.api_server \
 ```
 
 **Configure Hillstar:**
+
 ```bash
 export DEVSTRAL_ENDPOINT="http://localhost:8080"
 ```
@@ -227,15 +273,18 @@ export DEVSTRAL_ENDPOINT="http://localhost:8080"
 ## Using the Setup Wizard
 
 **Interactive Configuration (Recommended):**
+
 ```bash
 hillstar wizard
 ```
 
 This guides you through:
-1. Testing each provider's connectivity
-2. Saving valid credentials
-3. Setting provider preferences
-4. Verifying setup
+
+1. Selecting cloud and local providers to configure
+2. Storing API keys securely in your OS keyring (macOS Keychain, Linux Secret Service, Windows Credential Manager)
+3. Auto-discovering credentials already stored in your keyring
+4. Loading keys from `.env` files as an alternative method
+5. Verifying provider connectivity
 
 ---
 
@@ -249,7 +298,7 @@ hillstar presets
 hillstar enforce check
 
 # Run example workflow
-hillstar execute python/hillstar/tests/e2e/workflow.json
+hillstar execute workflow.json
 ```
 
 ---
@@ -273,16 +322,19 @@ rg "cost" .hillstar/
 
 ## Troubleshooting
 
-**"Connection refused"**
+### **"Connection refused"**
+
 - Local model server not running (Ollama, llama.cpp)
 - Check port: `lsof -i :11434` (Ollama default) or `netstat -an | rg 11434`
 
-**"Authentication failed"**
+### **"Authentication failed"**
+
 - API key not set correctly
 - Wrong environment variable name
 - Key has insufficient permissions
 
-**"Rate limited"**
+### **"Rate limited"**
+
 - Too many requests to API
 - Use workflow presets with lower tiers
 - Or switch to local models
@@ -291,9 +343,9 @@ rg "cost" .hillstar/
 
 ## Security Notes
 
-- ✅ API keys never embedded in workflows
-- ✅ Store in environment variables or `~/.hillstar/provider_registry.json`
-- ✅ Git ignores credential files (.gitignore)
-- ✅ Hillstar redacts credentials from error messages
-- ✅ Audit logging captures all model calls
-
+- API keys are stored in your OS keyring, never in plaintext config files
+- API keys are never embedded in workflows
+- Environment variables are supported for CI/CD or temporary use
+- Git ignores credential files (.gitignore)
+- Hillstar automatically redacts credentials from error messages and logs (24 pattern types)
+- Audit logging captures all model calls

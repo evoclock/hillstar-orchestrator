@@ -44,9 +44,9 @@ None (per-workflow via model_config)
 
 Failure Modes
 -------------
-- Unknown model → Return 0.0 (no pricing available)
-- Missing budget config → No budget enforcement
-- Registry unavailable → Return 0.0 for cost estimation
+- Unknown model Return 0.0 (no pricing available)
+- Missing budget config No budget enforcement
+- Registry unavailable Return 0.0 for cost estimation
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -64,101 +64,101 @@ from config.provider_registry import get_registry
 
 
 class CostManager:
-    """Manage cost estimation, budget enforcement, and cost tracking for models."""
+	"""Manage cost estimation, budget enforcement, and cost tracking for models."""
 
-    def __init__(self, model_config: dict):
-        """
-        Args:
-            model_config: Model configuration dict with budget info
-        """
-        self.model_config = model_config
-        self.cumulative_cost_usd = 0.0
-        self.node_costs: dict = {}  # node_id -> cost_usd
+	def __init__(self, model_config: dict):
+		"""
+		Args:
+			model_config: Model configuration dict with budget info
+		"""
+		self.model_config = model_config
+		self.cumulative_cost_usd = 0.0
+		self.node_costs: dict = {} # node_id -> cost_usd
 
-    def estimate_cost(
-        self,
-        provider: str,
-        model_name: str,
-        input_tokens: int,
-        output_tokens: int,
-    ) -> float:
-        """
-        Estimate cost of a model call using provider_registry pricing.
+	def estimate_cost(
+		self,
+		provider: str,
+		model_name: str,
+		input_tokens: int,
+		output_tokens: int,
+	) -> float:
+		"""
+		Estimate cost of a model call using provider_registry pricing.
 
-        Args:
-            provider: Provider name (anthropic, openai, local, devstral_local, etc.)
-            model_name: Model name/API ID
-            input_tokens: Estimated input tokens
-            output_tokens: Estimated output tokens
+		Args:
+			provider: Provider name (anthropic, openai, local, devstral_local, etc.)
+			model_name: Model name/API ID
+			input_tokens: Estimated input tokens
+			output_tokens: Estimated output tokens
 
-        Returns:
-            Estimated cost in USD (0.0 if pricing not available)
-        """
-        # Local/free models have no charge
-        if provider in ["devstral_local", "local", "ollama"]:
-            return 0.0
+		Returns:
+			Estimated cost in USD (0.0 if pricing not available)
+		"""
+		# Local/free models have no charge
+		if provider in ["devstral_local", "local", "ollama"]:
+			return 0.0
 
-        try:
-            # Get pricing from registry (source of truth)
-            registry = get_registry()
-            model_config = registry.get_model(provider, model_name)
+		try:
+			# Get pricing from registry (source of truth)
+			registry = get_registry()
+			model_config = registry.get_model(provider, model_name)
 
-            # If model not found in registry, return 0.0
-            if not model_config:
-                return 0.0
+			# If model not found in registry, return 0.0
+			if not model_config:
+				return 0.0
 
-            # Extract pricing from model config
-            pricing = model_config.get("pricing", {})
-            input_cost_per_1m = pricing.get("input_per_1m_usd")
-            output_cost_per_1m = pricing.get("output_per_1m_usd")
+			# Extract pricing from model config
+			pricing = model_config.get("pricing", {})
+			input_cost_per_1m = pricing.get("input_per_1m_usd")
+			output_cost_per_1m = pricing.get("output_per_1m_usd")
 
-            # If pricing not available, return 0.0
-            if input_cost_per_1m is None or output_cost_per_1m is None:
-                return 0.0
+			# If pricing not available, return 0.0
+			if input_cost_per_1m is None or output_cost_per_1m is None:
+				return 0.0
 
-            # Calculate cost based on tokens (pricing is per 1M tokens)
-            input_cost = (input_tokens / 1_000_000) * input_cost_per_1m
-            output_cost = (output_tokens / 1_000_000) * output_cost_per_1m
-            return input_cost + output_cost
+			# Calculate cost based on tokens (pricing is per 1M tokens)
+			input_cost = (input_tokens / 1_000_000) * input_cost_per_1m
+			output_cost = (output_tokens / 1_000_000) * output_cost_per_1m
+			return input_cost + output_cost
 
-        except Exception:
-            # If registry is unavailable, return 0.0
-            # This allows execution to continue without cost tracking
-            return 0.0
+		except Exception:
+			# If registry is unavailable, return 0.0
+			# This allows execution to continue without cost tracking
+			return 0.0
 
-    def check_budget(
-        self,
-        estimated_cost: float,
-        node_id: str,
-    ) -> None:
-        """
-        Check if cost would exceed budget limits.
+	def check_budget(
+		self,
+		estimated_cost: float,
+		node_id: str,
+	) -> None:
+		"""
+		Check if cost would exceed budget limits.
 
-        Args:
-            estimated_cost: Estimated cost of this call in USD
-            node_id: Node ID for logging
+		Args:
+			estimated_cost: Estimated cost of this call in USD
+			node_id: Node ID for logging
 
-        Raises:
-            BudgetExceededError: If budget would be exceeded
-        """
-        budget = self.model_config.get("budget", {})
-        max_per_task = budget.get("max_per_task_usd")
-        max_workflow = budget.get("max_workflow_usd")
+		Raises:
+			BudgetExceededError: If budget would be exceeded
+		"""
+		budget = self.model_config.get("budget", {})
+		max_per_task = budget.get("max_per_task_usd")
+		max_workflow = budget.get("max_workflow_usd")
 
-        if max_per_task and estimated_cost > max_per_task:
-            raise BudgetExceededError(
-                f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
-                f"exceeds per-task limit ${max_per_task}"
-            )
+		if max_per_task and estimated_cost > max_per_task:
+			raise BudgetExceededError(
+				f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
+				f"exceeds per-task limit ${max_per_task}"
+			)
 
-        if max_workflow and (self.cumulative_cost_usd + estimated_cost) > max_workflow:
-            remaining = max_workflow - self.cumulative_cost_usd
-            raise BudgetExceededError(
-                f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
-                f"would exceed workflow limit. Remaining: ${remaining:.4f}"
-            )
+		if max_workflow and (self.cumulative_cost_usd + estimated_cost) > max_workflow:
+			remaining = max_workflow - self.cumulative_cost_usd
+			raise BudgetExceededError(
+				f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
+				f"would exceed workflow limit. Remaining: ${remaining:.4f}"
+			)
 
-    def record_cost(self, node_id: str, cost: float) -> None:
-        """Record actual cost for a node."""
-        self.node_costs[node_id] = cost
-        self.cumulative_cost_usd += cost
+	def record_cost(self, node_id: str, cost: float) -> None:
+		"""Record actual cost for a node."""
+		self.node_costs[node_id] = cost
+		self.cumulative_cost_usd += cost

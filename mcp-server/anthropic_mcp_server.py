@@ -18,7 +18,7 @@ ARCHITECTURE:
 
 USAGE:
 ------
-    python anthropic_mcp_server.py
+ python anthropic_mcp_server.py
 
 Registered in ~/.claude.json under "anthropic" provider.
 
@@ -52,88 +52,88 @@ from base_mcp_server import BaseMCPServer, logger
 
 
 class AnthropicMCPServer(BaseMCPServer):
-    """Anthropic Claude models via official SDK."""
+	"""Anthropic Claude models via official SDK."""
 
-    def __init__(self):
-        super().__init__("anthropic")
+	def __init__(self):
+		super().__init__("anthropic")
 
-        api_key = os.getenv("ANTHROPIC_API_KEY")
-        if not api_key:
-            logger.error("ANTHROPIC_API_KEY not set")
-            sys.exit(1)
+		api_key = os.getenv("ANTHROPIC_API_KEY")
+		if not api_key:
+			logger.error("ANTHROPIC_API_KEY not set")
+			sys.exit(1)
 
-        self.client = Anthropic(api_key=api_key)
-        logger.info("Anthropic MCP server initialized")
+		self.client = Anthropic(api_key=api_key)
+		logger.info("Anthropic MCP server initialized")
 
-    def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute task via Anthropic API."""
+	def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+		"""Execute task via Anthropic API."""
 
-        if tool_name != "execute_task":
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": f"Unknown tool: {tool_name}"}]
-            }
+		if tool_name != "execute_task":
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": f"Unknown tool: {tool_name}"}]
+			}
 
-        prompt = arguments.get("prompt", "")
-        default_model = os.getenv("MODEL_DEFAULT", "claude-haiku-4-5-20241001")
-        model = arguments.get("model", default_model)
-        temperature = arguments.get("temperature")  # Optional parameter
+		prompt = arguments.get("prompt", "")
+		default_model = os.getenv("MODEL_DEFAULT", "claude-haiku-4-5-20241001")
+		model = arguments.get("model", default_model)
+		temperature = arguments.get("temperature") # Optional parameter
 
-        if not prompt:
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": "prompt is required"}]
-            }
+		if not prompt:
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": "prompt is required"}]
+			}
 
-        try:
-            # Model-specific max_tokens limits
-            max_tokens_map = {
-                "claude-opus-4-6": 4096,
-                "claude-sonnet-4-5-20250929": 4096,
-                "claude-haiku-4-5-20251001": 1024,
-            }
-            max_tokens = max_tokens_map.get(model, 4096)
+		try:
+			# Model-specific max_tokens limits
+			max_tokens_map = {
+				"claude-opus-4-6": 4096,
+				"claude-sonnet-4-5-20250929": 4096,
+				"claude-haiku-4-5-20251001": 1024,
+			}
+			max_tokens = max_tokens_map.get(model, 4096)
 
-            # Build request - temperature optional
-            request_args = {
-                "model": model,
-                "max_tokens": max_tokens,
-                "stream": True,
-                "messages": [
-                    {"role": "user", "content": prompt}
-                ]
-            }
+			# Build request - temperature optional
+			request_args = {
+				"model": model,
+				"max_tokens": max_tokens,
+				"stream": True,
+				"messages": [
+					{"role": "user", "content": prompt}
+				]
+			}
 
-            # Add temperature if provided
-            if temperature is not None:
-                request_args["temperature"] = temperature
+			# Add temperature if provided
+			if temperature is not None:
+				request_args["temperature"] = temperature
 
-            message = self.client.messages.create(**request_args)
+			message = self.client.messages.create(**request_args)
 
-            output = ""
-            for event in message:
-                if event.type == "content_block_delta":
-                    if hasattr(event.delta, "text"):
-                        output += event.delta.text
-            logger.info("Task completed successfully")
+			output = ""
+			for event in message:
+				if event.type == "content_block_delta":
+					if hasattr(event.delta, "text"):
+						output += event.delta.text
+			logger.info("Task completed successfully")
 
-            return {
-                "isError": False,
-                "content": [{"type": "text", "text": output}]
-            }
+			return {
+				"isError": False,
+				"content": [{"type": "text", "text": output}]
+			}
 
-        except Exception:
-            logger.error("API call failed")
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": "API call failed. Please try again."}]
-            }
+		except Exception:
+			logger.error("API call failed")
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": "API call failed. Please try again."}]
+			}
 
 
 def main():
-    server = AnthropicMCPServer()
-    server.run()
+	server = AnthropicMCPServer()
+	server.run()
 
 
 if __name__ == "__main__":
-    main()
+	main()

@@ -34,12 +34,6 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-[project.url]
-Homepage = "https://github.com/jgamboa/hillstar-orchestrator"
-Repository = "https://github.com/jgamboa/hillstar-orchestrator"
-Documentation = "https://github.com/jgamboa/hillstar-orchestrator/tree/main/docs"
-"Issue Tracker" = "https://github.com/jgamboa/hillstar-orchestrator/issues"
-
 dependencies = [
   "anthropic==0.79.0",
   "openai==2.21.0",
@@ -64,6 +58,11 @@ dev = [
 security = [
   "pip-audit==2.6.1",
   "bandit==1.7.5",
+]
+
+docs = [
+  "sphinx>=9.0",
+  "furo>=2025.12",
 ]
 
 [project.urls]

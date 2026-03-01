@@ -52,7 +52,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional, Tuple
 
 import httpx
 
@@ -215,6 +215,61 @@ class SetupWizard:
         else:
             print(f"\n[OK] {credentials_found} credential(s) loaded and secured in system keyring")
 
+    def _discover_keyring_credentials(self, provider: str) -> List[Tuple[str, str]]:
+        """Discover existing credentials in system keyring for the given provider."""
+        found_credentials = []
+        try:
+            patterns = [
+                ("openai", ["api_key", "default", "key"]),
+                ("OpenAI", ["api_key", "default", "key"]),
+                ("OPENAI", ["api_key", "default", "key"]),
+                ("hillstar-orchestrator", ["openai"]),
+            ]
+            for service, usernames in patterns:
+                for username in usernames:
+                    try:
+                        credential = keyring.get_password(service, username)
+                        if credential and credential.startswith("sk-"):
+                            found_credentials.append((service, username))
+                    except Exception:
+                        pass
+        except Exception as e:
+            error_msg = redact(str(e))
+            print(f"\n[INFO] Could not search keyring: {error_msg}")
+        return found_credentials
+
+    def _select_from_keyring(self, found_credentials: List[Tuple[str, str]]) -> Optional[str]:
+        """Display found credentials and let user select one."""
+        if not found_credentials:
+            return None
+        print(f"\nFound {len(found_credentials)} credential(s) in keyring:\n")
+        for idx, (service, username) in enumerate(found_credentials, 1):
+            try:
+                cred = keyring.get_password(service, username)
+                if cred and len(cred) > 15:
+                    preview = f"{cred[:10]}...{cred[-4:]}"
+                else:
+                    preview = "[credential]"
+                print(f" [{idx}] {service} / {username}")
+                print(f"     ({preview})")
+            except Exception:
+                print(f" [{idx}] {service} / {username} [access denied]")
+        print(f" [{len(found_credentials)+1}] Enter a new API key")
+        print(f" [{len(found_credentials)+2}] Skip this provider")
+        choice = input("\nSelect option (or press Enter to skip): ").strip()
+        if not choice or choice == str(len(found_credentials)+2):
+            return None
+        if choice == str(len(found_credentials)+1):
+            return "MANUAL_ENTRY"
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(found_credentials):
+                service, username = found_credentials[idx]
+                return keyring.get_password(service, username)
+        except (ValueError, IndexError):
+            print("Invalid selection")
+        return None
+
     def _configure_cloud_providers_interactive(self) -> None:
         """Configure API keys for cloud providers with interactive prompts."""
         print("\n" + "=" * 70)
@@ -233,6 +288,19 @@ class SetupWizard:
             api_key_var = env_vars[0] if env_vars else ""
 
             print(f"--- {display_name} ---")
+
+            # Try to discover existing credentials in system keyring
+            found_creds = self._discover_keyring_credentials(provider)
+            if found_creds:
+                selected_cred = self._select_from_keyring(found_creds)
+                if selected_cred and selected_cred != "MANUAL_ENTRY":
+                    keyring.set_password(self.KEYRING_SERVICE, provider, selected_cred)
+                    self.configured_credentials[provider] = selected_cred
+                    print("  Using credential from system keyring")
+                    continue
+                elif not selected_cred:
+                    print("  Skipping")
+                    continue
 
             # Try to get existing key from keyring
             existing_key = keyring.get_password(self.KEYRING_SERVICE, provider)

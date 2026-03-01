@@ -2,11 +2,12 @@
 
 ## Quick Links
 
-- **Setup Guide:** [SETUP_GUIDE.md](SETUP_GUIDE.md) - Configure providers (Anthropic, OpenAI, Mistral, local models)
-- **Troubleshooting:** See README § Troubleshooting for common issues
-- **Full User Manual:** [User_Manual.md](User_Manual.md) (4,700+ lines)
+- **Setup Guide:** [SETUP_GUIDE.md](SETUP_GUIDE.md) - Configure providers (Anthropic, OpenAI, Mistral, Google, local models)
+- **Troubleshooting:** See README Troubleshooting for common issues
+- **Full User Manual:** [User_Manual.md](User_Manual.md)
 - **How-To Guide:** [how-to-workflow-data-flow.md](how-to-workflow-data-flow.md)
-- **Source Code:** [hillstar/utils/doc_generator.py](../python/hillstar/utils/doc_generator.py)
+- **Provider Models:** [PROVIDER_MODEL_REFERENCE.md](PROVIDER_MODEL_REFERENCE.md)
+- **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Installation
 
@@ -30,7 +31,7 @@ from hillstar.governance import GovernanceEnforcer, HookManager, GovernancePolic
 from hillstar.models import AnthropicModel, OpenAIModel, MistralModel, OllamaModel
 
 # Utilities
-from hillstar.utils import DAGVisualizer, CredentialRedactor, HillstarException
+from hillstar.utils import CredentialRedactor, HillstarException
 
 # Workflows
 from hillstar.workflows import WorkflowDiscovery, WorkflowValidator, ModelPresets
@@ -48,8 +49,8 @@ config = HillstarConfig.load_user_overrides()
 
 ```python
 runner = WorkflowRunner(
-    workflow_path='workflows/my_workflow.json',
-    output_dir='output/'
+ workflow_path='workflows/my_workflow.json',
+ output_dir='output/'
 )
 results = runner.execute()
 ```
@@ -96,7 +97,7 @@ hillstar execute WORKFLOW_PATH [OUTPUT_DIR]
 # Show available model presets
 hillstar presets
 
-# Run setup wizard
+# Run setup wizard (stores credentials in OS keyring)
 hillstar wizard
 
 # Set development mode
@@ -104,15 +105,6 @@ hillstar mode dev|normal
 
 # Governance enforcement
 hillstar enforce check|status
-
-# Reduce workflow to Loon format
-hillstar loon reduce WORKFLOW
-
-# Expand Loon back to standard
-hillstar loon expand LOON
-
-# Execute a single node
-hillstar execute-node WORKFLOW NODE
 
 # Show version
 hillstar --version
@@ -122,12 +114,12 @@ hillstar --version
 
 | Module | Purpose |
 |--------|---------|
-| **config** | Configuration, provider registry, setup |
-| **execution** | Workflow runner, execution engine |
-| **governance** | Policy enforcement, compliance |
-| **models** | LLM provider adapters |
-| **utils** | Utilities, helpers, visualization |
-| **workflows** | Workflow validation, discovery |
+| **config** | Configuration, provider registry, setup wizard |
+| **execution** | Workflow runner, DAG execution engine |
+| **governance** | Policy enforcement, compliance, hooks |
+| **models** | LLM provider adapters (Anthropic, OpenAI, Mistral, Ollama, MCP) |
+| **utils** | Credential redaction, exceptions, tracing |
+| **workflows** | Workflow validation, discovery, presets |
 
 ## Key Classes
 
@@ -180,52 +172,63 @@ graph.is_dag()
 
 ### Supported Providers
 
-- **anthropic** - Claude models
-- **openai** - GPT models
-- **mistral** - Mistral models
-- **ollama** - Local models
-- **devstral_local** - Local Devstral
-- **google_ai_studio** - Google models
-- **azure_ai** - Azure models
-- **amazon_bedrock** - AWS Bedrock
-- **cohere** - Cohere models
-- **meta_llama** - Meta Llama models
+Cloud:
+
+- **anthropic** - Claude models (Opus, Sonnet, Haiku)
+- **openai** - GPT and o-series models
+- **mistral** - Mistral, Codestral, Devstral models
+- **google_ai_studio** - Gemini models
+
+Local:
+
+- **ollama** - Local models via Ollama
+- **devstral_local** - Local Devstral (GPU required)
+
+MCP (subprocess-based):
+
+- **anthropic_mcp** - Claude via MCP server
+- **openai_mcp** - GPT via MCP server
+- **mistral_mcp** - Mistral via MCP server
+- **ollama_mcp** - Ollama via MCP server
 
 ### Set API Key
 
 ```bash
-# Via environment variable
-export ANTHROPIC_API_KEY="sk-ant-..."
+# Recommended: Setup wizard (stores in OS keyring)
+hillstar wizard
 
-# Via configuration file
-echo '{"providers": {"anthropic": {"api_key": "sk-ant-..."}}}' > ~/.hillstar/provider_registry.json
+# Alternative: Environment variable (CI/CD or temporary use)
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-proj-..."
+export MISTRAL_API_KEY="..."
+export GOOGLE_API_KEY="AIza..."
 ```
 
 ## Workflow JSON Format
 
 ```json
 {
-  "name": "My Workflow",
-  "description": "Workflow description",
-  "version": "1.0",
-  "nodes": [
-    {
-      "id": "node_1",
-      "type": "model",
-      "provider": "anthropic",
-      "model": "claude-opus-4-6",
-      "prompt": "Your prompt template"
-    }
-  ],
-  "edges": [
-    {"from": "node_1", "to": "node_2"}
-  ],
-  "provider_config": {
-    "compliance": {
-      "tos_accepted": true,
-      "audit_enabled": true
-    }
+ "name": "My Workflow",
+ "description": "Workflow description",
+ "version": "1.0",
+ "nodes": [
+  {
+   "id": "node_1",
+   "type": "model",
+   "provider": "anthropic",
+   "model": "claude-opus-4-6",
+   "prompt": "Your prompt template"
   }
+ ],
+ "edges": [
+  {"from": "node_1", "to": "node_2"}
+ ],
+ "provider_config": {
+  "compliance": {
+   "tos_accepted": true,
+   "audit_enabled": true
+  }
+ }
 }
 ```
 
@@ -235,14 +238,14 @@ echo '{"providers": {"anthropic": {"api_key": "sk-ant-..."}}}' > ~/.hillstar/pro
 from hillstar.utils import HillstarException, CredentialRedactor
 
 try:
-    runner = WorkflowRunner('workflow.json', 'output/')
-    results = runner.execute()
+ runner = WorkflowRunner('workflow.json', 'output/')
+ results = runner.execute()
 except HillstarException as e:
-    # Handle Hillstar-specific errors
-    print(f"Workflow error: {e}")
+ # Handle Hillstar-specific errors
+ print(f"Workflow error: {e}")
 ```
 
-## Logging & Debugging
+## Logging and Debugging
 
 ```python
 # Enable debug mode
@@ -258,14 +261,8 @@ safe_message = redactor.redact(message)
 ## Generate Documentation
 
 ```bash
-# Generate user manual
-python python/generate-docs.py
-
-# With statistics
-python python/generate-docs.py --verbose --stats
-
-# Custom output
-python python/generate-docs.py --output custom_docs/Manual.md
+# Generate user manual from source
+python docs/doc_generator.py
 ```
 
 ## Performance Tips
@@ -282,12 +279,12 @@ python python/generate-docs.py --output custom_docs/Manual.md
 |----------|----------|
 | Full User Manual | `docs/User_Manual.md` |
 | How-To Guides | `docs/how-to-workflow-data-flow.md` |
-| Source Code | `python/hillstar/` |
-| Package Setup | `python/setup.py` |
-| Example Workflows | `dev/examples/` |
-| Configuration | `~/.hillstar/` |
+| MCP Servers | `mcp-server/*.py` |
+| Provider Registry | `config/provider_registry.default.json` |
+| Model Reference | `docs/PROVIDER_MODEL_REFERENCE.md` |
+| Workflow Schema | `spec/workflow-schema.json` |
 
-## Compliance & Governance
+## Compliance and Governance
 
 ```python
 from hillstar.governance import GovernanceEnforcer
@@ -300,28 +297,27 @@ enforcer.enforce(workflow, policy)
 ## Architecture Diagram
 
 ```bash
-┌─────────────────────────────────────┐
-│         Hillstar CLI                │
-└────────┬────────────────────────────┘
-         │
-┌────────▼────────────────────────────┐
-│      WorkflowRunner                 │
-├─────────────────────────────────────┤
-│  - Executes DAG workflows           │
-│  - Manages checkpoint/replay        │
-│  - Tracks execution trace           │
-└────────┬────────────────────────────┘
-         │
-    ┌────┴───┬───────────────────┐
-    │        │                   │
-┌───▼──┐ ┌───▼────┐ ┌────────────▼──┐
-│Models│ │Workflow│ │Governance     │
-├──────┤ │Engine  │ ├───────────────┤
-│      │ │        │ │- Policy       │
-│- LLM │ │- Graph │ │- Compliance   │
-│ API  │ │- Trace │ │- Audit Hooks  │
-│      │ │- Cache │ │               │
-└──────┘ └────────┘ └───────────────┘
++-------------------------------------+
+|           Hillstar CLI              |
++--------+----------------------------+
+         |
++--------+----------------------------+
+|         WorkflowRunner              |
++---------+---------------------------+
+| - Executes DAG workflows            |
+| - Manages checkpoint/replay         |
+| - Tracks execution trace            |
++--------+----------------------------+
+         |
+    +----+----+--------------+
+    |         |              |
++-------+ +--------+ +--------------+
+| Models| |Workflow| | Governance   |
++-------+ | Engine | +--------------+
+| - LLM | | - Graph| | - Policy     |
+|   API | | - Trace| | - Compliance |
+| - MCP | | - Cache| | - Audit Hooks|
++--------+ +--------+ +--------------+
 ```
 
 ## Getting Help
@@ -331,14 +327,8 @@ enforcer.enforce(workflow, policy)
 hillstar --help
 hillstar execute --help
 
-# Run diagnostic
-python -m hillstar.tests.e2e.troubleshoot.*
-
 # Check configuration
 hillstar enforce status
-
-# View logs
-tail -f ~/.hillstar/logs/*.log
 ```
 
 ## Common Issues
@@ -348,7 +338,7 @@ tail -f ~/.hillstar/logs/*.log
 | API key not found | Set env var or run `hillstar wizard` |
 | Invalid workflow | Run `hillstar validate WORKFLOW_PATH` |
 | Module not found | Install with `pip install hillstar-orchestrator` |
-| Permission denied | Check file permissions in `~/.hillstar/` |
+| Ollama not connecting | Ensure `ollama serve` is running on port 11434 |
 
 ## Version Info
 
@@ -359,8 +349,8 @@ python -c "import hillstar; print(hillstar.__version__)"
 
 ---
 
-**Last Updated:** 2026-02-17
-**Version:** 1.0
+**Last Updated:** 2026-03-01
+**Version:** 1.0.0
 **Status:** Production Ready
 
 For complete documentation, see [User_Manual.md](User_Manual.md)

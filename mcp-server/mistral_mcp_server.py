@@ -18,7 +18,7 @@ ARCHITECTURE:
 
 USAGE:
 ------
-    python mistral_mcp_server.py
+ python mistral_mcp_server.py
 
 Registered in ~/.claude.json under "mistral" provider.
 
@@ -64,89 +64,89 @@ from base_mcp_server import BaseMCPServer, logger
 
 
 class MistralMCPServer(BaseMCPServer):
-    """Mistral AI models via official SDK."""
+	"""Mistral AI models via official SDK."""
 
-    def __init__(self):
-        super().__init__("mistral")
+	def __init__(self):
+		super().__init__("mistral")
 
-        api_key = os.getenv("MISTRAL_API_KEY")
-        if not api_key:
-            logger.error("MISTRAL_API_KEY not set")
-            sys.exit(1)
+		api_key = os.getenv("MISTRAL_API_KEY")
+		if not api_key:
+			logger.error("MISTRAL_API_KEY not set")
+			sys.exit(1)
 
-        self.client = Mistral(api_key=api_key)
-        logger.info("Mistral MCP server initialized")
+		self.client = Mistral(api_key=api_key)
+		logger.info("Mistral MCP server initialized")
 
-    def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute task via Mistral API."""
+	def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+		"""Execute task via Mistral API."""
 
-        if tool_name != "execute_task":
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": f"Unknown tool: {tool_name}"}]
-            }
+		if tool_name != "execute_task":
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": f"Unknown tool: {tool_name}"}]
+			}
 
-        prompt = arguments.get("prompt", "")
-        default_model = os.getenv("MODEL_DEFAULT", "mistral-small-latest")
-        model = arguments.get("model", default_model)
-        temperature = arguments.get("temperature")  # Optional parameter
-        top_p = arguments.get("top_p")  # Optional parameter
+		prompt = arguments.get("prompt", "")
+		default_model = os.getenv("MODEL_DEFAULT", "mistral-small-latest")
+		model = arguments.get("model", default_model)
+		temperature = arguments.get("temperature") # Optional parameter
+		top_p = arguments.get("top_p") # Optional parameter
 
-        if not prompt:
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": "prompt is required"}]
-            }
+		if not prompt:
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": "prompt is required"}]
+			}
 
-        try:
-            # Model-specific max_tokens limits
-            max_tokens_map = {
-                "mistral-large-2411": 4096,
-                "mistral-medium-latest": 4096,
-                "mistral-small-latest": 4096,
-                "ministral-8b-latest": 4096,
-                "ministral-3b-latest": 4096,
-                "codestral-2508": 8000,
-            }
-            max_tokens = max_tokens_map.get(model, 4096)
+		try:
+			# Model-specific max_tokens limits
+			max_tokens_map = {
+				"mistral-large-2411": 4096,
+				"mistral-medium-latest": 4096,
+				"mistral-small-latest": 4096,
+				"ministral-8b-latest": 4096,
+				"ministral-3b-latest": 4096,
+				"codestral-2508": 8000,
+			}
+			max_tokens = max_tokens_map.get(model, 4096)
 
-            # Build request with optional temperature and top_p
-            request_args = {
-                "model": model,
-                "messages": [
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": max_tokens
-            }
+			# Build request with optional temperature and top_p
+			request_args = {
+				"model": model,
+				"messages": [
+					{"role": "user", "content": prompt}
+				],
+				"max_tokens": max_tokens
+			}
 
-            # Add optional parameters if provided
-            if temperature is not None:
-                request_args["temperature"] = temperature
-            if top_p is not None:
-                request_args["top_p"] = top_p
+			# Add optional parameters if provided
+			if temperature is not None:
+				request_args["temperature"] = temperature
+			if top_p is not None:
+				request_args["top_p"] = top_p
 
-            message = self.client.chat.complete(**request_args)
+			message = self.client.chat.complete(**request_args)
 
-            output = message.choices[0].message.content
-            logger.info("Task completed successfully")
+			output = message.choices[0].message.content
+			logger.info("Task completed successfully")
 
-            return {
-                "isError": False,
-                "content": [{"type": "text", "text": output}]
-            }
+			return {
+				"isError": False,
+				"content": [{"type": "text", "text": output}]
+			}
 
-        except Exception:
-            logger.error("API call failed")
-            return {
-                "isError": True,
-                "content": [{"type": "text", "text": "API call failed. Please try again."}]
-            }
+		except Exception:
+			logger.error("API call failed")
+			return {
+				"isError": True,
+				"content": [{"type": "text", "text": "API call failed. Please try again."}]
+			}
 
 
 def main():
-    server = MistralMCPServer()
-    server.run()
+	server = MistralMCPServer()
+	server.run()
 
 
 if __name__ == "__main__":
-    main()
+	main()

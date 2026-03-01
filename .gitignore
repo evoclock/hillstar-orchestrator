@@ -1,4 +1,10 @@
 
+# Sphinx build output
+docs/sphinx/_build/
+
+# Development logs, planning, and test execution (local only)
+dev/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -55,6 +61,7 @@ deprecated/
 .coverage
 htmlcov/
 .test-results/
+.test-results/deprecated/
 tmp_test/
 
 # Credentials (never commit)

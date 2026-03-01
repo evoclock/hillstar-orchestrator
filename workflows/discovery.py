@@ -34,9 +34,9 @@ None (per-workflow)
 
 Failure Modes
 -------------
-- Invalid JSON → ValueError
-- Missing required fields → KeyError
-- Unreadable files → IOError
+- Invalid JSON ValueError
+- Missing required fields KeyError
+- Unreadable files IOError
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
 
@@ -79,7 +79,7 @@ class WorkflowDiscovery:
 			# Check depth
 			depth = root[len(start_path):].count(os.sep)
 			if depth > max_depth:
-				dirs[:] = []  # Don't recurse further
+				dirs[:] = [] # Don't recurse further
 				continue
 
 			# Skip hidden directories

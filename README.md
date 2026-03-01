@@ -499,7 +499,7 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟢 **v1.0.0 Production Release** (Feb 26, 2026) - Core orchestration engine
+🟢 **v1.0.0 Production Release** (Feb 28, 2026) - Core orchestration engine
 complete, tested, and production-ready with comprehensive security and governance.
 
 **v1.0.0 Capabilities:**

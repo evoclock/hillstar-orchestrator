@@ -19,44 +19,45 @@ This ensures that in regulated or high-stakes environments, teams can prove exac
 
 ### High-Level Flow
 
-```
+```bash
 User: Defines workflow.json
-    |
-    v
+ |
+ v
 WorkflowRunner
-    |
-    +---> Load workflow from JSON
-    +---> Validate schema and compliance
-    +---> Initialize execution environment
-    |
-    v
-GraphExecutor
-    |
-    +---> Build DAG from workflow
-    +---> Topological sort (execution order)
-    +---> Track dependencies
-    |
-    v
+ |
+ +---> Load workflow from JSON
+ +---> Validate schema and compliance
+ +---> Initialize execution environment
+ |
+ v
+WorkflowGraph
+ |
+ +---> Build DAG from workflow
+ +---> Topological sort (execution order)
+ +---> Track dependencies
+ |
+ v
 NodeExecutor (for each node in order)
-    |
-    +---> Determine operation type
-    +---> Dispatch to appropriate handler
-    +---> Track inputs/outputs
-    +---> Record cost
-    |
-    v
+ |
+ +---> Determine operation type
+ +---> Dispatch to appropriate handler
+ +---> Track inputs/outputs
+ +---> Record cost
+ |
+ v
 Results and Audit Trail
-    |
-    +---> Final workflow outputs
-    +---> Complete trace log
-    +---> Cost breakdown
-    +---> Compliance report
+ |
+ +---> Final workflow outputs
+ +---> Complete trace log
+ +---> Cost breakdown
+ +---> Compliance report
 ```
 
 ### Module Breakdown
 
 #### execution/runner.py (Orchestration)
 Responsible for:
+
 - Loading and parsing workflow definitions
 - Initializing graph, trace logger, and checkpoints
 - Instantiating model selector, cost manager, and config validator
@@ -64,6 +65,7 @@ Responsible for:
 - Writing final results and metadata
 
 Key Methods:
+
 - __init__: Setup environment and load workflow
 - execute: Main orchestration loop
 - _get_execution_result: Format final output
@@ -71,18 +73,21 @@ Key Methods:
 
 #### execution/graph.py (DAG Management)
 Responsible for:
+
 - Building directed acyclic graph from workflow
 - Topological sorting for execution order
 - Dependency tracking and validation
 - Managing node connections
 
 Key Concepts:
+
 - Node: Single action (model_call, file_read, etc.)
 - Edge: Data flow from one node's output to another's input
 - Topological Order: Ensures dependencies resolved before execution
 
 #### execution/node_executor.py (Node Dispatch)
 Responsible for:
+
 - Executing individual nodes
 - Managing provider chains and fallbacks
 - Handling different operation types
@@ -90,6 +95,7 @@ Responsible for:
 - Error detection and retry logic
 
 Operation Types:
+
 - model_call: LLM inference
 - file_read: Read file content
 - file_write: Write file
@@ -97,6 +103,7 @@ Operation Types:
 - git_commit: Create git commit
 
 Key Methods:
+
 - execute_node: Main dispatcher
 - _execute_model_call: LLM invocation with retries
 - _execute_file_read/write: File I/O
@@ -106,6 +113,7 @@ Key Methods:
 
 #### execution/model_selector.py (Provider Selection)
 Responsible for:
+
 - Selecting models based on preference
 - Resolving provider preferences
 - Checking provider availability
@@ -113,38 +121,44 @@ Responsible for:
 - Detecting Ollama availability
 
 Key Methods:
-- _select_model: Model selection logic
-- _resolve_provider_preference: Provider preference resolution
-- _provider_is_available: Check provider readiness
-- _ollama_available: Detect local Ollama
+
+- select_model: Model selection logic
+- resolve_provider_preference: Provider preference resolution
+- provider_is_available: Check provider readiness
+- ollama_available: Detect local Ollama
 - get_model: Factory with caching
 
 #### execution/cost_manager.py (Cost Tracking)
 Responsible for:
+
 - Estimating costs before/after calls
 - Tracking cumulative costs
 - Per-node cost recording
 - Budget enforcement
 
 Key Methods:
-- _estimate_cost: Calculate cost for model call
-- _check_budget: Enforce budget limits
-- _record_cost: Track per-node costs
+
+- estimate_cost: Calculate cost for model call
+- check_budget: Enforce budget limits
+- record_cost: Track per-node costs
 
 #### execution/config_validator.py (Configuration)
 Responsible for:
+
 - Loading environment files
 - Validating model configuration
 - Resolving API keys (config > env > error)
 - Provider-specific validation
 
 Key Methods:
+
 - load_env_file: Load .env file
 - validate_model_config: Validate configuration structure
 - get_api_key_for_provider: Three-tier key resolution
 
 #### execution/checkpoint.py (State Management)
 Responsible for:
+
 - Saving workflow state at checkpoints
 - Resuming from checkpoints
 - Recording progress
@@ -152,6 +166,7 @@ Responsible for:
 
 #### execution/observability.py (Logging and Tracing)
 Responsible for:
+
 - Structured logging
 - Trace collection
 - Audit trail creation
@@ -159,6 +174,7 @@ Responsible for:
 
 #### execution/trace.py (Trace Data)
 Responsible for:
+
 - Trace data structures
 - Trace collection and aggregation
 - Trace output formatting
@@ -169,99 +185,99 @@ Responsible for:
 
 ### Workflow Execution Flow
 
-```
+```bash
 Input Workflow (JSON)
-    |
-    v
+ |
+ v
 Schema Validation
-    |
-    v
+ |
+ v
 Compliance Check
-    |
-    v
+ |
+ v
 Build Execution Graph
-    |
-    v
+ |
+ v
 For each node (topological order):
-    |
-    +---> Execute node
-    +---> Record outputs
-    +---> Track costs
-    +---> Log to trace
-    +---> Check compliance gates
-    |
-    v
+ |
+ +---> Execute node
+ +---> Record outputs
+ +---> Track costs
+ +---> Log to trace
+ +---> Check compliance gates
+ |
+ v
 Aggregate Results
-    |
-    +---> Final outputs
-    +---> Cost summary
-    +---> Trace log
-    +---> Compliance report
+ |
+ +---> Final outputs
+ +---> Cost summary
+ +---> Trace log
+ +---> Compliance report
 ```
 
 ### Node Execution Flow
 
-```
+```bash
 Node Definition (from workflow)
-    |
-    v
+ |
+ v
 Get Node Type
-    |
-    +---> model_call -> _execute_model_call
-    +---> file_read  -> _execute_file_read
-    +---> file_write -> _execute_file_write
-    +---> script_run -> _execute_script_run
-    +---> git_commit -> _execute_git_commit
-    |
-    v
+ |
+ +---> model_call -> _execute_model_call
+ +---> file_read -> _execute_file_read
+ +---> file_write -> _execute_file_write
+ +---> script_run -> _execute_script_run
+ +---> git_commit -> _execute_git_commit
+ |
+ v
 Execute Operation
-    |
-    v
+ |
+ v
 Handle Errors
-    |
-    +---> Retry if transient (rate limit, timeout)
-    +---> Fallback to next provider
-    +---> Fail if fatal (auth, config)
-    |
-    v
+ |
+ +---> Retry if transient (rate limit, timeout)
+ +---> Fallback to next provider
+ +---> Fail if fatal (auth, config)
+ |
+ v
 Record Results
-    |
-    +---> Store output
-    +---> Log cost
-    +---> Add to trace
-    +---> Check compliance
+ |
+ +---> Store output
+ +---> Log cost
+ +---> Add to trace
+ +---> Check compliance
 ```
 
 ### Provider Selection Flow
 
-```
+```bash
 Request Model
-    |
-    v
+ |
+ v
 Check Cache
-    |
-    +---> Found -> Return cached instance
-    |
-    +---> Not found -> Select model
-            |
-            v
-        Check Preferred Provider
-            |
-            +---> Available -> Use it
-            |
-            +---> Unavailable -> Try fallback providers
-                    |
-                    v
-                Try next in chain
-                    |
-                    +---> Found available -> Use it
-                    |
-                    +---> None available -> Error
-    |
-    v
+ |
+ +---> Found -> Return cached instance
+ |
+ +---> Not found -> Select model
+ |
+ v
+ Check Preferred Provider
+ |
+ +---> Available -> Use it
+ |
+ +---> Unavailable -> Try fallback providers
+ |
+ v
+ Try next in chain
+ |
+ +---> Found available -> Use it
+ |
+ +---> None available -> Error
+ |
+ v
 Create/Cache Model Instance
-    |
-    v
+ |
+ v
 Return Model
 ```
 
@@ -271,64 +287,48 @@ Return Model
 
 ### Credential Security
 
-```
+```bash
 Credential Management
-    |
-    +---> Three-tier resolution:
-    |     1. Check config file
-    |     2. Check environment variables
-    |     3. Return error
-    |
-    +---> In-flight redaction:
-    |     Pattern detection -> [REDACTED:type] replacement
-    |
-    +---> Error handling:
-    |     Detect credentials in errors -> Redact before logging
+ |
+ +---> Three-tier resolution:
+ | 1. Check config file
+ | 2. Check environment variables
+ | 3. Return error
+ |
+ +---> In-flight redaction:
+ | Pattern detection -> [REDACTED:type] replacement
+ |
+ +---> Error handling:
+ | Detect credentials in errors -> Redact before logging
 ```
 
 ### Compliance Architecture
 
-```
+```bash
 Workflow Execution
-    |
-    +---> At submission:
-    |     Check provider_config exists
-    |     Check tos_accepted = true
-    |     Check audit_enabled = true
-    |
-    +---> During execution:
-    |     Log all decisions
-    |     Track costs in real-time
-    |     Enforce budget limits
-    |
-    +---> At completion:
-    |     Generate compliance report
-    |     Verify all gates passed
-    |     Create audit trail
+ |
+ +---> At submission:
+ | Check provider_config exists
+ | Check tos_accepted = true
+ | Check audit_enabled = true
+ |
+ +---> During execution:
+ | Log all decisions
+ | Track costs in real-time
+ | Enforce budget limits
+ |
+ +---> At completion:
+ | Generate compliance report
+ | Verify all gates passed
+ | Create audit trail
 ```
 
 ---
 
-## Modularization Strategy
-
-### Why Modularize?
-
-Original runner.py was 1200+ lines handling:
-- Model selection logic
-- Cost tracking
-- Config validation
-- Node execution
-- Orchestration
-
-This made it hard to:
-- Test individual components
-- Reason about data flow
-- Extend with new providers
-- Debug issues
-
 ### Modularization Approach
 
 Each module:
+
 - Single responsibility
 - Explicit dependencies (passed via constructor)
 - No global state
@@ -337,24 +337,24 @@ Each module:
 
 #### Module Dependencies
 
-```
+```bash
 runner.py (Orchestrator)
-    |
-    +---> graph.py (DAG management)
-    +---> model_selector.py (Model factory)
-    |     |
-    |     +---> config_validator.py (Config validation)
-    |
-    +---> node_executor.py (Node dispatch)
-    |     |
-    |     +---> model_selector.py (Get model)
-    |     +---> cost_manager.py (Track cost)
-    |
-    +---> cost_manager.py (Budget tracking)
-    +---> config_validator.py (Config validation)
-    +---> checkpoint.py (State persistence)
-    +---> observability.py (Logging/tracing)
-    +---> trace.py (Trace data structures)
+ |
+ +---> graph.py (DAG management)
+ +---> model_selector.py (Model factory)
+ | |
+ | +---> config_validator.py (Config validation)
+ |
+ +---> node_executor.py (Node dispatch)
+ | |
+ | +---> model_selector.py (Get model)
+ | +---> cost_manager.py (Track cost)
+ |
+ +---> cost_manager.py (Budget tracking)
+ +---> config_validator.py (Config validation)
+ +---> checkpoint.py (State persistence)
+ +---> observability.py (Logging/tracing)
+ +---> trace.py (Trace data structures)
 ```
 
 ### Dependency Injection Pattern
@@ -363,14 +363,15 @@ All modules receive dependencies via constructor:
 
 ```python
 class NodeExecutor:
-    def __init__(self, model_factory, cost_manager, trace_logger, model_config):
-        self.model_factory = model_factory
-        self.cost_manager = cost_manager
-        self.trace_logger = trace_logger
-        self.model_config = model_config
+ def __init__(self, model_factory, cost_manager, trace_logger, model_config):
+ self.model_factory = model_factory
+ self.cost_manager = cost_manager
+ self.trace_logger = trace_logger
+ self.model_config = model_config
 ```
 
 Benefits:
+
 - No hidden dependencies
 - Easy to mock for testing
 - Clear what each module needs
@@ -382,25 +383,27 @@ Benefits:
 
 ### Provider Registry
 
-Located: python/hillstar/config/provider_registry.default.json
+Located: config/provider_registry.default.json
 
 Structure:
+
 ```json
 {
-  "provider_name": {
-    "models": {
-      "model_id": {
-        "display_name": "Human readable name",
-        "input_cost_per_token": 0.01,
-        "output_cost_per_token": 0.03,
-        "context_window": 200000
-      }
-    }
-  }
+ "provider_name": {
+ "models": {
+ "model_id": {
+ "display_name": "Human readable name",
+ "input_cost_per_token": 0.01,
+ "output_cost_per_token": 0.03,
+ "context_window": 200000
+ }
+ }
+ }
 }
 ```
 
 Used by:
+
 - model_selector.py: Find available models
 - cost_manager.py: Calculate costs
 - validator.py: Validate model references
@@ -410,6 +413,7 @@ Used by:
 Defined in: spec/workflow-schema.json
 
 Key sections:
+
 - metadata: Workflow info
 - provider_config: Required provider and compliance settings
 - nodes: Array of execution nodes with inputs/outputs
@@ -422,6 +426,7 @@ Key sections:
 ### Purpose
 
 MCP (Model Context Protocol) servers allow:
+
 - Subprocess-based model execution
 - Provider isolation
 - Security sandboxing
@@ -430,6 +435,7 @@ MCP (Model Context Protocol) servers allow:
 ### Structure
 
 Each MCP server:
+
 1. Spawns as subprocess
 2. Listens on stdio
 3. Implements JSON-RPC protocol
@@ -438,14 +444,16 @@ Each MCP server:
 6. Returns responses
 
 Used by:
-- execution/models/mcp_model.py: Subprocess lifecycle
-- Specific model implementations: anthropic_mcp_model.py, openai_mcp_model.py, etc.
+
+- models/mcp_model.py: Subprocess lifecycle
+- Specific model implementations: models/anthropic_mcp_model.py, models/openai_mcp_model.py, etc.
 
 ---
 
 ## Error Handling Strategy
 
 ### Transient Errors (Retry)
+
 - Rate limits (429)
 - Service unavailable (503)
 - Timeouts
@@ -454,12 +462,14 @@ Used by:
 Strategy: Retry with exponential backoff
 
 ### Fallback Errors (Try next provider)
+
 - Provider specific rate limits
 - Quota exceeded
 
 Strategy: Try next provider in chain
 
 ### Fatal Errors (Fail immediately)
+
 - Authentication failures
 - Configuration errors
 - Invalid input
@@ -472,16 +482,19 @@ Strategy: Return error, log for investigation
 ## Testing Architecture
 
 ### Unit Testing Strategy
+
 - Mock external dependencies
 - Test business logic in isolation
 - Focus on critical paths
 
 ### Integration Testing Strategy
+
 - Test workflows with realistic configurations
 - Use test API keys (if available)
 - Verify provider fallback chains
 
 ### E2E Testing Strategy
+
 - Full workflow execution
 - Multiple providers
 - Real cost calculation
@@ -494,46 +507,23 @@ See coverage.md for test coverage details.
 ## Deployment Considerations
 
 ### Local Deployment
+
 - Single machine execution
 - Local Ollama support
 - Development/testing
 
 ### Environment Variables
+
 - ANTHROPIC_API_KEY
 - OPENAI_API_KEY
 - MISTRAL_API_KEY
 - etc.
 
 ### Credential Security
+
 - Never commit credentials
 - Load from environment only
 - Redact in logs and errors
-
----
-
-## Future Extensions
-
-### Planned (Sprint 2+)
-
-1. Plugin Architecture (Cockatoo)
-   - Custom node types
-   - Provider plugins
-   - Custom handlers
-
-2. Distributed Execution
-   - Multi-machine workflows
-   - Queue-based dispatch
-   - Worker coordination
-
-3. Web UI (Vogelkop)
-   - Workflow builder
-   - Execution monitoring
-   - Results visualization
-
-4. Advanced Governance
-   - Multi-level approval workflows
-   - Resource quotas
-   - Team-based access control
 
 ---
 
@@ -548,6 +538,6 @@ See coverage.md for test coverage details.
 
 ---
 
-**Document Status:** Sprint 1 Release
-**Last Updated:** 2026-02-22
-**Version:** 1.0.0-sprint1
+__Document Status:__ Sprint 1 Release
+__Last Updated:__ 2026-02-28
+__Version:__ 1.0.0

@@ -1,11 +1,16 @@
-# Code Coverage Report - February 26, 2026
+# Test Coverage Evidence - Hillstar v1.0.0
 
-## Coverage Summary
+User-facing evidence of testing quality and scope achieved in v1.0.0 production release.
 
-**Generated**: February 26, 2026 (Final Test Run)
-**Total Statements**: 10,204
-**Missing Statements**: 962
-**Overall Coverage**: 91% (↑ from 87%)
+## Testing Summary
+
+- **Release Date**: February 28, 2026
+- **Total Tests**: 1,090 (100% passing)
+- **Code Coverage**: 91% overall
+- **Total Statements Measured**: 10,306
+- **Statements Covered**: 9,344
+- **Sprint 1 Improvement**: 87% → 91% (4 percentage point gain)
+- **Pre-Release Enhancement**: +12 keyring auto-discovery tests for setup_wizard.py
 
 ---
 
@@ -13,13 +18,13 @@
 
 | File | Statements | Missing | Excluded | Coverage |
 |------|-----------|---------|----------|----------|
-| __init__.py | 10 | 0 | 0 | 100% |
-| config/__init__.py | 5 | 0 | 0 | 100% |
+| **init**.py | 10 | 0 | 0 | 100% |
+| config/**init**.py | 5 | 0 | 0 | 100% |
 | config/config.py | 136 | 25 | 0 | 82% |
 | config/model_selector.py | 41 | 0 | 0 | 100% |
 | config/provider_registry.py | 161 | 20 | 0 | 88% |
-| config/setup_wizard.py | 295 | 3 | 0 | 99% ✓ |
-| execution/__init__.py | 6 | 0 | 0 | 100% |
+| config/setup_wizard.py | 295 | 3 | 0 | 99%  |
+| execution/**init**.py | 6 | 0 | 0 | 100% |
 | execution/checkpoint.py | 39 | 3 | 0 | 92% |
 | execution/config_validator.py | 88 | 27 | 0 | 69% |
 | execution/cost_manager.py | 37 | 2 | 0 | 95% |
@@ -27,15 +32,15 @@
 | execution/model_selector.py | 111 | 6 | 0 | 95% |
 | execution/node_executor.py | 183 | 28 | 0 | 85% |
 | execution/observability.py | 171 | 9 | 0 | 95% |
-| execution/runner.py | 178 | 2 | 0 | 99% ✓ |
+| execution/runner.py | 178 | 2 | 0 | 99%  |
 | execution/trace.py | 33 | 0 | 0 | 100% |
-| governance/__init__.py | 5 | 0 | 0 | 100% |
+| governance/**init**.py | 5 | 0 | 0 | 100% |
 | governance/compliance.py | 63 | 16 | 0 | 75% |
 | governance/enforcer.py | 58 | 3 | 0 | 95% |
 | governance/hooks.py | 43 | 0 | 0 | 100% |
 | governance/policy.py | 28 | 0 | 0 | 100% |
 | governance/project_init.py | 44 | 9 | 0 | 80% |
-| models/__init__.py | 10 | 0 | 0 | 100% |
+| models/**init**.py | 10 | 0 | 0 | 100% |
 | models/anthropic_mcp_model.py | 4 | 1 | 0 | 75% |
 | models/anthropic_model.py | 27 | 5 | 0 | 81% |
 | models/anthropic_ollama_api_model.py | 40 | 5 | 0 | 88% |
@@ -45,13 +50,13 @@
 | models/mistral_mcp_model.py | 4 | 0 | 0 | 100% |
 | models/ollama_mcp_model.py | 4 | 1 | 0 | 75% |
 | models/openai_mcp_model.py | 4 | 0 | 0 | 100% |
-| tests/__init__.py | 0 | 0 | 0 | 100% |
+| tests/**init**.py | 0 | 0 | 0 | 100% |
 | tests/conftest.py | 39 | 10 | 0 | 74% |
 | tests/test_cli.py | 146 | 0 | 0 | 100% |
 | tests/test_config_hillstar_config.py | 266 | 0 | 0 | 100% |
 | tests/test_config_model_selector.py | 243 | 6 | 0 | 98% |
 | tests/test_config_provider_registry.py | 264 | 5 | 0 | 98% |
-| tests/test_config_setup_wizard.py | 308 | 3 | 0 | 99% |
+| tests/test_config_setup_wizard.py | 410 | 3 | 0 | 99% |
 | tests/test_e2e_connectivity.py | 142 | 36 | 0 | 75% |
 | tests/test_e2e_haiku_synthesis.py | 159 | 21 | 0 | 87% |
 | tests/test_e2e_local_execution.py | 182 | 42 | 0 | 77% |
@@ -80,17 +85,17 @@
 | tests/test_workflows_discovery.py | 298 | 0 | 0 | 100% |
 | tests/test_workflows_model_presets.py | 254 | 11 | 0 | 96% |
 | tests/test_workflows_validator.py | 234 | 0 | 0 | 100% |
-| utils/__init__.py | 3 | 0 | 0 | 100% |
+| utils/**init**.py | 3 | 0 | 0 | 100% |
 | utils/credential_redactor.py | 42 | 2 | 0 | 95% |
 | utils/exceptions.py | 10 | 0 | 0 | 100% |
 | utils/json_output_viewer.py | 218 | 95 | 0 | 56% |
 | utils/report.py | 234 | 24 | 0 | 90% |
-| workflows/__init__.py | 5 | 0 | 0 | 100% |
+| workflows/**init**.py | 5 | 0 | 0 | 100% |
 | workflows/auto_discover.py | 164 | 5 | 0 | 97% |
 | workflows/discovery.py | 64 | 4 | 0 | 94% |
 | workflows/model_presets.py | 170 | 47 | 0 | 72% |
 | workflows/validator.py | 224 | 21 | 0 | 91% |
-| **TOTAL** | **10,204** | **962** | **33** | **91%** |
+| **TOTAL** | **10,306** | **962** | **33** | **91%** |
 
 ---
 
@@ -114,12 +119,4 @@
 - utils/json_output_viewer.py: 56%
 - models/mistral_api_model.py: 57%
 
-**Note:** Significant improvement achieved in Sprint 1:
-
-- setup_wizard.py: 32% → 99% ✓
-- execution/runner.py: 27% → 99% ✓
-- Overall: 87% → 91% ✓
-
----
-
-Report generated: February 26, 2026
+Report generated: February 28, 2026

@@ -17,9 +17,9 @@ If you see two different sets of MCP servers, it is usually because of global us
 - Location: `mcp-server/`.
 - Purpose: Provider bridge scripts used by Hillstar runtime and model wrappers.
 - Referenced by:
-  - `models/mcp_model.py`
-  - `models/openai_mcp_model.py`
-  - `config/provider_registry.default.json`
+- `models/mcp_model.py`
+- `models/openai_mcp_model.py`
+- `config/provider_registry.default.json`
 
 ## Why confusion happens
 

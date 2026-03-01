@@ -3,12 +3,18 @@
 import sys
 import pytest
 from pathlib import Path
-from io import StringIO
+from dotenv import load_dotenv
+
+from utils.credential_redactor import CredentialRedactor
 
 # Add parent directory to path so tests can import hillstar modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from utils.credential_redactor import CredentialRedactor
+# Load .env file for API credentials
+repo_root = Path(__file__).parent.parent
+env_file = repo_root / ".env"
+if env_file.exists():
+	load_dotenv(env_file, override=True)
 
 
 class CredentialRedactingStream:
@@ -43,7 +49,6 @@ def configure_credential_redaction():
 
 def pytest_runtest_makereport(item, call):
 	"""Redact credentials from test reports."""
-	redactor = CredentialRedactor()
 	# This hook is called after each test phase (setup, call, teardown)
 	# We redact any captured output here
 	pass
@@ -66,6 +71,45 @@ def pytest_runtest_logreport(report):
 
 
 def pytest_configure(config):
-	"""Configure pytest with credential redaction."""
-	# Hook into pytest's output capture to redact credentials
-	pass
+	"""Configure pytest with dynamic HTML report naming."""
+	from datetime import datetime
+	import os
+
+	# Determine if running full suite or individual test file
+	test_items = config.args if config.args else []
+
+	# If no specific test files specified, it's a full suite run
+	if not test_items or test_items == ['tests']:
+		report_name = f"full_suite_{datetime.now().strftime('%Y-%m-%d')}.html"
+		config.option.htmlpath = f".test-results/html/{report_name}"
+	else:
+		# For individual test files, use test_<filename>.html
+		# Extract the test file name from the path
+		test_file = test_items[0] if isinstance(test_items[0], str) else 'tests'
+		if 'test_' in test_file:
+			# Extract filename from path like tests/test_config_setup_wizard.py
+			filename = test_file.split('/')[-1].replace('.py', '')
+			report_name = f"{filename}.html"
+			config.option.htmlpath = f".test-results/html/{report_name}"
+
+	# Ensure the html plugin is enabled
+	config.pluginmanager.set_blocked('html')
+	if not config.pluginmanager.has_plugin('html'):
+		try:
+			config.pluginmanager.register(__import__('pytest_html'))
+		except ImportError:
+			pass
+
+
+# HTML Report Generation
+# =====================
+# To generate individual HTML reports for each test file with proper naming:
+#
+# Run each test file separately with --html flag:
+# pytest tests/test_config_hillstar_config.py \
+# --html=.test-results/html/test_config_hillstar_config.html
+# pytest tests/test_config_provider_registry.py \
+# --html=.test-results/html/test_config_provider_registry.html
+#
+# Report naming convention: test_<module>_<script>.html
+# Example: test_config_hillstar_config.html (from config/config.py)

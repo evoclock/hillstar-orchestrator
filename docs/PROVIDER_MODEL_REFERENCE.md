@@ -57,9 +57,9 @@
 
 | Model | Release | EOL | Input Cost/1M | Cache Writes (5m)/1M | Cache Writes (1h)/1M | Cache Hits/1M | Output Cost/1M | Thinking Mode | Use `effort` | Best For |
 |-------|---------|-----|---|---|---|---|---|---|---|----------|
-| **claude-opus-4-6** | Active | Feb 5, 2027 | $5 | $6.25 | $10 | $0.50 | $25 | Adaptive thinking | ✓ Yes | **Building agents, coding, best performance** |
-| **claude-sonnet-4-6** | Active | Feb 17, 2027 | $3 | $3.75 | $6 | $0.30 | $15 | Extended thinking | ✓ Yes | **Balance of speed & intelligence, agentic tasks** |
-| **claude-haiku-4-5-20251001** | Active | Oct 15, 2026 | $1 | $1.25 | $2 | $0.10 | $5 | Extended thinking | ✓ Yes | **Fastest with near-frontier intelligence** |
+| **claude-opus-4-6** | Active | Feb 5, 2027 | $5 | $6.25 | $10 | $0.50 | $25 | Adaptive thinking | Yes | **Building agents, coding, best performance** |
+| **claude-sonnet-4-6** | Active | Feb 17, 2027 | $3 | $3.75 | $6 | $0.30 | $15 | Extended thinking | Yes | **Balance of speed & intelligence, agentic tasks** |
+| **claude-haiku-4-5-20251001** | Active | Oct 15, 2026 | $1 | $1.25 | $2 | $0.10 | $5 | Extended thinking | Yes | **Fastest with near-frontier intelligence** |
 
 ### Previous Generations (Sunset Timeline)
 
@@ -78,17 +78,17 @@ Automatically allocates thinking tokens based on complexity and effort level. No
 
 ```bash
 curl https://api.anthropic.com/v1/messages \
-  --header "x-api-key: $ANTHROPIC_API_KEY" \
-  --header "content-type: application/json" \
-  --data '{
-    "model": "claude-opus-4-6",
-    "max_tokens": 16000,
-    "thinking": {
-      "type": "adaptive",
-      "effort": "high"  # low, medium, high
-    },
-    "messages": [{"role": "user", "content": "Analyze this codebase..."}]
-  }'
+ --header "x-api-key: $ANTHROPIC_API_KEY" \
+ --header "content-type: application/json" \
+ --data '{
+ "model": "claude-opus-4-6",
+ "max_tokens": 16000,
+ "thinking": {
+ "type": "adaptive",
+ "effort": "high" # low, medium, high
+ },
+ "messages": [{"role": "user", "content": "Analyze this codebase..."}]
+ }'
 ```
 
 ### **Sonnet 4.6 & Haiku 4.5: Extended Thinking + Effort**
@@ -97,17 +97,17 @@ Manual thinking budget with effort-based allocation.
 
 ```bash
 curl https://api.anthropic.com/v1/messages \
-  --header "x-api-key: $ANTHROPIC_API_KEY" \
-  --header "content-type: application/json" \
-  --data '{
-    "model": "claude-sonnet-4-6",
-    "max_tokens": 16000,
-    "thinking": {
-      "type": "enabled",
-      "budget_tokens": 10000  # Allocate thinking tokens
-    },
-    "messages": [{"role": "user", "content": "..."}]
-  }'
+ --header "x-api-key: $ANTHROPIC_API_KEY" \
+ --header "content-type: application/json" \
+ --data '{
+ "model": "claude-sonnet-4-6",
+ "max_tokens": 16000,
+ "thinking": {
+ "type": "enabled",
+ "budget_tokens": 10000 # Allocate thinking tokens
+ },
+ "messages": [{"role": "user", "content": "..."}]
+ }'
 ```
 
 Parameter Guidance
@@ -141,15 +141,19 @@ Parameter Guidance
 
 **Recommended Approach:**
 
-1. **Start with Temperature** (not Top P)
-   - 0.3-0.5: Deterministic code analysis, specific factual tasks
-   - 0.7: Balanced exploration and quality
-   - 1.0+: Creative tasks, multiple interpretations
-2. **Adjust Top P** while keeping Temperature fixed
-   - 0.5: Recommended default (filters unlikely tokens)
-   - 0.3-0.5: More deterministic
-   - 0.7-0.9: More exploratory
-3. **Application Order:** Temperature applied first, then Top P filters based on that distribution
+A. **Start with Temperature** (not Top P)
+
+- 0.3-0.5: Deterministic code analysis, specific factual tasks
+- 0.7: Balanced exploration and quality
+- 1.0+: Creative tasks, multiple interpretations
+
+B. **Adjust Top P** while keeping Temperature fixed
+
+- 0.5: Recommended default (filters unlikely tokens)
+- 0.3-0.5: More deterministic
+- 0.7-0.9: More exploratory
+
+C. **Application Order:** Temperature applied first, then Top P filters based on that distribution
 
 **Key Insight:** Unlike other providers, Mistral fully supports temperature/top_p tuning. Use this for exploration and multi-hypothesis tasks.
 
@@ -163,8 +167,8 @@ Parameter Guidance
 
 | Model | Use Case | Input Cost/1M | Cached Input/1M | Cache Storage/1M/hr | Output Cost/1M | Context | Thinking Support | Notes |
 |-------|----------|---|---|---|---|---------|-------------------|-------|
-| **gemini-3.1-pro-preview** | Multimodal, agentic AI (best in class) | $2/≤200k, $4/>200k |$0.40 | $4.50 | $12/≤200k, $18/>200k | 1M | ✓ Yes | Best overall, context-aware pricing |
-| **gemini-3-flash-preview** | Price-performance multimodal, agentic | $0.50 | $0.05 | $1 | $3 | 1M | ✓ Yes |  |
+| **gemini-3.1-pro-preview** | Multimodal, agentic AI (best in class) | $2/≤200k, $4/>200k |$0.40 | $4.50 | $12/≤200k, $18/>200k | 1M | Yes | Best overall, context-aware pricing |
+| **gemini-3-flash-preview** | Price-performance multimodal, agentic | $0.50 | $0.05 | $1 | $3 | 1M | Yes | |
 
 ### Advanced Reasoning Models (Gemini 2.5 - use `thinking` mode)
 
@@ -249,24 +253,24 @@ Parameter Guidance
 ```markdown
 Task: Analyze codebase, edit files, tool use, agents
 ├─ Cloud available? YES
-│  ├─ High Budget (best performance)
-│  │  ├─ Anthropic: Opus 4.6 (adaptive thinking, effort=high)
-│  │  ├─ OpenAI: GPT-5.2 (reasoning_effort=high)
-│  │  ├─ Google: Gemini 2.5-pro (thinking mode, 1M context)
-│  │  └─ Mistral: Magistral Medium 1.2 (temperature 0.2, tool use)
-│  ├─ Medium Budget (good balance)
-│  │  ├─ Anthropic: Sonnet 4.6 (extended thinking, effort=medium)
-│  │  ├─ OpenAI: GPT-5.1 or GPT-5.2 (reasoning_effort=medium)
-│  │  ├─ Google: Gemini 3-pro (thinking mode)
-│  │  └─ Mistral: Devstral 2 (temperature 0.2, coding agent)
-│  └─ Low Budget (cost-effective)
-│     ├─ Anthropic: Haiku 4.5 (extended thinking, effort=low)
-│     ├─ OpenAI: GPT-5-mini (reasoning_effort=low)
-│     ├─ Google: Gemini 3-flash ($0.25/1M, thinking mode)
-│     └─ Mistral: Mistral Large 3 ($1.5/1M, temperature 0.2)
+│ ├─ High Budget (best performance)
+│ │ ├─ Anthropic: Opus 4.6 (adaptive thinking, effort=high)
+│ │ ├─ OpenAI: GPT-5.2 (reasoning_effort=high)
+│ │ ├─ Google: Gemini 2.5-pro (thinking mode, 1M context)
+│ │ └─ Mistral: Magistral Medium 1.2 (temperature 0.2, tool use)
+│ ├─ Medium Budget (good balance)
+│ │ ├─ Anthropic: Sonnet 4.6 (extended thinking, effort=medium)
+│ │ ├─ OpenAI: GPT-5.1 or GPT-5.2 (reasoning_effort=medium)
+│ │ ├─ Google: Gemini 3-pro (thinking mode)
+│ │ └─ Mistral: Devstral 2 (temperature 0.2, coding agent)
+│ └─ Low Budget (cost-effective)
+│ ├─ Anthropic: Haiku 4.5 (extended thinking, effort=low)
+│ ├─ OpenAI: GPT-5-mini (reasoning_effort=low)
+│ ├─ Google: Gemini 3-flash ($0.25/1M, thinking mode)
+│ └─ Mistral: Mistral Large 3 ($1.5/1M, temperature 0.2)
 └─ Local only? YES
-   ├─ 16GB+ VRAM: devstral-small-2:24b (Mistral, temp ≤0.15) OR gpt-oss:20b (reasoning effort)
-   └─ 12GB VRAM: mistral-nemo:12b (temp ≤0.3) OR magistral:24b (general)
+ ├─ 16GB+ VRAM: devstral-small-2:24b (Mistral, temp ≤0.15) OR gpt-oss:20b (reasoning effort)
+ └─ 12GB VRAM: mistral-nemo:12b (temp ≤0.3) OR magistral:24b (general)
 ```
 
 ### For General Purpose / Agentic Tasks
@@ -274,27 +278,27 @@ Task: Analyze codebase, edit files, tool use, agents
 ```markdown
 Task: Multi-step workflows, tool calling, agent orchestration
 ├─ High Performance Needed
-│  ├─ Anthropic: Opus 4.6 + adaptive thinking (effort=high)
-│  ├─ OpenAI: GPT-5.2 + reasoning_effort (high)
-│  ├─ Google: Gemini 3-pro (thinking mode)
-│  └─ Mistral: Magistral Medium 1.2 (temperature 0.3)
+│ ├─ Anthropic: Opus 4.6 + adaptive thinking (effort=high)
+│ ├─ OpenAI: GPT-5.2 + reasoning_effort (high)
+│ ├─ Google: Gemini 3-pro (thinking mode)
+│ └─ Mistral: Magistral Medium 1.2 (temperature 0.3)
 ├─ Balanced (speed + quality)
-│  ├─ Anthropic: Sonnet 4.6 + extended thinking (effort=medium)
-│  ├─ OpenAI: GPT-5.1 + reasoning_effort (medium)
-│  ├─ Google: Gemini 3-flash (faster, still capable)
-│  └─ Mistral: Devstral 2 (temperature 0.3, tool use)
+│ ├─ Anthropic: Sonnet 4.6 + extended thinking (effort=medium)
+│ ├─ OpenAI: GPT-5.1 + reasoning_effort (medium)
+│ ├─ Google: Gemini 3-flash (faster, still capable)
+│ └─ Mistral: Devstral 2 (temperature 0.3, tool use)
 ├─ Cost-Sensitive
-│  ├─ Anthropic: Haiku 4.5 (thinking mode, effort=low)
-│  ├─ OpenAI: GPT-5-mini + reasoning_effort (low)
-│  ├─ Google: Gemini 3-flash-lite ($0.125/1M)
-│  └─ Mistral: Mistral Small 3.2 ($0.3/1M, temperature 0.2)
+│ ├─ Anthropic: Haiku 4.5 (thinking mode, effort=low)
+│ ├─ OpenAI: GPT-5-mini + reasoning_effort (low)
+│ ├─ Google: Gemini 3-flash-lite ($0.125/1M)
+│ └─ Mistral: Mistral Small 3.2 ($0.3/1M, temperature 0.2)
 ├─ Temperature Tuning Required (exploration, hypothesis generation)
-│  ├─ Mistral: Mistral Large 3 or Medium 3.1 (temperature 0.5-0.7)
-│  ├─ Local: magistral:24b or gpt-oss:20b (temperature 0.5)
-│  └─ Note: Frontier models use thinking/effort, not temperature
+│ ├─ Mistral: Mistral Large 3 or Medium 3.1 (temperature 0.5-0.7)
+│ ├─ Local: magistral:24b or gpt-oss:20b (temperature 0.5)
+│ └─ Note: Frontier models use thinking/effort, not temperature
 └─ Local Deployment
-   ├─ Ollama Cloud: devstral-2:123b-cloud OR gemini-3-flash-preview:cloud
-   └─ Self-hosted: gpt-oss:20b OR magistral:24b
+ ├─ Ollama Cloud: devstral-2:123b-cloud OR gemini-3-flash-preview:cloud
+ └─ Self-hosted: gpt-oss:20b OR magistral:24b
 ```
 
 ### For Analysis & Research (Long Context)
@@ -302,20 +306,20 @@ Task: Multi-step workflows, tool calling, agent orchestration
 ```markdown
 Task: Document analysis, synthesis, literature review, long context
 ├─ Massive Context (1M tokens)
-│  ├─ Google: Gemini 2.5-pro (thinking mode, $10-15/1M)
-│  ├─ Google: Gemini 3-pro (thinking mode, $12-18/1M)
-│  └─ Google: Gemini 2.5-flash-lite ($0.40/1M, lightweight)
+│ ├─ Google: Gemini 2.5-pro (thinking mode, $10-15/1M)
+│ ├─ Google: Gemini 3-pro (thinking mode, $12-18/1M)
+│ └─ Google: Gemini 2.5-flash-lite ($0.40/1M, lightweight)
 ├─ Large Context (200k tokens)
-│  ├─ Anthropic: Opus 4.6 + adaptive thinking (effort=high)
-│  ├─ OpenAI: GPT-5.2 + reasoning_effort (context limited to 400k)
-│  └─ Mistral: Mistral Large 3 (131k context, temperature 0.3)
+│ ├─ Anthropic: Opus 4.6 + adaptive thinking (effort=high)
+│ ├─ OpenAI: GPT-5.2 + reasoning_effort (context limited to 400k)
+│ └─ Mistral: Mistral Large 3 (131k context, temperature 0.3)
 ├─ Distributed Analysis (multiple docs)
-│  ├─ Anthropic: Sonnet 4.6 (cost-effective at 200k context)
-│  ├─ Mistral: Devstral 2 (coding + analysis, 131k)
-│  └─ Local: magistral:24b (131k context, temperature 0.5)
+│ ├─ Anthropic: Sonnet 4.6 (cost-effective at 200k context)
+│ ├─ Mistral: Devstral 2 (coding + analysis, 131k)
+│ └─ Local: magistral:24b (131k context, temperature 0.5)
 └─ Interactive Exploration
-   ├─ Mistral: Devstral 2 or Medium 3.1 (temperature tunable)
-   └─ Local: devstral-small-2:24b (temperature 0.2)
+ ├─ Mistral: Devstral 2 or Medium 3.1 (temperature tunable)
+ └─ Local: devstral-small-2:24b (temperature 0.2)
 ```
 
 ---
@@ -327,7 +331,7 @@ Based on parameter support matrix:
 **For Claude/OpenAI Reasoning/Gemini Models:**
 
 - **Simple tasks:** Use default thinking/effort settings
-- **Moderate tasks:** Increase `effort` parameter (low → medium)
+- **Moderate tasks:** Increase `effort` parameter (low medium)
 - **Complex tasks:** Set `effort` to high
 - **Never adjust temperature** — let thinking/effort control complexity
 
@@ -365,12 +369,12 @@ Example: GPT-5.2 analyzing same 200k token codebase across 5 agent steps
 
 ```bash
 Without caching (5 requests × 201k tokens):
-  Cost = 5 × (201k / 1M) × $25 = $25.13
+ Cost = 5 × (201k / 1M) × $25 = $25.13
 
 With 5m caching (write once, hit 4 times):
-  Write: (200k / 1M) × $25 + (1k / 1M) × $25 = $5.025
-  Hits: 4 × [(200k / 1M) × $2.50 + (1k / 1M) × $25] = $2.10
-  Total = $7.125
+ Write: (200k / 1M) × $25 + (1k / 1M) × $25 = $5.025
+ Hits: 4 × [(200k / 1M) × $2.50 + (1k / 1M) × $25] = $2.10
+ Total = $7.125
 
 Savings: 72% reduction
 ```
@@ -381,12 +385,12 @@ Example: Claude Opus 4.6 with same scenario, 1h cache duration
 
 ```bash
 Without caching (5 requests × 201k tokens):
-  Cost = 5 × (201k / 1M) × $5 = $5.025
+ Cost = 5 × (201k / 1M) × $5 = $5.025
 
 With 1h caching (write once, hit 4 times):
-  Write: (200k / 1M) × $10 + (1k / 1M) × $5 = $2.005
-  Hits: 4 × [(200k / 1M) × $0.50 + (1k / 1M) × $5] = $0.42
-  Total = $2.425
+ Write: (200k / 1M) × $10 + (1k / 1M) × $5 = $2.005
+ Hits: 4 × [(200k / 1M) × $0.50 + (1k / 1M) × $5] = $0.42
+ Total = $2.425
 
 Savings: 52% reduction
 ```
@@ -422,13 +426,13 @@ See official pricing pages:
 
 | Provider | Model Family | Temperature | Top P | Thinking/Effort | Recommended Tuning |
 |----------|---|---|---|---|---|
-| **Anthropic** | All (Opus/Sonnet/Haiku) | ✗ Default only | ✗ Conflicts | ✓ Use `effort` parameter | Use thinking + effort |
-| **OpenAI** | Reasoning (5.x, o3) | ✗ Not supported | ✗ | ✓ Use `reasoning_effort` | Use reasoning_effort |
-| | Standard (4.1) | ✓ Tunable | ✓ Tunable | — | Use temperature + top_p |
-| **Gemini** | All (3.x, 2.5) | ✗ Default only | ✗ | ✓ Use thinking mode | Use thinking mode only |
-| **Mistral** | All models | ✓ Tunable | ✓ Tunable | — | Use temperature + top_p (fix one, adjust other) |
-| **Ollama** | Cloud models | ✓ Varies | ✓ Varies | ✓ Where available | Check model-specific |
-| **Local** | Self-hosted | ✓ Tunable | ✓ Tunable | — | Use temperature (check device limits) |
+| **Anthropic** | All (Opus/Sonnet/Haiku) | Default only | Conflicts | Use `effort` parameter | Use thinking + effort |
+| **OpenAI** | Reasoning (5.x, o3) | Not supported | | Use `reasoning_effort` | Use reasoning_effort |
+| | Standard (4.1) | Tunable | Tunable | — | Use temperature + top_p |
+| **Gemini** | All (3.x, 2.5) | Default only | | Use thinking mode | Use thinking mode only |
+| **Mistral** | All models | Tunable | Tunable | — | Use temperature + top_p (fix one, adjust other) |
+| **Ollama** | Cloud models | Varies | Varies | Where available | Check model-specific |
+| **Local** | Self-hosted | Tunable | Tunable | — | Use temperature (check device limits) |
 
 ---
 
@@ -436,7 +440,7 @@ See official pricing pages:
 
 | Old Model | New Model | Reason | Action Required |
 |-----------|-----------|--------|-----------------|
-| claude-opus-4-1-20250805 | claude-opus-4-6 | $75→$25/MTok, better performance | **Migrate immediately** |
+| claude-opus-4-1-20250805 | claude-opus-4-6 | $75$25/MTok, better performance | **Migrate immediately** |
 | claude-sonnet-4-5-20250929 | claude-sonnet-4-6 | Same price, better performance, adaptive thinking | Migrate before Sep 29 |
 | claude-haiku-3-20240307 | claude-haiku-4-5-20251001 | EOL Mar 7, 2025 | **URGENT: Migrate** |
 | GPT-5.1 | GPT-5.2 | Same reasoning support, better outputs | Recommend migration |

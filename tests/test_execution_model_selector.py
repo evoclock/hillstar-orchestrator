@@ -64,7 +64,7 @@ class TestModelSelection:
 		}
 		provider, model = model_factory.select_model("test_node_2", node)
 		assert provider == "openai"
-		assert model == "gpt-4o"  # Default for openai
+		assert model == "gpt-5-mini-2025-08-07" # Default for openai
 
 	def test_select_model_with_task_type_auto_mode(self, model_factory):
 		"""Test selecting model based on task_type in auto mode."""

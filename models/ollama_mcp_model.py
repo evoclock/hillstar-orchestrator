@@ -28,18 +28,18 @@ from .mcp_model import MCPModel
 
 
 class OllamaMCPModel(MCPModel):
-    """Ollama local models via MCP server."""
+	"""Ollama local models via MCP server."""
 
-    def __init__(self, model_name: str):
-        """
-        Initialize Ollama MCP model.
+	def __init__(self, model_name: str):
+		"""
+		Initialize Ollama MCP model.
 
-        Args:
-            model_name: Ollama model identifier (e.g., "devstral-small-2:24b")
-        """
-        super().__init__(
-            provider="ollama_mcp",
-            model_name=model_name,
-            server_script="mcp-server/ollama_mcp_server.py",
-            api_key=None,  # Ollama doesn't require API key
-        )
+		Args:
+		model_name: Ollama model identifier (e.g., "devstral-small-2:24b")
+		"""
+		super().__init__(
+			provider="ollama_mcp",
+			model_name=model_name,
+			server_script="mcp-server/ollama_mcp_server.py",
+			api_key=None, # Ollama doesn't require API key
+		)
