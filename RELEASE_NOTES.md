@@ -270,10 +270,11 @@ If you use Hillstar in your research, please cite:
 
 ```bibtex
 @software{gamboa2026hillstar,
- title={Hillstar: Security and Reproducibility-First Workflow Orchestrator},
+ title={Hillstar Orchestrator v1.0.0},
  author={Gamboa, Julen},
  year={2026},
- url={https://github.com/evoclock/hillstar-orchestrator}
+ doi={10.5281/zenodo.18829921},
+ url={https://doi.org/10.5281/zenodo.18829921}
 }
 ```
 
