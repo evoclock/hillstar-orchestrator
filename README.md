@@ -2,6 +2,8 @@
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg)](https://doi.org/10.5281/zenodo.18829921)
+
 **[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
 
 ## A security and reproducibility-first workflow orchestration tool
