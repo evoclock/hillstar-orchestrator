@@ -86,7 +86,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-"" = ["*.json"]
+config = ["*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
