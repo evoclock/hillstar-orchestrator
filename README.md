@@ -2,7 +2,7 @@
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
-**[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
+**[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
 
 ## A security and reproducibility-first workflow orchestration tool
 
