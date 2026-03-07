@@ -157,14 +157,30 @@ class NodeExecutor:
 	def _get_provider_chain(self, node_id: str, node: dict) -> list:
 		"""Build provider chain: explicit/preferred providers first, then fallback chain.
 
-		Fallback allows testing other providers if primary choice fails.
-		User's explicit provider choice is always attempted first.
+		Behavior depends on model_config.mode:
+		- "explicit": When a node declares provider, use ONLY that provider.
+		  No fallback. This prevents silent rerouting that corrupts results
+		  (e.g., an extraction calibrated for Haiku being sent to OpenAI).
+		- "auto" (default): Explicit provider tried first, then fallback chain.
+
+		Why strict mode matters: In research workflows, provider fallback is
+		dangerous because different models produce qualitatively different
+		outputs. A Haiku extraction prompt with few-shot examples tuned for
+		Anthropic's instruction-following will produce garbage on OpenAI or
+		Ollama. Silent fallback means the workflow "succeeds" but outputs
+		are unusable, wasting both cost and time. Discovered in Manuscript_01
+		Step 05 where Anthropic transient errors triggered fallback to
+		openai_mcp, which cannot run claude-haiku-4-5.
 		"""
 		preferred = []
 
-		# If node has explicit provider, prioritize it but allow fallback to test others
+		# If node has explicit provider, prioritize it
 		if node.get("provider"):
 			preferred = [node.get("provider")]
+			# In explicit mode, honor the node's provider strictly — no fallback
+			mode = self.model_config.get("mode", "auto")
+			if mode == "explicit":
+				return preferred
 
 		# If config has provider_preference, use that as secondary preference
 		config_prefs = self.model_config.get("provider_preference", [])
@@ -174,8 +190,7 @@ class NodeExecutor:
 				if p not in preferred:
 					preferred.append(p)
 
-		# Default fallback chain: Anthropic OpenAI Ollama (incl. Devstral)
-		# Note: Mistral (Vibe CLI + API) coming soon
+		# Default fallback chain (auto mode only): Anthropic -> OpenAI -> Ollama
 		default_chain = ["anthropic", "openai", "ollama"]
 
 		# Combine: explicit/preferred first, then remaining from default
