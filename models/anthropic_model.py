@@ -135,22 +135,42 @@ class AnthropicModel:
 		system: str | None = None,
 	) -> dict[str, Any]:
 		"""
-		Call Claude model.
+		Call Claude model with automatic prompt caching.
+
+		When a system prompt is provided, it is wrapped with a cache_control
+		breakpoint so that repeated calls with the same system prompt reuse
+		cached tokens. This reduces input token costs and avoids rate limits
+		on sequential extract calls sharing the same instructions.
 
 		Args:
 		prompt: Input prompt
 		max_tokens: Maximum tokens to generate
 		temperature: Ignored (Anthropic API doesn't support temperature)
-		system: System prompt
+		system: System prompt (cached automatically if provided)
 
 		Returns:
-		Dictionary with response and metadata
+		Dictionary with response and metadata including cache stats
 		"""
 		try:
+			# Build system parameter with cache_control for prompt caching
+			# Anthropic caches the system prefix across sequential calls,
+			# reducing both cost (cached tokens billed at 90% discount)
+			# and rate limit pressure (cached tokens don't count toward input TPM)
+			if system:
+				system_with_cache: Any = [
+					{
+						"type": "text",
+						"text": system,
+						"cache_control": {"type": "ephemeral"},
+					}
+				]
+			else:
+				system_with_cache = ""
+
 			message = self.client.messages.create(
 				model=self.model_name,
 				max_tokens=max_tokens,
-				system=system or "",
+				system=system_with_cache,
 				messages=[{"role": "user", "content": prompt}],
 			)
 
@@ -161,10 +181,17 @@ class AnthropicModel:
 					text_output = block.text
 					break
 
+			# Include cache stats in response for observability
+			usage = message.usage
+			cache_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+			cache_creation = getattr(usage, "cache_creation_input_tokens", 0) or 0
+
 			return {
 				"output": text_output,
 				"model": self.model_name,
-				"tokens_used": message.usage.input_tokens + message.usage.output_tokens,
+				"tokens_used": usage.input_tokens + usage.output_tokens,
+				"cache_read_tokens": cache_read,
+				"cache_creation_tokens": cache_creation,
 				"provider": "anthropic",
 			}
 		except Exception as e:
