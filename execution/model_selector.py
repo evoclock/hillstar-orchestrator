@@ -69,6 +69,7 @@ from models import (
 	AnthropicModel,
 	AnthropicMCPModel,
 	DevstralLocalModel,
+	JanCodeLocalModel,
 	MistralAPIModel,
 	OpenAIMCPModel,
 	MistralMCPModel,
@@ -121,6 +122,8 @@ class ModelFactory:
 			# Use explicit model if given, else fall back to provider default
 			_defaults = {
 				"devstral": "devstral",
+				"jan_code": "jan-code",
+				"jan_code_local": "jan-code",
 				"local": "local",
 				"anthropic": "claude-haiku-4-5-20251001",
 				"openai": "gpt-5-mini-2025-08-07",
@@ -191,10 +194,21 @@ class ModelFactory:
 
 		return resolved
 
+	# Local llama.cpp providers and their default endpoints
+	LOCAL_LLAMA_PROVIDERS = {
+		"devstral": "http://127.0.0.1:8080",
+		"devstral_local": "http://127.0.0.1:8080",
+		"jan_code": "http://127.0.0.1:8081",
+		"jan_code_local": "http://127.0.0.1:8081",
+	}
+
 	def provider_is_available(self, provider: str) -> bool:
 		"""Check if a provider appears available based on local tools/endpoints."""
 		if provider in ["local"]:
 			return True
+
+		if provider in self.LOCAL_LLAMA_PROVIDERS:
+			return self._check_http_health(self.LOCAL_LLAMA_PROVIDERS[provider])
 
 		if provider in ["anthropic_mcp"]:
 			return shutil.which("claude") is not None
@@ -210,6 +224,14 @@ class ModelFactory:
 
 		# Default to True for API-based providers or custom providers
 		return True
+
+	def _check_http_health(self, endpoint: str) -> bool:
+		"""Check if an HTTP server is healthy via /health endpoint."""
+		try:
+			with urllib.request.urlopen(f"{endpoint}/health", timeout=10) as resp:
+				return resp.status == 200
+		except Exception:
+			return False
 
 	def ollama_available(self) -> bool:
 		"""Check if Ollama is available via CLI or HTTP."""
@@ -289,6 +311,8 @@ class ModelFactory:
 				self._models[key] = OllamaMCPModel(model_name)
 			elif provider in ["devstral", "devstral_local", "local"]:
 				self._models[key] = DevstralLocalModel(model_name)
+			elif provider in ["jan_code", "jan_code_local"]:
+				self._models[key] = JanCodeLocalModel(model_name)
 			else:
 				raise ValueError(f"Unknown provider: {provider}")
 
