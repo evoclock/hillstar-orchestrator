@@ -102,19 +102,14 @@ class WorkflowValidator:
 		"""
 		errors = []
 
-		# Required top-level fields
-		required_fields = ["id", "graph", "provider_config"]
+		# Required top-level fields (provider_config is optional --
+		# compliance enforcement happens in validate_compliance for
+		# cloud providers that require it; local-only workflows
+		# do not need provider_config at all)
+		required_fields = ["id", "graph"]
 		for field in required_fields:
 			if field not in workflow:
-				if field == "provider_config":
-					errors.append(
-						f"Missing required field: {field}. "
-						f"You must define provider_config with compliance requirements "
-						f"(tos_accepted, audit_enabled, restricted_use_acknowledged) "
-						f"for each provider used in the workflow."
-					)
-				else:
-					errors.append(f"Missing required field: {field}")
+				errors.append(f"Missing required field: {field}")
 
 		# Validate graph structure
 		graph = workflow.get("graph", {})

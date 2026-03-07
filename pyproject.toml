@@ -75,6 +75,7 @@ Issues = "https://github.com/evoclock/hillstar-orchestrator/issues"
 hillstar = "cli:main"
 
 [tool.setuptools]
+py-modules = ["cli"]
 packages = [
   "config",
   "execution",

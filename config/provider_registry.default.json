@@ -475,6 +475,68 @@
             "cache_storage_per_1m_per_hour_usd": null
           },
           "tier": "free"
+        },
+        "minimax-m2.5:cloud": {
+          "display_name": "MiniMax M2.5 (Cloud-routed via Ollama)",
+          "context_window": 1048576,
+          "max_output_tokens": 16384,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "analysis",
+            "coding",
+            "long_context"
+          ],
+          "tier": "free",
+          "ollama_model": "minimax-m2.5:cloud"
+        }
+      }
+    },
+    "jan_code": {
+      "display_name": "Jan Code (Local via llama.cpp)",
+      "type": "local",
+      "endpoint": "http://127.0.0.1:8081",
+      "auth_type": "none",
+      "env_vars": [],
+      "compliance": {
+        "requires_tos_acceptance": false,
+        "data_residency": [
+          "local"
+        ],
+        "allowed_use_cases": [
+          "research",
+          "development",
+          "commercial"
+        ],
+        "restricted_use_cases": [],
+        "rate_limit_per_minute": 0,
+        "audit_required": false
+      },
+      "models": {
+        "jan-code": {
+          "display_name": "Jan Code 4B (Q8_0 GGUF)",
+          "context_window": 32768,
+          "max_output_tokens": 8192,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_sampling_params": {
+            "temperature": 0.00000073,
+            "max_tokens": 8192
+          }
         }
       }
     },
