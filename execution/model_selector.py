@@ -75,6 +75,7 @@ from models import (
 	MistralMCPModel,
 	OllamaMCPModel,
 )
+from models.ollama_api_model import OllamaAPIModel
 from config.model_selector import ModelSelector
 
 
@@ -307,6 +308,8 @@ class ModelFactory:
 				self._models[key] = MistralAPIModel(model_name, api_key=api_key)
 			elif provider == "mistral_mcp":
 				self._models[key] = MistralMCPModel(model_name, api_key=api_key)
+			elif provider == "ollama":
+				self._models[key] = OllamaAPIModel(model_name)
 			elif provider == "ollama_mcp":
 				self._models[key] = OllamaMCPModel(model_name)
 			elif provider in ["devstral", "devstral_local", "local"]:
