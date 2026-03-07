@@ -160,6 +160,9 @@ class WorkflowGraph:
 					if node_id in self.node_outputs:
 						output = self.node_outputs[node_id]
 						if key == "output":
+							# Extract the "output" field if result is a dict
+							if isinstance(output, dict) and "output" in output:
+								return str(output["output"]) if output["output"] is not None else ""
 							return str(output) if output is not None else ""
 						elif isinstance(output, dict):
 							val = output.get(key)

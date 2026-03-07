@@ -193,4 +193,4 @@ Add discovered models to ~/.hillstar/provider_registry.json? [Y/n]
 | jan_code missing | provider_registry.default.json | YES (local) | Auto-discovery in wizard/registry command |
 | minimax-m2.5:cloud unknown | provider_registry.default.json | YES (local) | Auto-discovery in wizard/registry command |
 | Registry discovery UX | N/A | No | New `hillstar registry discover` command |
-| Template resolution bug | graph.py:162-163 | No | See separate note |
+| Template resolution bug | graph.py:162-163 | YES (hotfix) | See separate note; remaining: unit tests, dual node_outputs cleanup |
