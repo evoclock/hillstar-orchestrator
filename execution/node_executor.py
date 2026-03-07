@@ -60,6 +60,7 @@ Last Edited
 
 import os
 import subprocess
+import time
 from datetime import datetime
 from typing import Any
 from .model_selector import ModelFactory
@@ -129,6 +130,36 @@ class NodeExecutor:
 		]
 		error_lower = str(error_msg).lower()
 		return any(keyword in error_lower for keyword in fallback_keywords)
+
+	def _is_retryable_error(self, error_msg: str) -> bool:
+		"""Check if an error is retryable (transient server errors, rate limits, timeouts).
+
+		Unlike fallback errors, retryable errors should be retried on the SAME
+		provider with exponential backoff rather than falling back to a different
+		provider. This is critical in explicit mode where provider fallback is
+		disabled.
+
+		Covers: 500 Internal Server Error, 502 Bad Gateway, 503 Service Unavailable,
+		429 Rate Limit, timeouts, connection resets.
+		"""
+		retry_keywords = [
+			"internal server error",
+			"500",
+			"502",
+			"503",
+			"bad gateway",
+			"service_unavailable",
+			"overloaded",
+			"rate_limit",
+			"429",
+			"timeout",
+			"connection reset",
+			"broken pipe",
+			"temporary failure",
+			"api call failed",
+		]
+		error_lower = str(error_msg).lower()
+		return any(keyword in error_lower for keyword in retry_keywords)
 
 	def _normalize_temperature_for_provider(self, provider: str, temperature: float) -> float:
 		"""Normalize temperature for provider constraints.
@@ -265,13 +296,45 @@ class NodeExecutor:
 			# Adjust temperature for provider constraints
 			temperature = self._normalize_temperature_for_provider(provider_to_use, temperature)
 
-			# Call model
-			result = model.call(
-				prompt=prompt,
-				max_tokens=parameters.get("max_tokens", 4096),
-				temperature=temperature,
-				system=parameters.get("system"),
-			)
+			# Call model with retry logic for transient errors
+			# In explicit mode, retry same provider with backoff instead of falling back
+			max_retries = 3
+			retry_delays = [30, 60, 120]  # exponential backoff: 30s, 60s, 120s
+			result = None
+
+			for retry in range(max_retries + 1):
+				result = model.call(
+					prompt=prompt,
+					max_tokens=parameters.get("max_tokens", 4096),
+					temperature=temperature,
+					system=parameters.get("system"),
+				)
+
+				# If success, break out of retry loop
+				if not (isinstance(result, dict) and result.get("error")):
+					break
+
+				error_msg = result.get("error", "Unknown error")
+
+				# Check if retryable and we have retries left
+				if self._is_retryable_error(error_msg) and retry < max_retries:
+					delay = retry_delays[retry]
+					self.trace_logger.log({
+						"timestamp": datetime.now().isoformat(),
+						"node_id": node_id,
+						"event": "retry",
+						"provider": provider_to_use,
+						"model": model_name,
+						"error": error_msg,
+						"retry_attempt": retry + 1,
+						"max_retries": max_retries,
+						"delay_seconds": delay,
+					})
+					time.sleep(delay)
+					continue
+
+				# Not retryable or out of retries, break to fallback/error handling
+				break
 
 			# Check for errors in result (e.g., from model provider failures)
 			if isinstance(result, dict) and result.get("error"):
