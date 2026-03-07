@@ -45,11 +45,26 @@ import os
 import json
 import argparse
 
-from .workflows import WorkflowDiscovery, WorkflowValidator, ModelPresets
-from .execution import WorkflowRunner
-from .config import SetupWizard
-from .utils import HillstarException
-from .governance import GovernanceEnforcer, HookManager
+from pathlib import Path
+
+# Auto-load secrets from ~/.config/hillstar/secrets.env if it exists
+_secrets_file = Path.home() / ".config" / "hillstar" / "secrets.env"
+if _secrets_file.exists():
+	with open(_secrets_file) as _f:
+		for _line in _f:
+			_line = _line.strip()
+			if _line and not _line.startswith("#") and "=" in _line:
+				_key, _, _val = _line.partition("=")
+				os.environ.setdefault(_key.strip(), _val.strip())
+
+from workflows.discovery import WorkflowDiscovery
+from workflows.validator import WorkflowValidator
+from workflows.model_presets import ModelPresets
+from execution.runner import WorkflowRunner
+from config.setup_wizard import SetupWizard
+from config.config import HillstarConfig
+from utils.exceptions import HillstarException
+from governance import GovernanceEnforcer, HookManager
 
 
 def cmd_discover(args):
