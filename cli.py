@@ -60,6 +60,7 @@ if _secrets_file.exists():
 from workflows.discovery import WorkflowDiscovery
 from workflows.validator import WorkflowValidator
 from workflows.model_presets import ModelPresets
+from workflows.agent_scanner import AgentScanner, Severity, format_findings
 from execution.runner import WorkflowRunner
 from config.setup_wizard import SetupWizard
 from config.config import HillstarConfig
@@ -326,6 +327,60 @@ def cmd_mode(args):
 		return 1
 
 
+def cmd_agent_scan(args):
+	"""Scan MCP configs and skill files for security issues."""
+	target = Path(args.target).resolve()
+
+	if not target.exists():
+		print(f"[FAIL] Target not found: {target}")
+		return 1
+
+	# Map --severity flag to enum
+	severity_map = {
+		"info": Severity.INFO,
+		"low": Severity.LOW,
+		"medium": Severity.MEDIUM,
+		"high": Severity.HIGH,
+		"critical": Severity.CRITICAL,
+	}
+	min_severity = severity_map.get(args.severity, Severity.LOW)
+
+	print(f"[SCAN] Scanning: {target}")
+	print()
+
+	result = AgentScanner.scan_path(target)
+
+	# Filter by severity
+	result.findings = [f for f in result.findings if f.severity >= min_severity]
+
+	if args.json_output:
+		output = {
+			"files_scanned": result.files_scanned,
+			"servers_scanned": result.servers_scanned,
+			"findings": [
+				{
+					"rule_id": f.rule_id,
+					"severity": f.severity.name,
+					"title": f.title,
+					"description": f.description,
+					"file_path": f.file_path,
+					"evidence": f.evidence,
+					"line_number": f.line_number,
+					"server_name": f.server_name,
+				}
+				for f in result.findings
+			],
+		}
+		print(json.dumps(output, indent=2))
+	else:
+		print(format_findings(result))
+
+	# Exit code: 1 if any HIGH or CRITICAL findings
+	if result.critical_count or result.high_count:
+		return 1
+	return 0
+
+
 def main():
 	"""Main CLI entry point."""
 	parser = argparse.ArgumentParser(
@@ -402,6 +457,29 @@ Examples:
 	mode_parser.add_argument('mode', choices=['dev', 'normal'], help='dev: enable development mode | normal: disable development mode')
 	mode_parser.add_argument('--hillstar-dir', default=None, help='Path to .hillstar dir (default: .hillstar)')
 	mode_parser.set_defaults(func=cmd_mode)
+
+	# agent-scan command
+	scan_parser = subparsers.add_parser(
+		'agent-scan',
+		help='Scan MCP configs and skill files for security issues',
+	)
+	scan_parser.add_argument(
+		'target',
+		help='File or directory to scan (JSON config, Markdown skill, or directory)',
+	)
+	scan_parser.add_argument(
+		'--severity',
+		choices=['info', 'low', 'medium', 'high', 'critical'],
+		default='low',
+		help='Minimum severity to report (default: low)',
+	)
+	scan_parser.add_argument(
+		'--json',
+		dest='json_output',
+		action='store_true',
+		help='Output findings as JSON',
+	)
+	scan_parser.set_defaults(func=cmd_agent_scan)
 
 	args = parser.parse_args()
 
