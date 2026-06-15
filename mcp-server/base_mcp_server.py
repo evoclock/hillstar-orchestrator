@@ -51,7 +51,7 @@ julen.gamboa.ds@gmail.com
 import json
 import sys
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from pathlib import Path
 
 # Logging setup
@@ -120,11 +120,18 @@ class BaseMCPServer:
 		"""Execute a tool. Subclasses override this."""
 		raise NotImplementedError("Subclasses must implement call_tool()")
 
-	def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-		"""Route MCP requests."""
+	def handle_request(self, request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+		"""Route MCP requests. Returns None for notifications (no response)."""
 		method = request.get("method")
 		params = request.get("params", {})
 		request_id = request.get("id")
+
+		# Notifications (no id, method starts with "notifications/") get no response.
+		# Per JSON-RPC 2.0 + MCP spec: client sends notifications/initialized after
+		# handshake; any response to a notification violates protocol and clients
+		# disconnect.
+		if request_id is None or (method or "").startswith("notifications/"):
+			return None
 
 		result = None
 		if method == "initialize":
@@ -134,19 +141,20 @@ class BaseMCPServer:
 		elif method == "tools/call":
 			result = self.call_tool(params.get("name"), params.get("arguments", {}))
 		else:
-			result = {
-				"isError": True,
-				"content": [{"type": "text", "text": f"Unknown method: {method}"}]
-			}
-
-		# Wrap response in JSON-RPC 2.0 format if id is present
-		if request_id is not None:
 			return {
 				"jsonrpc": "2.0",
 				"id": request_id,
-				"result": result
+				"error": {
+					"code": -32601,
+					"message": f"Method not found: {method}"
+				}
 			}
-		return result
+
+		return {
+			"jsonrpc": "2.0",
+			"id": request_id,
+			"result": result
+		}
 
 	def run(self):
 		"""Main MCP event loop."""
@@ -156,12 +164,22 @@ class BaseMCPServer:
 				line = sys.stdin.readline()
 				if not line:
 					break
+				line = line.strip()
+				if not line:
+					continue
 
-				request = json.loads(line)
+				try:
+					request = json.loads(line)
+				except json.JSONDecodeError as e:
+					logger.warning(f"Skipping malformed JSON line: {e}")
+					continue
+
 				response = self.handle_request(request)
 
-				sys.stdout.write(json.dumps(response) + "\n")
-				sys.stdout.flush()
+				# Notifications return None; do not write to stdout.
+				if response is not None:
+					sys.stdout.write(json.dumps(response) + "\n")
+					sys.stdout.flush()
 
 		except KeyboardInterrupt:
 			logger.info("Received interrupt, shutting down")

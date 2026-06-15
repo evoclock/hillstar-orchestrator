@@ -27,7 +27,7 @@ the user selects an Ollama cloud model as the execution provider.
 
 MODEL ALIASES (from tools/ollama/models.config):
 ------------------------------------------------
-- minimax minimax-m2.5:cloud (recommended for code)
+- minimax minimax-m2.7:cloud (recommended for code)
 - devstral-2 devstral-2:123b-cloud (recommended for code)
 - gpt-oss gpt-oss:120b-cloud (deterministic, low temp)
 - mistral-large-3 mistral-large-3:675b-cloud (deterministic, low temp)
@@ -231,13 +231,19 @@ class MinimaxMCPServer:
 				]
 			}
 
-	def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-		"""Route incoming MCP requests."""
+	def handle_request(self, request: Dict[str, Any]):
+		"""Route incoming MCP requests. Returns None for notifications."""
 		method = request.get("method")
 		params = request.get("params", {})
 		request_id = request.get("id")
 
 		logger.info(f"Request: {method}")
+
+		# Notifications (no id, or method starts with "notifications/") get no
+		# response — required by JSON-RPC 2.0 + MCP spec. Writing anything to
+		# stdout for these causes the client to drop the connection.
+		if request_id is None or (method or "").startswith("notifications/"):
+			return None
 
 		result = None
 		if method == "initialize":
@@ -250,24 +256,20 @@ class MinimaxMCPServer:
 				params.get("arguments", {})
 			)
 		else:
-			result = {
-				"isError": True,
-				"content": [
-					{
-						"type": "text",
-						"text": f"Unknown method: {method}"
-					}
-				]
-			}
-
-		# Wrap response in JSON-RPC 2.0 format if id is present
-		if request_id is not None:
 			return {
 				"jsonrpc": "2.0",
 				"id": request_id,
-				"result": result
+				"error": {
+					"code": -32601,
+					"message": f"Method not found: {method}"
+				}
 			}
-		return result
+
+		return {
+			"jsonrpc": "2.0",
+			"id": request_id,
+			"result": result
+		}
 
 
 def main():
@@ -297,10 +299,13 @@ def main():
 				request = json.loads(line)
 				response = server.handle_request(request)
 
-				# Send JSON response to stdout
-				sys.stdout.write(json.dumps(response) + "\n")
-				sys.stdout.flush()
-				logger.debug(f"Response sent for request #{request_count}")
+				# Notifications return None; do not write to stdout (spec).
+				if response is not None:
+					sys.stdout.write(json.dumps(response) + "\n")
+					sys.stdout.flush()
+					logger.debug(f"Response sent for request #{request_count}")
+				else:
+					logger.debug(f"Notification handled silently for request #{request_count}")
 
 			except json.JSONDecodeError as e:
 				logger.error(f"Invalid JSON received: {e}")
