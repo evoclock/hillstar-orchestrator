@@ -478,9 +478,11 @@ environmental constraints.
 
 ---
 
-## License
+## License and provider terms
 
-Apache 2.0
+The Hillstar Orchestrator codebase is licensed under the terms of the LICENSE file at the repository root. That license governs the orchestrator code itself.
+
+Running API calls through Hillstar does not grant any rights or warranties regarding each API provider's Terms of Service. The operator of Hillstar is responsible for complying with each API provider's Terms of Service.
 
 ---
 
