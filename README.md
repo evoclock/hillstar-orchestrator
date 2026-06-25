@@ -2,7 +2,13 @@
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg)](https://doi.org/10.5281/zenodo.18829921)
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.18829921"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg" alt="DOI"/></a>
+  <a href="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml"><img src="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml/badge.svg" alt="Docs"/></a>
+  <a href="https://pypi.org/project/hillstar-orchestrator/"><img src="https://img.shields.io/pypi/v/hillstar-orchestrator?style=flat" alt="PyPI"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat" alt="License"/></a>
+  <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.10+"/>
+</p>
 
 **[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
 
