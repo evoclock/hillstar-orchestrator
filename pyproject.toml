@@ -53,6 +53,7 @@ dev = [
   "pytest-html==4.1.1",
   "ruff==0.3.0",
   "pyright==1.1.371",
+  "python-dotenv>=1.0",
 ]
 
 security = [
@@ -61,8 +62,8 @@ security = [
 ]
 
 docs = [
-  "sphinx>=9.0",
-  "furo>=2025.12",
+  "sphinx>=8",
+  "furo>=2024.8",
 ]
 
 [project.urls]
@@ -95,6 +96,10 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --tb=short --junit-xml=.test-results/junit/results.xml --html=.test-results/html/report.html --self-contained-html --cov=. --cov-report=html:.test-results/coverage --cov-report=term"
+markers = [
+  "e2e: end-to-end tests that make live network/model calls; deselected by default, run with -m e2e",
+  "integration: cross-component integration tests that may need external services; deselected by default, run with -m integration",
+]
 
 [tool.ruff]
 target-version = "py310"

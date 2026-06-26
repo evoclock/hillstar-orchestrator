@@ -1,0 +1,1 @@
+uv run --extra dev pytest -o addopts= -m "not e2e and not integration" -q

@@ -74,16 +74,24 @@ class TestValidateSchemaRequiredFields:
 		assert valid is False
 		assert any("graph" in e.lower() for e in errors)
 
-	def test_validate_schema_detects_missing_provider_config(self):
-		"""Deep: Rejects workflow without provider_config and shows helpful message."""
+	def test_validate_schema_allows_missing_provider_config(self):
+		"""provider_config is optional at the schema level: a local-only
+		workflow (id + graph, no provider_config) is schema-valid, because
+		local providers carry no ToS to accept. Cloud-provider compliance
+		(ToS acceptance, audit) is enforced separately in validate_compliance
+		and is covered by test_validate_compliance_detects_missing_tos_acceptance
+		and test_validate_compliance_detects_missing_audit_requirement below, so
+		the rejection failure mode is asserted there, not duplicated here."""
 		workflow = {
 			"id": "test",
 			"graph": {"nodes": {}, "edges": []}
 		}
 		valid, errors = WorkflowValidator().validate_schema(workflow)
-		assert valid is False
-		assert any("provider_config" in e for e in errors)
-		assert any("compliance" in e.lower() or "tos_accepted" in e for e in errors)
+		assert valid is True
+		assert errors == []
+		# Regression guard: provider_config must NOT be treated as a required
+		# top-level field (the pre-8bacf45 behaviour this test used to assert).
+		assert not any("provider_config" in e for e in errors)
 
 
 class TestValidateSchemaGraphStructure:

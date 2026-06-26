@@ -73,7 +73,6 @@ def pytest_runtest_logreport(report):
 def pytest_configure(config):
 	"""Configure pytest with dynamic HTML report naming."""
 	from datetime import datetime
-	import os
 
 	# Determine if running full suite or individual test file
 	test_items = config.args if config.args else []
@@ -99,6 +98,22 @@ def pytest_configure(config):
 			config.pluginmanager.register(__import__('pytest_html'))
 		except ImportError:
 			pass
+
+
+def pytest_collection_modifyitems(items):
+	"""Auto-mark live tests by module name so the default gate run deselects them.
+
+	The e2e and integration suites make live network and model calls; with no
+	credentials or connectivity they hang rather than fail, which is fatal for a
+	pre-commit gate. Marking them here (instead of editing each file) keeps the
+	rule in one place and covers any future test_e2e_*/test_integration module.
+	Run them explicitly with `-m e2e` or `-m integration`.
+	"""
+	for item in items:
+		if "test_e2e_" in item.nodeid:
+			item.add_marker(pytest.mark.e2e)
+		elif "test_integration" in item.nodeid:
+			item.add_marker(pytest.mark.integration)
 
 
 # HTML Report Generation
