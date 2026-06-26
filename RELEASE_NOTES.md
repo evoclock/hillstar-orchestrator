@@ -284,4 +284,4 @@ Or use CITATION.cff for automated citation management.
 
 ## License
 
-Apache License 2.0 - See LICENSE file for details.
+GNU Affero General Public License v3.0 (AGPLv3), with Section 7(b) attribution terms - See LICENSE file for details.

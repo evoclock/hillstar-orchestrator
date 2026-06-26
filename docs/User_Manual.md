@@ -8,8 +8,8 @@
 | **Version** | 1.0.0 |
 | **Description** | A security and reproducibility-first workflow orchestration tool |
 | **Author** | Julen Gamboa |
-| **License** | Apache-2.0 |
-| **Repository** | <https://github.com/evoclock/agentic-orchestrator> |
+| **License** | AGPL-3.0-or-later |
+| **Repository** | <https://github.com/evoclock/hillstar-orchestrator> |
 | **Python** | >=3.10 |
 
 ## Table of Contents

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Compliance & Governance for Hillstar Orchestrator.
 
 Enforce workflow-driven development by gating git commits

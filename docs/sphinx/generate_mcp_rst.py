@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Generate Sphinx RST documentation for MCP servers.
 
 Since mcp-server/ uses a hyphen (not a valid Python package name),

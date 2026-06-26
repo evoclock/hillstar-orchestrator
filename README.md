@@ -6,11 +6,11 @@
   <a href="https://doi.org/10.5281/zenodo.18829921"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg" alt="DOI"/></a>
   <a href="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml"><img src="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml/badge.svg" alt="Docs"/></a>
   <a href="https://pypi.org/project/hillstar-orchestrator/"><img src="https://img.shields.io/pypi/v/hillstar-orchestrator?style=flat" alt="PyPI"/></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat" alt="License"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL%20v3-blue?style=flat" alt="License: AGPL v3"/></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.10+"/>
 </p>
 
-**[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](docs/User_Manual.md)** | **[Setup Guide](docs/SETUP_GUIDE.md)**
+**[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/User_Manual.md)** | **[Setup Guide](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/SETUP_GUIDE.md)**
 
 ## A security and reproducibility-first workflow orchestration tool
 
@@ -299,7 +299,7 @@ external systems.
 ```bash
 hillstar-orchestrator/
 ├── README.md # This file
-├── LICENSE # Apache 2.0
+├── LICENSE # AGPLv3
 ├── requirements.txt # Python dependencies
 ├── pyproject.toml # Package configuration
 ├── .gitignore
@@ -486,7 +486,11 @@ environmental constraints.
 
 ## License and provider terms
 
-The Hillstar Orchestrator codebase is licensed under the terms of the LICENSE file at the repository root. That license governs the orchestrator code itself.
+Hillstar is free software licensed under the GNU Affero General Public License v3.0 (AGPLv3), together with the additional author-attribution terms set forth under Section 7(b) in the LICENSE file at the repository root. See that file for the full text.
+
+Hillstar was designed by Julen Gamboa. All copies, modified versions, and derivative works must preserve attribution to the original author, and any user-facing primary documentation must link to the upstream repository at https://github.com/evoclock/hillstar-orchestrator (Section 7(b)).
+
+A commercial licence that waives the AGPLv3 obligations (including the Section 13 network-use source-disclosure requirement and the Section 7(b) attribution terms) is available for users who cannot or do not wish to comply with the AGPLv3. Contact the author for details.
 
 Running API calls through Hillstar does not grant any rights or warranties regarding each API provider's Terms of Service. The operator of Hillstar is responsible for complying with each API provider's Terms of Service.
 
