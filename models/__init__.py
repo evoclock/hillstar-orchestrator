@@ -9,6 +9,7 @@ Supported providers:
     - anthropic_ollama: Anthropic via Ollama (local proxy)
     - ollama: Local Ollama models
     - devstral_local: Devstral local (GPU required)
+    - jan_code_local: Jan-Code 4B local (GPU required)
     - google_ai_studio: Google Gemini (API key auth)
     - mistral: Mistral AI (cloud API)
 """
@@ -17,6 +18,7 @@ Supported providers:
 from .anthropic_ollama_api_model import AnthropicOllamaAPIModel
 from .anthropic_model import AnthropicModel
 from .devstral_local_model import DevstralLocalModel
+from .jan_code_local_model import JanCodeLocalModel
 from .mistral_api_model import MistralAPIModel
 from .mcp_model import MCPModel
 from .anthropic_mcp_model import AnthropicMCPModel
@@ -37,6 +39,7 @@ __all__ = [
 	"AnthropicOllamaAPIModel",
 	"AnthropicModel",
 	"DevstralLocalModel",
+	"JanCodeLocalModel",
 	"MistralAPIModel",
 	"MCPModel",
 	"AnthropicMCPModel",

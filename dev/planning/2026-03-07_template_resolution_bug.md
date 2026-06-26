@@ -1,8 +1,9 @@
 # Template Resolution Bug in graph.py
 
 **Date**: 2026-03-07
-**Severity**: Medium (does not affect edge-based data flow, only template strings)
+**Severity**: Critical (affects all workflows using `{{ node.output }}` templates)
 **File**: `execution/graph.py`, lines 150-176
+**Status**: FIXED (2026-03-07)
 
 ---
 
@@ -46,9 +47,13 @@ This gets injected into downstream prompt strings, polluting them with metadata.
 
 ---
 
-## Why This Hasn't Caused Problems Yet
+## Impact Assessment (Revised)
 
-Our manuscript workflows use **edge-based data flow** (DAG edges define predecessor outputs passed as `inputs` to `get_node_inputs()`), not template-based substitution. The template mechanism is only triggered when a node's prompt/parameters contain literal `{{ node_id.output }}` strings.
+Original assessment was that this only affects template-based substitution, not edge-based data flow.
+This was **incorrect** -- all manuscript workflows use `{{ node.output }}` template strings in their
+`input` fields (e.g., `"Schema: {{ load_schema_template.output }}"`). The bug would have caused
+all downstream model calls to receive corrupted prompts containing Python dict string representations
+instead of actual content. Severity upgraded to **Critical**.
 
 ---
 
@@ -83,6 +88,24 @@ Add a test that:
 
 ---
 
+## Fix Applied (2026-03-07)
+
+```python
+# graph.py _resolve_references, line 162-165
+if key == "output":
+    # Extract the "output" field if result is a dict
+    if isinstance(output, dict) and "output" in output:
+        return str(output["output"]) if output["output"] is not None else ""
+    return str(output) if output is not None else ""
+```
+
+Verified with unit test:
+- Dict result `{"output": "SCHEMA CONTENT", "file_path": "/path"}` → resolves to `"SCHEMA CONTENT"`
+- Plain string result `"plain text"` → resolves to `"plain text"`
+- Reinstalled package and confirmed fix live in installed version
+
 ## Sprint Assignment
 
-Sprint 2 -- part of execution module hardening.
+Moved from Sprint 2 to Sprint 1 hotfix. Remaining Sprint 2 work:
+- Add formal unit tests to test suite
+- Address the dual `node_outputs` design smell (graph vs node_executor stores)

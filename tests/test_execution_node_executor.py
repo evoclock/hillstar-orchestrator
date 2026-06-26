@@ -10,6 +10,22 @@ from execution.node_executor import NodeExecutor
 from utils.exceptions import ExecutionError
 
 
+@pytest.fixture(autouse=True)
+def _no_backoff_sleep():
+	"""Patch the retry backoff sleep to a no-op for the whole module.
+
+	_execute_model_call retries retryable errors (429/503/504) in explicit mode
+	with a real exponential backoff (time.sleep 30/60/120s; node_executor line
+	~347, added in the agent-scan retry/backoff change). The model is mocked in
+	these tests, so that backoff is the only real wall-clock delay; without this
+	patch a single retryable-error test sleeps ~210s and the suite appears to
+	hang. Patching keeps the retry LOGIC exercised (retry counts, exhaustion,
+	fallthrough) while removing the wait.
+	"""
+	with patch("execution.node_executor.time.sleep"):
+		yield
+
+
 @pytest.fixture
 def mock_model_factory():
 	"""Create a mock ModelFactory."""
