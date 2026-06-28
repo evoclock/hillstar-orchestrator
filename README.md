@@ -1,4 +1,4 @@
-# Hillstar Orchestrator v1.0.0
+# Hillstar Orchestrator v1.1.0
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
@@ -26,7 +26,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 
 ---
 
-## Current Features (v1.0.0)
+## Current Features (v1.1.0)
 
 - **DAG-based workflows** - Define complex research pipelines as
  directed acyclic graphs
@@ -48,6 +48,8 @@ Whether you are coordinating between multiple large language model (LLM) provide
  keys, tokens, and PII
 - **MCP Server Support** - Optional MCP servers for integration with
  Claude Code and other tools
+- **Agent security scanning** - Static `agent-scan` of MCP configs and
+ skill files (hardcoded secrets, injection, dangerous flags)
 
 ---
 
@@ -82,7 +84,7 @@ hillstar validate examples/simple-workflow.json
 hillstar execute examples/simple-workflow.json
 ```
 
-See **[docs/User_Manual.md](docs/User_Manual.md)** for step-by-step
+See **[docs/User_Manual.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/User_Manual.md)** for step-by-step
 examples of building workflows.
 
 Output:
@@ -211,15 +213,15 @@ Complete workflows require root-level configuration with DAG nodes:
 - **Cloud APIs**: Anthropic (Claude), OpenAI (GPT), Mistral,
  Google (Gemini)
 - All use API keys/credentials (never embedded in workflows)
-- **Local Models**: Ollama, llama.cpp, Devstral, or any HTTP-compatible
- server
+- **Local Models**: Ollama, llama.cpp, Devstral, Jan-Code, or any
+ HTTP-compatible server
 - **Custom Providers**: Bring your own via wrapper scripts
 - **Subscription mode**: OpenAI only. Unlike Anthropic, OpenAI has decided to support access and usage of your subscription via third party harnesses/tools. A caveat worth mentioning is that if you are developing software, you should default to Cloud APIs for reliability.
 
 **Further information on subscription mode support can be found through the following links:**
 
-- **[docs/MCP_TOPOLOGY.md](docs/MCP_TOPOLOGY.md)**
-- **[docs/OPENAI_HILLSTAR_SETUP.md](docs/OPENAI_HILLSTAR_SETUP.md)**
+- **[docs/MCP_TOPOLOGY.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/MCP_TOPOLOGY.md)**
+- **[docs/OPENAI_HILLSTAR_SETUP.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/OPENAI_HILLSTAR_SETUP.md)**
 
 **Model specification in workflows:**
 
@@ -246,7 +248,7 @@ Check model constraints before setting sampling parameters:
 - **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
  performance issues
 
-See **[docs/PROVIDER_MODEL_REFERENCE.md](docs/PROVIDER_MODEL_REFERENCE.md)**
+See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
 for complete constraints by model and provider.
 
 ### Model Selection & Presets
@@ -259,6 +261,32 @@ Hillstar provides flexible model selection with four preset strategies:
 - `balanced` - Mix of cost and quality
 - `maximize_quality` - Highest quality models regardless of cost
 - `local_only` - Air-gapped: Local models only (no cloud APIs)
+
+---
+
+## Security Scanning
+
+Hillstar can statically scan MCP server configurations and agent skill
+files for security issues before you wire them into a workflow:
+
+```bash
+# Scan a single MCP config, a skill file, or a whole directory
+hillstar agent-scan ~/.claude.json
+hillstar agent-scan ./skills/
+hillstar agent-scan ./config --severity medium   # raise the threshold
+hillstar agent-scan ./config --json              # machine-readable output
+```
+
+The scanner flags hardcoded secrets, shell-injection vectors, dangerous
+launch flags, and unencrypted endpoints in MCP configs, and
+prompt-injection, data-exfiltration, and destructive-command patterns in
+skill files. Findings are graded `info`, `low`, `medium`, `high`, and
+`critical`; `--severity` sets the minimum reported (default `low`). The
+command exits non-zero when any `high` or `critical` finding is present,
+so it can gate CI.
+
+See **[docs/User_Manual.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/User_Manual.md)**
+for the full command reference.
 
 ---
 
@@ -428,7 +456,7 @@ hillstar wizard
 #### Error: "Unsupported parameter: 'temperature' not supported..."
 
 - Model does not support temperature (o3, o3-mini, GPT-5 series)
-- See **[docs/PROVIDER_MODEL_REFERENCE.md](docs/PROVIDER_MODEL_REFERENCE.md)**
+- See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
  for constraints
 - Remove temperature from parameters, or use a different model
 
@@ -503,7 +531,7 @@ If you use Hillstar Orchestrator in research, please cite:
 ```bibtex
 
 @software{gamboa2026hillstar,
- title={Hillstar Orchestrator v1.0.0},
+ title={Hillstar Orchestrator v1.1.0},
  author={Gamboa, Julen},
  year={2026},
  doi={10.5281/zenodo.18829921},
@@ -515,13 +543,25 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟢 **v1.0.0 Production Release** (Feb 28, 2026) - Core orchestration engine
-complete, tested, and production-ready with comprehensive security and governance.
+🟢 **v1.1.0 Release** (Jun 28, 2026) - Builds on the v1.0.0 production
+engine with an agent security scanner, expanded local-model providers, and a
+licence change to AGPLv3.
 
-**v1.0.0 Capabilities:**
+**New in v1.1.0:**
+
+- **Agent security scanning** - `agent-scan` statically checks MCP configs
+ and skill files for hardcoded secrets, injection, dangerous flags, and
+ data-exfiltration patterns
+- **Expanded local providers** - Ollama over its HTTP API, plus the Jan-Code
+ 4B local model via llama.cpp
+- **Documented resilience** - Provider retry/backoff policy (3 retries at
+ 30/60/120s) surfaced in the setup guide
+- **Licence** - Relicensed to AGPLv3 with Section 7(b) attribution terms
+
+**v1.1.0 Capabilities:**
 
 - **Multi-provider access** - Anthropic, OpenAI, Mistral, Google cloud
- APIs; local models (Ollama, llama.cpp, Devstral); MCP servers
+ APIs; local models (Ollama, llama.cpp, Devstral, Jan-Code); MCP servers
 - **Smart model selection** - Four cost/quality presets or explicitly
  choose any model
 - **Safe parameters** - Model constraints auto-documented with helpful
@@ -530,6 +570,8 @@ complete, tested, and production-ready with comprehensive security and governanc
  execution (default), dev mode, or one-time override
 - **Secure credentials** - Automatic credential redaction in logs/errors;
  never embedded in workflows
+- **Agent security scanning** - Static analysis of MCP configs and skill
+ files before they enter a workflow
 - **Workflow visualization** - Mermaid DAG diagrams; topological
  execution order visible
 - **Checkpoint/replay** - Resume from saved state; audit trail of
@@ -538,10 +580,10 @@ complete, tested, and production-ready with comprehensive security and governanc
 - **Workflow discovery & validation** - Auto-find and validate workflows
  before execution
 
-**v1.0.0 Test & Quality Metrics:**
+**v1.1.0 Test & Quality Metrics:**
 
-- **1,078 tests** - 100% pass rate
-- **91% code coverage** - Comprehensive module coverage (41 modules at 100%, 20 at 95-99%)
+- **1,117 tests** - 100% pass rate
+- **83% line coverage** - Project-wide (`pytest --cov=.`)
 - **Credential security** - 24 pattern types detected and redacted
 - **MCP integration** - 7 MCP servers validated and tested
 - **Performance** - Topological DAG execution with intelligent fallback chains

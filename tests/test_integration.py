@@ -18,9 +18,28 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from workflows import AutoDiscover, WorkflowDiscovery, ModelPresets, WorkflowValidator
+
+# This repository's own root, derived from the test location (portable).
+REPO_ROOT = str(Path(__file__).resolve().parent.parent)
+
+# External integration corpus (a checkout of the legacy workflow examples).
+# Not shipped with Hillstar; set HILLSTAR_IT_FIXTURE_ROOT to a local checkout
+# to run the corpus-dependent tests. They skip when it is absent.
+IT_FIXTURE_ROOT = os.environ.get("HILLSTAR_IT_FIXTURE_ROOT", "/opt/hillstar-it-fixtures")
+
+
+def _require_fixture_corpus():
+	"""Skip a test when the external integration corpus is not present."""
+	if not os.path.isdir(IT_FIXTURE_ROOT):
+		pytest.skip(
+			"external integration corpus not present; set HILLSTAR_IT_FIXTURE_ROOT "
+			"to a local checkout to run this test"
+		)
 
 
 class TestIntegration:
@@ -31,7 +50,8 @@ class TestIntegration:
 		"""Test discovering workflows in agentic-orchestrator."""
 		print("\n TEST: Discovery in project")
 
-		start_dir = '/home/jgamboa/agentic-orchestrator'
+		_require_fixture_corpus()
+		start_dir = IT_FIXTURE_ROOT
 		workflows = WorkflowDiscovery.get_all_workflow_info(start_dir, max_depth=4)
 
 		assert len(workflows) > 0, "Should find at least one workflow"
@@ -61,7 +81,8 @@ class TestIntegration:
 		"""Test validating a valid workflow."""
 		print("\n TEST: Validation of valid workflow")
 
-		workflow_path = '/home/jgamboa/agentic-orchestrator/dev/examples/mouse-phenome/workflow.json'
+		_require_fixture_corpus()
+		workflow_path = os.path.join(IT_FIXTURE_ROOT, 'dev/examples/mouse-phenome/workflow.json')
 		valid, errors = WorkflowValidator.validate_file(workflow_path)
 
 		assert valid, f"Should validate successfully, got errors: {errors}"
@@ -94,7 +115,7 @@ class TestIntegration:
 		"""Test auto-discovery in a Hillstar project."""
 		print("\n TEST: Auto-discover project")
 
-		start_dir = '/home/jgamboa/hillstar-orchestrator'
+		start_dir = REPO_ROOT
 		is_hillstar = AutoDiscover.is_hillstar_project(start_dir)
 
 		assert is_hillstar, "Should detect as Hillstar project"
@@ -169,8 +190,9 @@ class TestIntegration:
 		"""Test workflow suggestions."""
 		print("\n TEST: Workflow suggestions")
 
+		_require_fixture_corpus()
 		workflows = WorkflowDiscovery.get_all_workflow_info(
-			'/home/jgamboa/agentic-orchestrator',
+			IT_FIXTURE_ROOT,
 			max_depth=4
 		)
 
@@ -189,8 +211,9 @@ class TestIntegration:
 		"""Test comprehensive recommendations."""
 		print("\n TEST: Full recommendations")
 
+		_require_fixture_corpus()
 		workflows = WorkflowDiscovery.get_all_workflow_info(
-			'/home/jgamboa/agentic-orchestrator',
+			IT_FIXTURE_ROOT,
 			max_depth=4
 		)
 

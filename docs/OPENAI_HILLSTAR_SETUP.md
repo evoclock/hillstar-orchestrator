@@ -1,4 +1,4 @@
-# OpenAI with Hillstar v1.0.0
+# OpenAI with Hillstar v1.1.0
 
 Complete guide to setting up OpenAI authentication across both the Hillstar project layer and the Claude infrastructure layer.
 
@@ -456,5 +456,5 @@ The server handles authentication transparently.
 ---
 
 **Last Updated**: 2026-02-28
-**Version**: 1.0.0
-**Project**: Hillstar v1.0.0 (Production Release)
+**Version**: 1.1.0
+**Project**: Hillstar v1.1.0 (Production Release)

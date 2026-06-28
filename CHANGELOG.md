@@ -2,6 +2,26 @@
 
 All notable changes to Hillstar are documented in this file.
 
+## 1.1.0 (2026-06-28)
+
+### Added
+
+- `agent-scan` CLI command: static security scanning of MCP server configs and agent skill files for hardcoded secrets, shell injection, dangerous launch flags, unencrypted endpoints, and prompt-injection and data-exfiltration patterns. Findings are graded info/low/medium/high/critical; the command exits non-zero on any high or critical finding.
+- Ollama HTTP API provider (`ollama`) for calling Ollama directly over its HTTP endpoint in addition to the MCP path.
+- Jan-Code 4B local provider (`jan_code`) via llama.cpp (OpenAI-compatible API on port 8081).
+
+### Changed
+
+- Relicensed from Apache-2.0 to AGPLv3 with Section 7(b) attribution terms.
+- Documentation: documented the agent-scan command, the new local providers, and the provider retry/backoff policy across the README, User Manual, Setup Guide, and Provider Model Reference.
+- The `tests/` package is no longer bundled in the wheel (unnecessary at runtime, and it had carried absolute developer paths into the 1.0.0 artifact).
+
+### Fixed
+
+- `scripts/check_licences.py` now scopes its scan to declared runtime dependencies and normalises non-standard licence strings (SPDX expressions, PEP 639 License-Expression, and classifier fallback).
+- README documentation links now use absolute URLs so they resolve on PyPI.
+- Removed hardcoded absolute developer paths from the docs generator, the MCP-server test script, and the integration/e2e tests. The docs generator and e2e test now derive the repository root from their own location; the integration tests skip the external corpus unless `HILLSTAR_IT_FIXTURE_ROOT` points to a local checkout.
+
 ## 1.0.0 (2026-03-01) - Production Release
 
 ### Added

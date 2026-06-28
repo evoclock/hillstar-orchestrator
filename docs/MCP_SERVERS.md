@@ -617,6 +617,6 @@ SDK Versions (pinned in requirements.txt):
 
 **Document Status:** Sprint 1 Release
 **Last Updated:** 2026-02-28
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 See PROVIDER_MODEL_REFERENCE.md for provider-specific details and capabilities.

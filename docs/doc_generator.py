@@ -1269,11 +1269,19 @@ class DocumentationGenerator:
 
 
 def generate_user_manual(
-	package_path: str = "/home/jgamboa/hillstar-orchestrator",
-	setup_py_path: str = "/home/jgamboa/agentic-orchestrator/python/setup.py",
-	output_path: str = "/home/jgamboa/hillstar-orchestrator/docs/User_Manual.md"
+	package_path: str | None = None,
+	setup_py_path: str | None = None,
+	output_path: str | None = None,
 ) -> None:
-	"""Generate User Manual documentation for Hillstar package."""
+	"""Generate User Manual documentation for Hillstar package.
+
+	Paths default to this repository, derived from the module location, so the
+	generator is portable across checkouts.
+	"""
+	repo_root = Path(__file__).resolve().parent.parent
+	package_path = package_path or str(repo_root)
+	setup_py_path = setup_py_path or str(repo_root / "pyproject.toml")
+	output_path = output_path or str(repo_root / "docs" / "User_Manual.md")
 	generator = DocumentationGenerator(package_path, setup_py_path)
 	generator.analyze_package()
 	generator.save_documentation(output_path)

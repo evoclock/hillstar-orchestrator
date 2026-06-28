@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hillstar-orchestrator"
-version = "1.0.1"
+version = "1.1.0"
 description = "Security and reproducibility-first workflow orchestrator for research environments"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -84,7 +84,6 @@ packages = [
   "models",
   "workflows",
   "utils",
-  "tests",
 ]
 
 [tool.setuptools.package-data]

@@ -200,6 +200,10 @@ ollama pull neural-chat
 hillstar presets  # Should show ollama provider
 ```
 
+Hillstar can call Ollama directly over its HTTP API (the `ollama`
+provider) in addition to the MCP path; both use `http://127.0.0.1:11434`
+by default and need no API key.
+
 **Available Models (via ollama pull):**
 
 - `mistral` - Fast, general purpose
@@ -270,6 +274,34 @@ export DEVSTRAL_ENDPOINT="http://localhost:8080"
 
 ---
 
+### Jan-Code Local (GPU Required)
+
+**Requirements:**
+
+- NVIDIA GPU with 16GB+ VRAM
+- Q8_0 GGUF model (~4.4GB on disk); 32K context tuned for 16GB
+- llama.cpp server (`jan_code_server.sh`) running on port 8081
+
+**Setup:**
+
+```bash
+# Start the llama.cpp server with the Jan-Code 4B Q8_0 GGUF model
+./jan_code_server.sh
+# Serves an OpenAI-compatible API on http://127.0.0.1:8081
+```
+
+**Configure Hillstar:**
+
+The `jan_code` provider talks to the endpoint above; no API key is needed.
+Health is checked via `GET /health`. Jan-Code runs deterministically
+(temperature 0) by default.
+
+```bash
+hillstar presets  # Should show the jan_code provider
+```
+
+---
+
 ## Using the Setup Wizard
 
 **Interactive Configuration (Recommended):**
@@ -317,6 +349,25 @@ Before running expensive models:
 # View estimated costs in trace output
 rg "cost" .hillstar/
 ```
+
+---
+
+## Resilience and Retries
+
+Hillstar automatically retries transient provider failures during node
+execution. The policy is fixed and needs no configuration:
+
+- Up to 3 retries per node (4 attempts total).
+- Backoff between attempts: 30s, then 60s, then 120s.
+- Retried on HTTP 500, 502, 503, and 429, and on transient network errors
+  (timeouts, connection resets, broken pipes, temporary failures).
+
+Errors that are not transient (for example quota exhaustion, context-length
+overflow, or provider overload) are not retried on the same provider;
+instead the configured provider fallback chain is tried. When a model is
+pinned in `explicit` mode the fallback chain is disabled, so only the
+single provider is retried. A budget-exceeded condition stops execution
+immediately.
 
 ---
 

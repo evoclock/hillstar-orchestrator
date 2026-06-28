@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Package** | hillstar-orchestrator |
-| **Version** | 1.0.0 |
+| **Version** | 1.1.0 |
 | **Description** | A security and reproducibility-first workflow orchestration tool |
 | **Author** | Julen Gamboa |
 | **License** | AGPL-3.0-or-later |
@@ -133,7 +133,7 @@ hillstar/
 
 #### Module: `hillstar-orchestrator (package)`
 
-Hillstar Orchestrator v1.0.0.
+Hillstar Orchestrator v1.1.0.
 
 ---
 
@@ -232,6 +232,26 @@ cmd_mode(args)
 ```
 
 Set development mode for development commits.
+
+**Arguments:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `args` | - | - | - |
+
+##### cmd_agent_scan
+
+```python
+cmd_agent_scan(args)
+```
+
+Scan MCP configs and skill files for security issues.
+
+Backs the `hillstar agent-scan <target>` command. `target` is a JSON MCP
+config, a Markdown skill file, or a directory walked recursively. Options:
+`--severity {info,low,medium,high,critical}` (minimum severity to report,
+default `low`) and `--json` (emit findings as JSON). Returns exit code 1
+when any high- or critical-severity finding is present, otherwise 0.
 
 **Arguments:**
 

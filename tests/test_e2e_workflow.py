@@ -281,7 +281,7 @@ def test_unit_tests():
 			["python", "-m", "pytest", "tests/", "--collect-only", "-q"],
 			capture_output=True,
 			text=True,
-			cwd="/home/jgamboa/hillstar-orchestrator",
+			cwd=str(Path(__file__).resolve().parent.parent),
 			timeout=30,
 		)
 

@@ -403,7 +403,7 @@ Examples:
 	"""
 	)
 
-	parser.add_argument('--version', action='version', version='hillstar 1.0.0')
+	parser.add_argument('--version', action='version', version='hillstar 1.1.0')
 
 	subparsers = parser.add_subparsers(dest='command', help='Command to run')
 

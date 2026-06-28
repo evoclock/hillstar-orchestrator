@@ -338,7 +338,7 @@ class TestCommandHelp:
 		)
 
 		assert result.returncode == 0
-		assert '1.0.0' in result.stdout or 'version' in result.stdout.lower()
+		assert '1.1.0' in result.stdout
 
 
 class TestCLIIntegration:

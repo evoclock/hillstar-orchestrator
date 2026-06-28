@@ -68,7 +68,7 @@ For subscription mode, run:
  (Select ChatGPT sign-in to create auth.json with tokens)
 
 Environment variables:
- CODEX_HOME=/home/jgamboa/.config/openai/codex-home (optional, auto-detected)
+ CODEX_HOME=~/.config/openai/codex-home (optional, auto-detected)
  OPENAI_CHATGPT_LOGIN_MODE=true (enables subscription mode)
  OPENAI_API_KEY=sk-proj-... (API key fallback)
 

@@ -2,7 +2,7 @@
 # Test all MCP servers can start and respond to MCP protocol
 
 echo "=== Testing All MCP Servers ==="
-cd /home/jgamboa/hillstar-orchestrator
+cd "$(dirname "$0")/.." || exit 1
 
 SERVERS=(
   "mcp-server/minimax_server.py"

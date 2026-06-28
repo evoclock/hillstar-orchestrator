@@ -237,6 +237,7 @@ Parameter Guidance
 | **gpt-oss:20b** | 20B | 16GB | 8k | Reasoning, agentic tasks | Standard (0.5-0.7) | Reasoning effort tuning |
 | **magistral:24b** | 24B | 16GB | 131k | General purpose, long reasoning chains | Standard (0.7) | Flexible |
 | **devstral-small-2:24b** | 24B | 16GB | 32k | **Codebase exploration, tool use, file editing** | **≤0.15 CRITICAL** | Coding-focused, determinism important |
+| **jan-code (Jan-Code 4B)** | 4B | 16GB | 32k | Local coding, deterministic harness steps | **0 (deterministic default)** | Q8_0 GGUF (~4.4GB), llama.cpp on :8081, `jan_code` provider |
 
 ### Quantization Notes
 
@@ -352,6 +353,11 @@ Based on parameter support matrix:
 ---
 
 ## Prompt Caching: Provider Comparison
+
+**Note:** Hillstar does not yet implement client-side prompt caching. The
+registry's `cached_input` and `cache_storage` pricing fields are
+informational, and the comparison below is provider-side economics to
+inform model and provider choice, not a Hillstar feature.
 
 **Provider Support Summary**:
 
