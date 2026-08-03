@@ -494,6 +494,101 @@
           ],
           "tier": "free",
           "ollama_model": "minimax-m2.5:cloud"
+        },
+        "glm-5.2:cloud": {
+          "display_name": "GLM-5.2 (cloud)",
+          "context_window": 128000,
+          "max_output_tokens": 32000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "glm-5.2:cloud"
+        },
+        "deepseek-v4-pro:cloud": {
+          "display_name": "DeepSeek-V4 Pro (cloud)",
+          "context_window": 128000,
+          "max_output_tokens": 32000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "deepseek-v4-pro:cloud"
+        },
+        "kimi-k2.7-code:cloud": {
+          "display_name": "Kimi K2.7 Code (cloud)",
+          "context_window": 128000,
+          "max_output_tokens": 32000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "kimi-k2.7-code:cloud"
+        },
+        "minimax-m3:cloud": {
+          "display_name": "MiniMax-M3 (cloud)",
+          "context_window": 128000,
+          "max_output_tokens": 32000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "minimax-m3:cloud"
+        },
+        "qwen3-coder-next:cloud": {
+          "display_name": "Qwen3 Coder Next (cloud)",
+          "context_window": 128000,
+          "max_output_tokens": 32000,
+          "pricing": {
+            "input_per_1m_usd": 0.0,
+            "output_per_1m_usd": 0.0,
+            "cached_input_per_1m_usd": null,
+            "cache_storage_per_1m_per_hour_usd": null
+          },
+          "capabilities": [
+            "reasoning",
+            "coding",
+            "analysis"
+          ],
+          "tier": "free",
+          "default_temperature": 0.3,
+          "ollama_model": "qwen3-coder-next:cloud"
         }
       }
     },
@@ -534,7 +629,7 @@
           ],
           "tier": "free",
           "default_sampling_params": {
-            "temperature": 0.00000073,
+            "temperature": 7.3e-07,
             "max_tokens": 8192
           }
         }
@@ -581,7 +676,7 @@
           "requires_gpu": true,
           "gpu_vram_min_gb": 16,
           "default_sampling_params": {
-            "temperature": 0.0000073,
+            "temperature": 7.3e-06,
             "max_tokens": 8192
           }
         }
@@ -793,10 +888,10 @@
           "context_window": 1048576,
           "max_output_tokens": 65536,
           "pricing": {
-            "input_per_1m_usd": 4.00,
-            "output_per_1m_usd": 18.00,
-            "cached_input_per_1m_usd": 0.40,
-            "cache_storage_per_1m_per_hour_usd": 4.50
+            "input_per_1m_usd": 4.0,
+            "output_per_1m_usd": 18.0,
+            "cached_input_per_1m_usd": 0.4,
+            "cache_storage_per_1m_per_hour_usd": 4.5
           },
           "capabilities": [
             "reasoning",
@@ -818,9 +913,9 @@
           "max_output_tokens": 65536,
           "pricing": {
             "input_per_1m_usd": 0.5,
-            "output_per_1m_usd": 3.00,
-            "cached_input_per_1m_usd": 0.10,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "output_per_1m_usd": 3.0,
+            "cached_input_per_1m_usd": 0.1,
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "capabilities": [
             "reasoning",
@@ -839,10 +934,10 @@
           "context_window": 1048576,
           "max_output_tokens": 65536,
           "pricing": {
-            "input_per_1m_usd": 0.10,
-            "output_per_1m_usd": 0.40,
+            "input_per_1m_usd": 0.1,
+            "output_per_1m_usd": 0.4,
             "cached_input_per_1m_usd": 0.01,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "capabilities": [
             "reasoning",
@@ -860,8 +955,8 @@
           "context_window": 128000,
           "max_output_tokens": 64000,
           "pricing": {
-            "input_per_1m_usd": 2.50,
-            "output_per_1m_usd": 15.00,
+            "input_per_1m_usd": 2.5,
+            "output_per_1m_usd": 15.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -912,8 +1007,8 @@
         "claude-opus-4-6": {
           "display_name": "Claude Opus 4.6 (MCP)",
           "pricing": {
-            "input_per_1m_usd": 5.00,
-            "output_per_1m_usd": 25.00,
+            "input_per_1m_usd": 5.0,
+            "output_per_1m_usd": 25.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -922,8 +1017,8 @@
         "claude-sonnet-4-6": {
           "display_name": "Claude Sonnet 4.6 (MCP)",
           "pricing": {
-            "input_per_1m_usd": 3.00,
-            "output_per_1m_usd": 15.00,
+            "input_per_1m_usd": 3.0,
+            "output_per_1m_usd": 15.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -932,8 +1027,8 @@
         "claude-haiku-4-5-20251001": {
           "display_name": "Claude Haiku 4.5 (MCP)",
           "pricing": {
-            "input_per_1m_usd": 1.00,
-            "output_per_1m_usd": 5.00,
+            "input_per_1m_usd": 1.0,
+            "output_per_1m_usd": 5.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1000,7 +1095,7 @@
           "max_output_tokens": 128000,
           "pricing": {
             "input_per_1m_usd": 1.25,
-            "output_per_1m_usd": 10.00,
+            "output_per_1m_usd": 10.0,
             "cached_input_per_1m_usd": 0.125,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1023,7 +1118,7 @@
           "max_output_tokens": 128000,
           "pricing": {
             "input_per_1m_usd": 0.25,
-            "output_per_1m_usd": 2.00,
+            "output_per_1m_usd": 2.0,
             "cached_input_per_1m_usd": 0.025,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1045,7 +1140,7 @@
           "max_output_tokens": 128000,
           "pricing": {
             "input_per_1m_usd": 0.05,
-            "output_per_1m_usd": 0.40,
+            "output_per_1m_usd": 0.4,
             "cached_input_per_1m_usd": 0.005,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1067,7 +1162,7 @@
           "pricing": {
             "input_per_1m_usd": 10.0,
             "output_per_1m_usd": 40.0,
-            "cached_input_per_1m_usd": 2.50,
+            "cached_input_per_1m_usd": 2.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "capabilities": [
@@ -1091,9 +1186,9 @@
           "context_window": 200000,
           "max_output_tokens": 100000,
           "pricing": {
-            "input_per_1m_usd": 2.00,
-            "output_per_1m_usd": 8.00,
-            "cached_input_per_1m_usd": 0.50,
+            "input_per_1m_usd": 2.0,
+            "output_per_1m_usd": 8.0,
+            "cached_input_per_1m_usd": 0.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "capabilities": [
@@ -1114,9 +1209,9 @@
           "context_window": 1047575,
           "max_output_tokens": 32768,
           "pricing": {
-            "input_per_1m_usd": 2.00,
-            "output_per_1m_usd": 8.00,
-            "cached_input_per_1m_usd": 0.50,
+            "input_per_1m_usd": 2.0,
+            "output_per_1m_usd": 8.0,
+            "cached_input_per_1m_usd": 0.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "capabilities": [
@@ -1241,7 +1336,7 @@
         "GPT-5.2": {
           "pricing": {
             "input_per_1m_usd": 1.75,
-            "output_per_1m_usd": 14.00,
+            "output_per_1m_usd": 14.0,
             "cached_input_per_1m_usd": 0.175,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1250,7 +1345,7 @@
         "GPT-5.1": {
           "pricing": {
             "input_per_1m_usd": 1.25,
-            "output_per_1m_usd": 10.00,
+            "output_per_1m_usd": 10.0,
             "cached_input_per_1m_usd": 0.125,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1260,25 +1355,25 @@
           "pricing": {
             "input_per_1m_usd": 10.0,
             "output_per_1m_usd": 40.0,
-            "cached_input_per_1m_usd": 2.50,
+            "cached_input_per_1m_usd": 2.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "tier": "premium"
         },
         "o4-mini": {
           "pricing": {
-            "input_per_1m_usd": 2.00,
-            "output_per_1m_usd": 8.00,
-            "cached_input_per_1m_usd": 0.50,
+            "input_per_1m_usd": 2.0,
+            "output_per_1m_usd": 8.0,
+            "cached_input_per_1m_usd": 0.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "tier": "premium"
         },
         "GPT-4.1": {
           "pricing": {
-            "input_per_1m_usd": 2.00,
-            "output_per_1m_usd": 8.00,
-            "cached_input_per_1m_usd": 0.50,
+            "input_per_1m_usd": 2.0,
+            "output_per_1m_usd": 8.0,
+            "cached_input_per_1m_usd": 0.5,
             "cache_storage_per_1m_per_hour_usd": null
           },
           "tier": "premium"
@@ -1286,7 +1381,7 @@
         "GPT-5-mini": {
           "pricing": {
             "input_per_1m_usd": 0.25,
-            "output_per_1m_usd": 2.00,
+            "output_per_1m_usd": 2.0,
             "cached_input_per_1m_usd": 0.025,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1295,7 +1390,7 @@
         "GPT-5-nano": {
           "pricing": {
             "input_per_1m_usd": 0.05,
-            "output_per_1m_usd": 0.40,
+            "output_per_1m_usd": 0.4,
             "cached_input_per_1m_usd": 0.005,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1308,46 +1403,46 @@
       "models": {
         "gemini-3.1-pro-preview": {
           "pricing": {
-            "input_per_1m_usd": 4.00,
-            "output_per_1m_usd": 18.00,
-            "cached_input_per_1m_usd": 0.40,
-            "cache_storage_per_1m_per_hour_usd": 4.50
+            "input_per_1m_usd": 4.0,
+            "output_per_1m_usd": 18.0,
+            "cached_input_per_1m_usd": 0.4,
+            "cache_storage_per_1m_per_hour_usd": 4.5
           },
           "tier": "premium"
         },
         "gemini-3-flash-preview": {
           "pricing": {
-            "input_per_1m_usd": 0.50,
-            "output_per_1m_usd": 3.00,
+            "input_per_1m_usd": 0.5,
+            "output_per_1m_usd": 3.0,
             "cached_input_per_1m_usd": 0.05,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "tier": "affordable"
         },
         "Best value in Gemini 3 line": {
           "pricing": {
-            "input_per_1m_usd": 0.50,
-            "output_per_1m_usd": 3.00,
+            "input_per_1m_usd": 0.5,
+            "output_per_1m_usd": 3.0,
             "cached_input_per_1m_usd": 0.05,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "tier": "affordable"
         },
         "gemini-2.5-pro": {
           "pricing": {
-            "input_per_1m_usd": 2.50,
-            "output_per_1m_usd": 15.00,
+            "input_per_1m_usd": 2.5,
+            "output_per_1m_usd": 15.0,
             "cached_input_per_1m_usd": 0.25,
-            "cache_storage_per_1m_per_hour_usd": 4.50
+            "cache_storage_per_1m_per_hour_usd": 4.5
           },
           "tier": "expensive"
         },
         "gemini-2.5-flash": {
           "pricing": {
-            "input_per_1m_usd": 0.30,
-            "output_per_1m_usd": 2.50,
+            "input_per_1m_usd": 0.3,
+            "output_per_1m_usd": 2.5,
             "cached_input_per_1m_usd": 0.03,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "tier": "affordable"
         },
@@ -1356,14 +1451,14 @@
             "input_per_1m_usd": 0.02,
             "output_per_1m_usd": 0.12,
             "cached_input_per_1m_usd": 0.01,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "tier": "affordable"
         },
         "gemini-2.5-computer-user": {
           "pricing": {
-            "input_per_1m_usd": 2.50,
-            "output_per_1m_usd": 15.00,
+            "input_per_1m_usd": 2.5,
+            "output_per_1m_usd": 15.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1371,8 +1466,8 @@
         },
         "deep-research-pro-preview": {
           "pricing": {
-            "input_per_1m_usd": 4.00,
-            "output_per_1m_usd": 18.00,
+            "input_per_1m_usd": 4.0,
+            "output_per_1m_usd": 18.0,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1380,8 +1475,8 @@
         },
         "gemini-robotics-er-1.5": {
           "pricing": {
-            "input_per_1m_usd": 0.30,
-            "output_per_1m_usd": 2.50,
+            "input_per_1m_usd": 0.3,
+            "output_per_1m_usd": 2.5,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1398,17 +1493,17 @@
         },
         "gemini-2.0-flash": {
           "pricing": {
-            "input_per_1m_usd": 0.10,
-            "output_per_1m_usd": 0.40,
+            "input_per_1m_usd": 0.1,
+            "output_per_1m_usd": 0.4,
             "cached_input_per_1m_usd": 0.025,
-            "cache_storage_per_1m_per_hour_usd": 1.00
+            "cache_storage_per_1m_per_hour_usd": 1.0
           },
           "tier": "affordable"
         },
         "gemini-2.0-flash-lite": {
           "pricing": {
             "input_per_1m_usd": 0.075,
-            "output_per_1m_usd": 0.30,
+            "output_per_1m_usd": 0.3,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
@@ -1417,7 +1512,7 @@
         "Most budget-friendly Gemini model": {
           "pricing": {
             "input_per_1m_usd": 0.075,
-            "output_per_1m_usd": 0.30,
+            "output_per_1m_usd": 0.3,
             "cached_input_per_1m_usd": null,
             "cache_storage_per_1m_per_hour_usd": null
           },
