@@ -1,0 +1,36 @@
+name: Tests
+
+# The suite previously ran only through the local pre-commit gate, so nothing
+# verified it in CI and nothing verified the declared `requires-python` floor.
+# The matrix starts at the floor deliberately: a version we claim to support but
+# never execute is a claim, not a guarantee.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # Same selection as .pre-commit-verify, so CI and the local gate agree on
+      # what "the suite passes" means. e2e and integration need live providers
+      # and are deselected in both.
+      - name: Run tests
+        run: >
+          uv run --python ${{ matrix.python-version }} --extra dev
+          pytest -o addopts= -m "not e2e and not integration" -q
