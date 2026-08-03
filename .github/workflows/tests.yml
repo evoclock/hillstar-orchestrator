@@ -30,7 +30,13 @@ jobs:
       # Same selection as .pre-commit-verify, so CI and the local gate agree on
       # what "the suite passes" means. e2e and integration need live providers
       # and are deselected in both.
+      #
+      # keyrings.alt supplies a keyring backend for the credential-storage
+      # tests. A headless runner has none, whereas a developer machine provides
+      # one through the OS. It is added for the test run only and stores
+      # nothing of value.
       - name: Run tests
         run: >
           uv run --python ${{ matrix.python-version }} --extra dev
+          --with keyrings.alt
           pytest -o addopts= -m "not e2e and not integration" -q
