@@ -267,6 +267,31 @@ class ModelFactory:
 		self._ollama_available_cache = available
 		return available
 
+	def _custom_provider(self, provider: str) -> dict | None:
+		"""Return the workflow's `custom_providers` entry for `provider`, if any.
+
+		`model_config.custom_providers` has been in the workflow schema since
+		the beginning (endpoint / model_name / type), but nothing read it during
+		execution — only `WorkflowDiscovery` looked at it, for a metadata
+		boolean. Reading it here is what lets a workflow target an arbitrary
+		OpenAI-compatible endpoint (notably the Vogelkop router) without adding
+		a provider to the hardcoded enum below.
+
+		Returns None when the entry is missing or malformed, so a typo falls
+		through to normal provider resolution rather than silently producing a
+		client pointed at nothing.
+		"""
+		custom = self.model_config.get("custom_providers")
+		if not isinstance(custom, dict):
+			return None
+		entry = custom.get(provider)
+		if not isinstance(entry, dict):
+			return None
+		endpoint = entry.get("endpoint")
+		if not isinstance(endpoint, str) or not endpoint.strip():
+			return None
+		return entry
+
 	def get_model(self, provider: str, model_name: str, **kwargs):
 		"""Get or create model instance with smart selection.
 
@@ -298,6 +323,24 @@ class ModelFactory:
 					)
 			# Get API key from config or environment (for providers that need it)
 			api_key = self.config_validator.get_api_key_for_provider(provider)
+
+			custom = self._custom_provider(provider)
+			if custom is not None:
+				# A declared endpoint wins over the built-in provider table, so
+				# a workflow can point `ollama` (or any name) at a different
+				# host without editing source. `model_name` from the entry
+				# overrides the node's, letting the workflow name a seat while
+				# the entry supplies what the backend actually serves.
+				endpoint = custom["endpoint"].rstrip("/")
+				effective_model = custom.get("model_name") or model_name
+				kind = custom.get("type", "custom")
+				if kind == "ollama":
+					self._models[key] = OllamaAPIModel(effective_model, endpoint=endpoint)
+				else:
+					# llamacpp and custom both speak OpenAI-compatible
+					# /v1/chat/completions, which is also what the router serves.
+					self._models[key] = JanCodeLocalModel(effective_model, endpoint=endpoint)
+				return self._models[key]
 
 			if provider == "anthropic":
 				self._models[key] = AnthropicModel(model_name, api_key=api_key)
