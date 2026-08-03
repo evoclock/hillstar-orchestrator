@@ -36,7 +36,10 @@ class TestInitializeProjectStructureDefaults:
 			try:
 				os.chdir(tmpdir)
 				result = initialize_project_structure(None)
-				assert result["project_root"] == tmpdir
+				# initialize_project_structure() resolves its path, so compare
+				# against the resolved tmpdir: on macOS /var is a symlink to
+				# /private/var and the raw string would never match.
+				assert result["project_root"] == os.path.realpath(tmpdir)
 				assert result["status"] == "success"
 			finally:
 				os.chdir(original_cwd)
@@ -48,7 +51,8 @@ class TestInitializeProjectStructureDefaults:
 			try:
 				os.chdir(tmpdir)
 				result = initialize_project_structure()
-				assert result["project_root"] == tmpdir
+				# See note above: compare resolved paths, not raw tmpdir.
+				assert result["project_root"] == os.path.realpath(tmpdir)
 			finally:
 				os.chdir(original_cwd)
 
@@ -177,7 +181,8 @@ class TestInitializeGitignoreHandling:
 			result = initialize_project_structure(tmpdir)
 			gitignore_path = os.path.join(tmpdir, ".gitignore")
 			assert os.path.exists(gitignore_path)
-			assert str(gitignore_path) in result["created_directories"]
+			# created_directories holds resolved paths.
+			assert os.path.realpath(gitignore_path) in result["created_directories"]
 
 	def test_init_adds_hillstar_entries_to_gitignore(self):
 		"""Deep: .gitignore contains all Hillstar entries."""
@@ -322,7 +327,8 @@ class TestInitializeCreatedDirectoriesList:
 		with tempfile.TemporaryDirectory() as tmpdir:
 			result = initialize_project_structure(tmpdir)
 			gitignore_path = os.path.join(tmpdir, ".gitignore")
-			assert gitignore_path in result["created_directories"]
+			# created_directories holds resolved paths.
+			assert os.path.realpath(gitignore_path) in result["created_directories"]
 
 	def test_init_created_directories_excludes_duplicates(self):
 		"""Side Effect: No duplicate entries in created_directories."""
