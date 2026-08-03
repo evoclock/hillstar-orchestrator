@@ -446,3 +446,117 @@ class TestConfigurationValidation:
 		assert result1 == result2
 		# Cache should be set
 		assert model_factory._ollama_available_cache is not None
+
+
+class TestCustomProviderEndpoint:
+	"""Custom-provider endpoint plumbing.
+
+	`model_config.custom_providers` has always been in the workflow schema
+	(endpoint / model_name / type) but nothing read it during execution — only
+	WorkflowDiscovery, for a metadata boolean. These tests cover reading it, so
+	a workflow can target an arbitrary OpenAI-compatible endpoint (the Vogelkop
+	router in particular) without adding a name to the hardcoded provider enum.
+	"""
+
+	def _factory(self, custom, trace, validator):
+		return ModelFactory(
+			model_config={"mode": "explicit", "custom_providers": custom},
+			trace_logger=trace,
+			config_validator=validator,
+		)
+
+	def test_custom_llamacpp_provider_uses_declared_endpoint(
+		self, mock_trace_logger, mock_config_validator
+	):
+		"""A declared endpoint reaches the model client instead of the default."""
+		factory = self._factory(
+			{
+				"router": {
+					"endpoint": "http://127.0.0.1:18100",
+					"model_name": "router-planner",
+					"type": "llamacpp",
+				}
+			},
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		model = factory.get_model("router", "router-planner")
+		assert model.endpoint == "http://127.0.0.1:18100"
+		# llamacpp/custom speak OpenAI-compatible /v1/chat/completions, which is
+		# what the router serves.
+		assert model.api_url == "http://127.0.0.1:18100/v1/chat/completions"
+
+	def test_custom_ollama_provider_uses_declared_endpoint(
+		self, mock_trace_logger, mock_config_validator
+	):
+		"""type: ollama builds an ollama client at the declared host."""
+		factory = self._factory(
+			{
+				"remote-ollama": {
+					"endpoint": "http://192.168.1.6:11434",
+					"model_name": "qwen3-coder-next:cloud",
+					"type": "ollama",
+				}
+			},
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		model = factory.get_model("remote-ollama", "ignored")
+		assert model.endpoint == "http://192.168.1.6:11434"
+		assert model.model_name == "qwen3-coder-next:cloud"
+
+	def test_entry_model_name_overrides_the_node(
+		self, mock_trace_logger, mock_config_validator
+	):
+		"""The node may name a seat; the entry supplies what the backend serves."""
+		factory = self._factory(
+			{"router": {"endpoint": "http://127.0.0.1:18100", "model_name": "seat-model", "type": "custom"}},
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		assert factory.get_model("router", "router-planner").model_name == "seat-model"
+
+	def test_node_model_used_when_entry_names_none(
+		self, mock_trace_logger, mock_config_validator
+	):
+		factory = self._factory(
+			{"router": {"endpoint": "http://127.0.0.1:18100", "type": "custom"}},
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		assert factory.get_model("router", "from-node").model_name == "from-node"
+
+	def test_trailing_slash_is_normalised(self, mock_trace_logger, mock_config_validator):
+		"""Avoids a doubled slash in the composed request URL."""
+		factory = self._factory(
+			{"router": {"endpoint": "http://127.0.0.1:18100/", "type": "custom"}},
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		assert factory.get_model("router", "m").api_url == "http://127.0.0.1:18100/v1/chat/completions"
+
+	def test_malformed_entry_falls_through_to_normal_resolution(
+		self, mock_trace_logger, mock_config_validator
+	):
+		"""A typo must not yield a client pointed at nothing.
+
+		An entry with no usable endpoint is ignored, so resolution proceeds
+		through the built-in provider table and an unknown name still raises.
+		"""
+		factory = self._factory(
+			{"ollama": {"model_name": "x", "type": "ollama"}},  # no endpoint
+			mock_trace_logger,
+			mock_config_validator,
+		)
+		model = factory.get_model("ollama", "minimax-m3:cloud")
+		assert model.endpoint == "http://127.0.0.1:11434"  # the built-in default
+
+	def test_absent_custom_providers_changes_nothing(
+		self, mock_trace_logger, mock_config_validator
+	):
+		factory = ModelFactory(
+			model_config={"mode": "explicit"},
+			trace_logger=mock_trace_logger,
+			config_validator=mock_config_validator,
+		)
+		assert factory.get_model("ollama", "minimax-m3:cloud").endpoint == "http://127.0.0.1:11434"
