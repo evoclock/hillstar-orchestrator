@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from execution.model_selector import ModelFactory
+from execution.seat_resolver import SeatResolutionError
 from utils.exceptions import ConfigurationError
 
 
@@ -560,3 +561,91 @@ class TestCustomProviderEndpoint:
 			config_validator=mock_config_validator,
 		)
 		assert factory.get_model("ollama", "minimax-m3:cloud").endpoint == "http://127.0.0.1:11434"
+
+
+class TestSeatDispatch:
+	"""A workflow node naming a SEAT resolves through the chain.
+
+	The point is portability: the same workflow runs under Vogelkop (router
+	injected), standalone against a router the user runs, or against local
+	models only -- without the workflow file carrying a host address.
+	"""
+
+	def _factory(self, trace, validator, custom=None):
+		config = {"mode": "explicit"}
+		if custom is not None:
+			config["custom_providers"] = custom
+		return ModelFactory(
+			model_config=config, trace_logger=trace, config_validator=validator
+		)
+
+	def test_seat_uses_a_workflow_pin_when_present(
+		self, mock_trace_logger, mock_config_validator
+	):
+		factory = self._factory(
+			mock_trace_logger,
+			mock_config_validator,
+			custom={"router": {"endpoint": "http://127.0.0.1:18100", "type": "custom"}},
+		)
+		model = factory.get_model("router", "router-planner")
+		assert model.endpoint == "http://127.0.0.1:18100"
+		# The seat name passes through: the router substitutes the backend's
+		# real model itself.
+		assert model.model_name == "router-planner"
+
+	def test_seat_uses_the_host_router_env(
+		self, monkeypatch, mock_trace_logger, mock_config_validator
+	):
+		monkeypatch.setenv("HILLSTAR_ROUTER_URL", "http://127.0.0.1:18100")
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		model = factory.get_model("router", "router-reviewer")
+		assert model.endpoint == "http://127.0.0.1:18100"
+		assert model.model_name == "router-reviewer"
+
+	def test_seat_falls_back_to_a_local_model(
+		self, monkeypatch, mock_trace_logger, mock_config_validator
+	):
+		"""No router: the seat resolves against what the machine has."""
+		monkeypatch.delenv("HILLSTAR_ROUTER_URL", raising=False)
+		monkeypatch.setattr(
+			"execution.seat_resolver._ollama_models", lambda: ["jan-code-4b:latest"]
+		)
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		model = factory.get_model("router", "router-planner")
+		assert model.model_name == "jan-code-4b:latest"
+		# Local discovery leaves the endpoint unset so the client default applies.
+		assert model.endpoint == "http://127.0.0.1:11434"
+
+	def test_unresolvable_seat_raises_rather_than_escalating(
+		self, monkeypatch, mock_trace_logger, mock_config_validator
+	):
+		"""Never reach for a paid API because nothing local was found."""
+		monkeypatch.delenv("HILLSTAR_ROUTER_URL", raising=False)
+		monkeypatch.setattr("execution.seat_resolver._ollama_models", lambda: [])
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		with pytest.raises(SeatResolutionError):
+			factory.get_model("router", "router-planner")
+
+	# Portability makes the model vary by machine, so the trace is the only
+	# place the actual choice survives.
+	def test_resolution_is_recorded_in_the_trace(
+		self, monkeypatch, mock_trace_logger, mock_config_validator
+	):
+		monkeypatch.setenv("HILLSTAR_ROUTER_URL", "http://127.0.0.1:18100")
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		factory.get_model("router", "router-planner")
+		events = [c.args[0] for c in mock_trace_logger.log.call_args_list]
+		seat_events = [e for e in events if e.get("event") == "seat_resolved"]
+		assert len(seat_events) == 1
+		assert seat_events[0]["seat"] == "router-planner"
+		assert seat_events[0]["source"] == "host-config"
+		assert seat_events[0]["model"] == "router-planner"
+
+	def test_a_non_seat_model_name_is_unaffected(
+		self, mock_trace_logger, mock_config_validator
+	):
+		"""Existing workflows naming a concrete model keep working."""
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		model = factory.get_model("ollama", "minimax-m3:cloud")
+		assert model.model_name == "minimax-m3:cloud"
+		assert model.endpoint == "http://127.0.0.1:11434"

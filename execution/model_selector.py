@@ -79,6 +79,7 @@ from models import (
 	OllamaMCPModel,
 )
 from models.ollama_api_model import OllamaAPIModel
+from execution.seat_resolver import is_seat, resolve_seat
 from config.model_selector import ModelSelector
 
 
@@ -292,6 +293,45 @@ class ModelFactory:
 			return None
 		return entry
 
+	def _model_for_seat(self, seat_name: str):
+		"""Build the model a seat resolves to on THIS machine.
+
+		Resolution is deliberately not cached across calls beyond the existing
+		model cache: the answer depends on what the machine currently has, and
+		a router that comes up mid-session should be usable without a restart.
+
+		The chosen model is recorded in the trace. Portability makes the model
+		vary by machine, so an execution receipt is the only place that record
+		survives -- see agents-process/execution-architecture.md.
+		"""
+		resolution = resolve_seat(
+			seat_name,
+			custom_providers=self.model_config.get("custom_providers"),
+		)
+
+		self.trace_logger.log(
+			{
+				"timestamp": datetime.now().isoformat(),
+				"event": "seat_resolved",
+				"seat": seat_name,
+				"source": resolution.source,
+				"provider": resolution.provider,
+				"model": resolution.model_name,
+				"endpoint": resolution.endpoint,
+			}
+		)
+
+		if resolution.provider == "ollama":
+			# Local discovery leaves the endpoint unset, so the client's own
+			# default (127.0.0.1:11434) applies.
+			if resolution.endpoint:
+				return OllamaAPIModel(resolution.model_name, endpoint=resolution.endpoint)
+			return OllamaAPIModel(resolution.model_name)
+
+		# llamacpp and custom both speak OpenAI-compatible
+		# /v1/chat/completions, which is what the router serves.
+		return JanCodeLocalModel(resolution.model_name, endpoint=resolution.endpoint)
+
 	def get_model(self, provider: str, model_name: str, **kwargs):
 		"""Get or create model instance with smart selection.
 
@@ -323,6 +363,14 @@ class ModelFactory:
 					)
 			# Get API key from config or environment (for providers that need it)
 			api_key = self.config_validator.get_api_key_for_provider(provider)
+
+			# A SEAT names a role, not a model. Resolve it through the chain
+			# (workflow pin -> host router -> local discovery -> typed failure)
+			# so the same workflow runs under Vogelkop, standalone, or on
+			# another machine without carrying a host address.
+			if is_seat(model_name):
+				self._models[key] = self._model_for_seat(model_name)
+				return self._models[key]
 
 			custom = self._custom_provider(provider)
 			if custom is not None:
