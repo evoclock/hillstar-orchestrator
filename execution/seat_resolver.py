@@ -75,9 +75,13 @@ class Seat:
 	capability: Capability
 
 
-# The seat vocabulary. Deliberately short and stable: these are roles, not
-# models. Hillstar knows the NAMES so it can resolve them standalone; the
-# Vogelkop router is authoritative when routing.
+# Seats whose CAPABILITY hillstar must know without asking anyone: an embedding
+# seat must never be served by a chat model. This is not the list of valid
+# seats. A deployment adds seats (a US-origin reviewer, a second implementer)
+# in the router's configuration, and a copy of that list here would go stale
+# the moment it did — which is exactly what happened.
+SEAT_PREFIX = "router-"
+
 SEATS: Mapping[str, Seat] = {
 	"router-planner": Seat("router-planner", Capability.CHAT),
 	"router-reviewer": Seat("router-reviewer", Capability.CHAT),
@@ -108,7 +112,14 @@ class Resolution:
 
 
 def is_seat(name: str) -> bool:
-	return name in SEATS
+	"""True for any name in the seat namespace.
+
+	Deliberately permissive. Hillstar cannot know which seats a deployment has
+	configured, so treating an unknown `router-*` name as a typo would reject
+	valid workflows. An unservable seat fails at resolution with a typed error
+	naming what the router does offer, which is the honest place for it.
+	"""
+	return name in SEATS or name.startswith(SEAT_PREFIX)
 
 
 def seat_capability(name: str) -> Capability | None:
@@ -245,9 +256,14 @@ def resolve_seat(
 	"""
 	seat = SEATS.get(seat_name)
 	if seat is None:
-		raise SeatResolutionError(
-			f"unknown seat {seat_name!r}; known seats: {', '.join(sorted(SEATS))}"
-		)
+		if not is_seat(seat_name):
+			raise SeatResolutionError(
+				f"{seat_name!r} is not a seat; seat names begin {SEAT_PREFIX!r}"
+			)
+		# A seat this build has no capability entry for. Chat is the safe
+		# assumption: every capability-specific seat is named above, and the
+		# router rejects a seat it does not serve.
+		seat = Seat(seat_name, Capability.CHAT)
 
 	env = os.environ if env is None else env
 	installed_models = _ollama_models if installed_models is None else installed_models

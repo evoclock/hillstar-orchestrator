@@ -51,10 +51,18 @@ class TestSeatVocabulary:
 		assert is_seat("router-planner") is True
 		assert is_seat("glm-5.2:cloud") is False
 
-	def test_unknown_seat_raises_with_the_known_names(self):
+	def test_a_seat_nothing_can_serve_says_how_to_serve_it(self):
+		"""A seat name is valid; being unservable is a deployment fact.
+
+		The failure names the seat and the three ways to satisfy it, rather
+		than listing the seats this build happens to enumerate: a deployment
+		defines its own, so that list would be wrong as often as right.
+		"""
 		with pytest.raises(SeatResolutionError) as exc:
 			resolve_seat("router-nope", installed_models=_no_models, env={})
-		assert "router-planner" in str(exc.value)
+		assert "router-nope" in str(exc.value)
+		assert "custom_providers" in str(exc.value)
+		assert "HILLSTAR_ROUTER_URL" in str(exc.value)
 
 
 class TestChainPrecedence:
@@ -203,3 +211,49 @@ class TestProvenance:
 			resolve_seat("router-planner", env={}, installed_models=_models("m:1")).source,
 		}
 		assert sources == {"workflow-pin", "host-config", "local-discovery"}
+
+
+class TestDeploymentDefinedSeats:
+	"""Seats a deployment adds are valid without a hillstar release.
+
+	The seat table lived in two places, hillstar and the Vogelkop router. Adding
+	router-reviewer-us and router-reviewer-cloud to the router made every
+	workflow using them fail hillstar validation with "Unknown provider
+	'router'", because this side had never heard of them.
+	"""
+
+	def test_recognises_a_seat_this_build_does_not_enumerate(self):
+		assert is_seat("router-reviewer-us")
+		assert is_seat("router-reviewer-cloud")
+		assert is_seat("router-implementer-reasoning-us")
+
+	def test_rejects_a_name_outside_the_seat_namespace(self):
+		assert not is_seat("gpt-5")
+		assert not is_seat("deepseek-v4-flash")
+		assert not is_seat("")
+
+	def test_resolves_an_unenumerated_seat_through_the_router(self):
+		res = resolve_seat(
+			"router-reviewer-us",
+			env={"HILLSTAR_ROUTER_URL": "http://127.0.0.1:18100"},
+		)
+		assert res.endpoint.startswith("http://127.0.0.1:18100")
+		assert res.model_name == "router-reviewer-us"
+
+	def test_a_pin_still_outranks_the_router_for_a_new_seat(self):
+		res = resolve_seat(
+			"router-reviewer-us",
+			custom_providers={
+				"router-reviewer-us": {
+					"endpoint": "http://127.0.0.1:18011",
+					"model_name": "puzzle-75b",
+					"type": "custom",
+				}
+			},
+			env={"HILLSTAR_ROUTER_URL": "http://127.0.0.1:18100"},
+		)
+		assert res.endpoint == "http://127.0.0.1:18011"
+
+	def test_a_name_outside_the_namespace_still_fails_typed(self):
+		with pytest.raises(SeatResolutionError):
+			resolve_seat("not-a-seat", env={})
