@@ -55,6 +55,7 @@ from typing import Any, Optional, Tuple
 from importlib.resources import files
 
 from config.provider_registry import ProviderRegistry
+from execution.seat_resolver import is_seat
 
 
 class WorkflowValidator:
@@ -346,6 +347,15 @@ class WorkflowValidator:
 
 			provider = node.get("provider")
 			model = node.get("model")
+
+			# A SEAT names a role, not a model, and resolves at run time
+			# against whatever the machine has. Seats are deliberately absent
+			# from the model-scoped registry, so validating one against it
+			# would reject every portable workflow. The seat resolver is the
+			# authority here and raises a typed error if the seat cannot be
+			# served.
+			if model and is_seat(model):
+				continue
 
 			if provider:
 				# Check provider exists in registry
