@@ -79,6 +79,13 @@ class TestCompilation:
 		g = compile_loops(_workflow(max_attempts=3))["graph"]
 		assert {"from": "review@3", "to": "publish"} in g["edges"]
 
+	# The edge and the reference must agree. They did not: publish waited on
+	# attempt 3 while reading attempt 1, so a failed first attempt left the
+	# template unresolved and written out literally.
+	def test_a_node_outside_the_loop_reads_the_final_attempt(self):
+		nodes = compile_loops(_workflow(max_attempts=3))["graph"]["nodes"]
+		assert nodes["publish"]["input"] == "{{ review@3.output }}"
+
 	def test_every_attempt_records_its_place(self):
 		nodes = compile_loops(_workflow())["graph"]["nodes"]
 		assert nodes["implement"]["loop"] == {"id": "fix", "attempt": 1, "of": 3}
@@ -149,7 +156,15 @@ class TestSkippingSatisfiedAttempts:
 		ran, graph = self._run({"review": "VERDICT sign-off"})
 		assert "implement@2" not in ran
 		assert "review@3" not in ran
-		assert graph.node_outputs["review@2"] == {"skipped": True}
+
+	# Downstream nodes read the LAST attempt, because that is the loop's result.
+	# A skipped attempt therefore carries the result that satisfied the exit
+	# condition; a marker there would hand the next node "skipped" instead of
+	# the review that signed off.
+	def test_a_skipped_attempt_carries_the_winning_result(self):
+		_, graph = self._run({"review": "VERDICT sign-off"})
+		assert graph.node_outputs["review@2"] == "VERDICT sign-off"
+		assert graph.node_outputs["review@3"] == "VERDICT sign-off"
 
 	def test_every_attempt_runs_when_nothing_succeeds(self):
 		ran, _ = self._run({})
