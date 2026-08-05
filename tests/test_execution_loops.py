@@ -215,3 +215,81 @@ class TestFeedbackToTheNextAttempt:
 		order = graph.get_execution_order()
 		assert order.index("review") < order.index("implement@2")
 		assert order.index("review@2") < order.index("implement@3")
+
+
+class TestExitOnEvidenceAndOpinion:
+	"""A loop that ends on the reviewer alone can exit on broken code.
+
+	Measured: two reviewers signed off unanimously on code that failed two
+	ground-truth cases. The loop stopped iterating with the defects in place,
+	because nothing in its exit condition consulted what the code actually did.
+	"""
+
+	def _wf(self, attempts=3):
+		return {
+			"id": "evidence-loop",
+			"graph": {
+				"nodes": {
+					"implement": {"tool": "model_call", "input": "write it"},
+					"check": {"tool": "script_run", "input": "run it"},
+					"review": {"tool": "model_call", "input": "review {{ implement.output }}"},
+					"publish": {"tool": "file_write", "input": "{{ review.output }}"},
+				},
+				"edges": [
+					{"from": "implement", "to": "check"},
+					{"from": "check", "to": "review"},
+					{"from": "review", "to": "publish"},
+				],
+				"loops": [{
+					"id": "revise",
+					"body": ["implement", "check", "review"],
+					"max_attempts": attempts,
+					"until": {"all_of": [
+						{"node": "review", "contains": "sign-off"},
+						{"node": "check", "contains": "PASS"},
+					]},
+				}],
+			},
+		}
+
+	def _run(self, outputs):
+		graph = WorkflowGraph(self._wf())
+		ran = []
+
+		def executor(node_id, node, inputs):
+			ran.append(node_id)
+			return outputs.get(node_id, "revise: not yet")
+
+		for node_id in graph.get_execution_order():
+			graph.execute_node(node_id, executor)
+		return ran, graph
+
+	def test_compiles_with_a_compound_condition(self):
+		nodes = compile_loops(self._wf())["graph"]["nodes"]
+		assert "implement@2" in nodes and "check@3" in nodes
+
+	# The failure this prevents.
+	def test_keeps_going_when_the_reviewer_signs_off_on_failing_code(self):
+		ran, _ = self._run({"review": "VERDICT sign-off", "check": "FAIL: no_header"})
+		assert "implement@2" in ran
+		assert "implement@3" in ran
+
+	def test_keeps_going_when_the_code_passes_but_the_reviewer_objects(self):
+		ran, _ = self._run({"review": "revise", "check": "PASS: every case"})
+		assert "implement@2" in ran
+
+	def test_stops_when_evidence_and_opinion_agree(self):
+		ran, _ = self._run({"review": "VERDICT sign-off", "check": "PASS: every case"})
+		assert "implement@2" not in ran
+
+	def test_a_single_condition_still_works(self):
+		w = self._wf()
+		w["graph"]["loops"][0]["until"] = {"node": "review", "contains": "sign-off"}
+		nodes = compile_loops(w)["graph"]["nodes"]
+		assert "review@3" in nodes
+
+	def test_refuses_a_condition_naming_a_node_outside_the_body(self):
+		w = self._wf()
+		w["graph"]["loops"][0]["until"] = {"all_of": [{"node": "publish", "contains": "x"}]}
+		with pytest.raises(LoopError, match="not in the body"):
+			compile_loops(w)
