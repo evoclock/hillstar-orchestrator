@@ -123,14 +123,24 @@ def _validate(loop: Mapping[str, Any], nodes: Mapping[str, Any]) -> tuple[list[s
 		)
 
 	until = loop.get("until")
-	if not isinstance(until, Mapping) or "node" not in until:
+	if not isinstance(until, Mapping):
 		raise LoopError(f"loop {loop.get('id')!r}: until must name the node whose output ends the loop")
-	if until["node"] not in body:
-		raise LoopError(f"loop {loop.get('id')!r}: until.node {until['node']!r} is not in the body")
-	if not any(k in until for k in ("contains", "not_contains", "equals")):
-		raise LoopError(
-			f"loop {loop.get('id')!r}: until needs one of contains, not_contains or equals"
-		)
+
+	# `all_of` lets the exit depend on more than one node. A loop that ends on
+	# the reviewer alone can exit while execution says the code is broken:
+	# measured, two reviewers signed off unanimously on code failing two
+	# ground-truth cases, and the loop stopped iterating with the defects in
+	# place. Evidence and opinion both have to agree before the work is done.
+	conditions = until.get("all_of") if isinstance(until.get("all_of"), list) else [until]
+	for c in conditions:
+		if not isinstance(c, Mapping) or "node" not in c:
+			raise LoopError(f"loop {loop.get('id')!r}: every until condition must name a node")
+		if c["node"] not in body:
+			raise LoopError(f"loop {loop.get('id')!r}: until node {c['node']!r} is not in the body")
+		if not any(k in c for k in ("contains", "not_contains", "equals")):
+			raise LoopError(
+				f"loop {loop.get('id')!r}: until needs one of contains, not_contains or equals"
+			)
 	return list(body), attempts, dict(until)
 
 
@@ -157,9 +167,12 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		# LAST attempt, so downstream sees the final result.
 		exits = [e for e in edges if e["from"] in body_set and e["to"] not in body_set]
 
-		last = _suffixed(until["node"], attempts)
+		conditions = until.get("all_of") if isinstance(until.get("all_of"), list) else [until]
+		# The attempt ends when its last condition node has produced output.
+		check_node = conditions[-1]["node"]
+		last = _suffixed(check_node, attempts)
 		for e in exits:
-			if e["from"] == until["node"]:
+			if e["from"] == check_node:
 				e["from"] = last
 
 		# A node outside the loop reads the loop's RESULT, which is the last
@@ -171,10 +184,10 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		for node_id, node in nodes.items():
 			if node_id in body_set:
 				continue
-			nodes[node_id] = _rewrite_references_to_last(dict(node), until["node"], last)
+			nodes[node_id] = _rewrite_references_to_last(dict(node), check_node, last)
 
 		for attempt in range(2, attempts + 1):
-			prev_check = _suffixed(until["node"], attempt - 1)
+			prev_check = _suffixed(check_node, attempt - 1)
 			for node_id in body:
 				copy = _rewrite_references(dict(nodes[node_id]), body_set, attempt)
 				# The exit condition, carried on every node of the attempt: if
@@ -204,6 +217,13 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 
 
 def condition_met(condition: Mapping[str, Any], outputs: Mapping[str, Any]) -> bool:
+	"""True when the condition holds. `all_of` requires every part."""
+	if isinstance(condition.get("all_of"), list):
+		return all(_single_condition_met(c, outputs) for c in condition["all_of"])
+	return _single_condition_met(condition, outputs)
+
+
+def _single_condition_met(condition: Mapping[str, Any], outputs: Mapping[str, Any]) -> bool:
 	"""Evaluate a `skip_if` / `when` condition against the outputs so far.
 
 	A condition on a node that has not produced output is NOT met: an absent
