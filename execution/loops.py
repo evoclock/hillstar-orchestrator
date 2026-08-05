@@ -93,6 +93,20 @@ def _rewrite_references(value: Any, body: set[str], attempt: int) -> Any:
 	return value
 
 
+def _rewrite_references_to_last(value: Any, node_id: str, last: str) -> Any:
+	"""Point a reference at the loop's final attempt."""
+	if node_id == last:
+		return value
+	if isinstance(value, str):
+		out = value.replace(f"{{{{ {node_id}.", f"{{{{ {last}.")
+		return out.replace(f"{{{{{node_id}.", f"{{{{{last}.")
+	if isinstance(value, list):
+		return [_rewrite_references_to_last(v, node_id, last) for v in value]
+	if isinstance(value, dict):
+		return {k: _rewrite_references_to_last(v, node_id, last) for k, v in value.items()}
+	return value
+
+
 def _validate(loop: Mapping[str, Any], nodes: Mapping[str, Any]) -> tuple[list[str], int, dict]:
 	body = loop.get("body")
 	if not isinstance(body, list) or not body:
@@ -147,6 +161,17 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		for e in exits:
 			if e["from"] == until["node"]:
 				e["from"] = last
+
+		# A node outside the loop reads the loop's RESULT, which is the last
+		# attempt — the same one its edge now waits on. Leaving the reference on
+		# attempt 1 while the edge points at attempt 3 is a contradiction: if
+		# attempt 1 failed, the reference resolves to nothing and the template
+		# is written out literally, which is what reached a reviewer file as
+		# "{{ review.output }}".
+		for node_id, node in nodes.items():
+			if node_id in body_set:
+				continue
+			nodes[node_id] = _rewrite_references_to_last(dict(node), until["node"], last)
 
 		for attempt in range(2, attempts + 1):
 			prev_check = _suffixed(until["node"], attempt - 1)

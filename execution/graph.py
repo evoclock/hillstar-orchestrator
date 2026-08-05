@@ -198,7 +198,11 @@ class WorkflowGraph:
 		# would spend a model call to discard the result.
 		skip_if = node.get("skip_if")
 		if skip_if and condition_met(skip_if, self.node_outputs):
-			self.node_outputs[node_id] = {"skipped": True}
+			# Carry the result that satisfied the condition, rather than a
+			# marker. Downstream nodes read the LAST attempt, since that is the
+			# loop's result; a marker there would hand them "skipped" instead of
+			# the review that actually signed off.
+			self.node_outputs[node_id] = self.node_outputs.get(skip_if.get("node"), {"skipped": True})
 			self.trace.append({
 				"node_id": node_id,
 				"tool": tool,
