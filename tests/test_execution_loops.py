@@ -164,3 +164,39 @@ class TestSkippingSatisfiedAttempts:
 		ran, _ = self._run({"review@2": "VERDICT sign-off"})
 		assert "implement@2" in ran
 		assert "implement@3" not in ran
+
+
+class TestFeedbackToTheNextAttempt:
+	"""The reviewer's revisions must reach the next implementer attempt.
+
+	Without this the loop is a retry of the identical prompt: the implementer
+	never sees why it failed, so it reproduces the same defect and the extra
+	attempts buy nothing.
+	"""
+
+	def _wf(self):
+		w = _workflow(max_attempts=3)
+		w["graph"]["nodes"]["implement"]["input"] = (
+			"write it {{ seed.output }}\nPrevious review: {{ prev.review.output }}"
+		)
+		return w
+
+	def test_the_second_attempt_reads_the_first_review(self):
+		nodes = compile_loops(self._wf())["graph"]["nodes"]
+		assert "{{ review.output }}" in nodes["implement@2"]["input"]
+
+	def test_the_third_attempt_reads_the_second_review(self):
+		nodes = compile_loops(self._wf())["graph"]["nodes"]
+		assert "{{ review@2.output }}" in nodes["implement@3"]["input"]
+
+	# Nothing has been reviewed on the first attempt.
+	def test_the_first_attempt_has_no_dangling_reference(self):
+		nodes = compile_loops(self._wf())["graph"]["nodes"]
+		assert "prev." not in nodes["implement"]["input"]
+		assert "{{" not in nodes["implement"]["input"].split("Previous review:")[1]
+
+	def test_the_expansion_is_still_a_dag(self):
+		graph = WorkflowGraph(self._wf())
+		order = graph.get_execution_order()
+		assert order.index("review") < order.index("implement@2")
+		assert order.index("review@2") < order.index("implement@3")

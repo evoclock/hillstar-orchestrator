@@ -35,6 +35,7 @@ rather than run and discarded.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping
 
 
@@ -49,14 +50,41 @@ def _suffixed(node_id: str, attempt: int) -> str:
 def _rewrite_references(value: Any, body: set[str], attempt: int) -> Any:
 	"""Point `{{ node.output }}` at this attempt's copy of a body node.
 
+	`{{ prev.node.output }}` instead names the PREVIOUS attempt. That is what
+	carries a review back to the implementer: without it the second attempt
+	would reference its own review, which has not run yet, and the implementer
+	would simply repeat the first prompt and produce the same defect. On the
+	first attempt there is no previous output, so it resolves to nothing.
+
 	References to nodes OUTSIDE the loop body are left alone: they name work
 	that happens once, and every attempt should see the same value.
 	"""
 	if isinstance(value, str):
 		out = value
+		# Resolve prev-references to a sentinel FIRST. Rewriting them straight to
+		# the previous attempt would leave text the same-attempt pass below then
+		# rewrites again, moving the reference forward to the attempt that has
+		# not run.
+		sentinel = {}
+		for node_id in body:
+			pattern = r"\{\{\s*prev\." + re.escape(node_id) + r"\.([a-zA-Z_]+)\s*\}\}"
+			if attempt <= 1:
+				# Nothing has been reviewed yet, so the reference resolves to
+				# nothing rather than to an unresolved template.
+				out = re.sub(pattern, "", out)
+			else:
+				token = f"\x00PREV{len(sentinel)}\x00"
+				target = _suffixed(node_id, attempt - 1)
+				out, n = re.subn(pattern, lambda m, t=token: t + m.group(1) + "\x01", out)
+				if n:
+					sentinel[token] = target
+
 		for node_id in body:
 			out = out.replace(f"{{{{ {node_id}.", f"{{{{ {_suffixed(node_id, attempt)}.")
 			out = out.replace(f"{{{{{node_id}.", f"{{{{{_suffixed(node_id, attempt)}.")
+
+		for token, target in sentinel.items():
+			out = re.sub(re.escape(token) + r"([a-zA-Z_]+)\x01", lambda m, t=target: "{{ " + t + "." + m.group(1) + " }}", out)
 		return out
 	if isinstance(value, list):
 		return [_rewrite_references(v, body, attempt) for v in value]
@@ -141,6 +169,7 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 			edges.append({"from": prev_check, "to": _suffixed(body[0], attempt)})
 
 		for node_id in body:
+			nodes[node_id] = _rewrite_references(dict(nodes[node_id]), body_set, 1)
 			nodes[node_id].setdefault("loop", {"id": loop.get("id"), "attempt": 1, "of": attempts})
 
 	out = dict(workflow)
