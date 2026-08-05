@@ -59,6 +59,9 @@ from collections import defaultdict, deque
 from typing import Any, Dict, List
 
 
+from execution.loops import compile_loops, condition_met
+
+
 class WorkflowGraph:
 	"""Directed Acyclic Graph (DAG) workflow executor."""
 
@@ -67,6 +70,10 @@ class WorkflowGraph:
 		Args:
 			workflow_json: Workflow definition (nodes + edges)
 		"""
+		# Bounded iteration is declared, not drawn. Compiling it here means the
+		# rest of this class still receives a DAG, so topological sort,
+		# checkpoints and tracing need no special case for a loop.
+		workflow_json = compile_loops(workflow_json)
 		self.id = workflow_json.get("id", "unnamed")
 		self.nodes = workflow_json["graph"]["nodes"]
 		self.edges = workflow_json["graph"]["edges"]
@@ -185,6 +192,21 @@ class WorkflowGraph:
 		"""Execute a single node."""
 		node = self.nodes[node_id]
 		tool = node["tool"]
+
+		# A later attempt of a bounded loop whose exit condition is already
+		# satisfied. Skipped rather than run: the work is done, and running it
+		# would spend a model call to discard the result.
+		skip_if = node.get("skip_if")
+		if skip_if and condition_met(skip_if, self.node_outputs):
+			self.node_outputs[node_id] = {"skipped": True}
+			self.trace.append({
+				"node_id": node_id,
+				"tool": tool,
+				"status": "skipped",
+				"reason": "loop exit condition already met",
+			})
+			return self.node_outputs[node_id]
+
 		inputs = self.get_node_inputs(node_id)
 
 		if node_id in self.permissions:
