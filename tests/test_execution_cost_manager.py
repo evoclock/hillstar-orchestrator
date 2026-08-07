@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from execution.cost_manager import CostManager
+from utils import BudgetExceededError
 
 
 @pytest.fixture
@@ -209,6 +210,19 @@ class TestBudgetChecking:
 			node_id="node1"
 		)
 		assert result is None
+
+	def test_reserved_estimates_share_the_workflow_budget(self):
+		"""Concurrent estimates cannot collectively exceed the workflow limit."""
+		manager = CostManager({"budget": {"max_workflow_usd": 10.0}})
+		manager.check_budget(6.0, "node_1", reserve=True)
+
+		with pytest.raises(BudgetExceededError, match="would exceed workflow limit"):
+			manager.check_budget(6.0, "node_2", reserve=True)
+
+		manager.release_budget("node_1")
+		manager.check_budget(6.0, "node_2", reserve=True)
+		manager.record_cost("node_2", 6.0)
+		assert manager.cumulative_cost_usd == 6.0
 
 
 class TestCostRecording:

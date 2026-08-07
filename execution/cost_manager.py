@@ -62,6 +62,8 @@ Last Edited
 2026-02-24
 """
 
+import threading
+
 from utils import BudgetExceededError
 from config.provider_registry import get_registry
 
@@ -77,6 +79,9 @@ class CostManager:
 		self.model_config = model_config
 		self.cumulative_cost_usd = 0.0
 		self.node_costs: dict = {} # node_id -> cost_usd
+		self._lock = threading.RLock()
+		self._reserved_cost_usd = 0.0
+		self._reserved_by_node: dict[str, float] = {}
 
 	def estimate_cost(
 		self,
@@ -133,35 +138,57 @@ class CostManager:
 		self,
 		estimated_cost: float,
 		node_id: str,
+		reserve: bool = False,
 	) -> None:
 		"""
 		Check if cost would exceed budget limits.
 
+		When ``reserve`` is true, hold the estimate until ``record_cost`` or
+		``release_budget``. This makes concurrent workflow calls share one budget.
+
 		Args:
 			estimated_cost: Estimated cost of this call in USD
 			node_id: Node ID for logging
+			reserve: Hold the estimate against the workflow budget
 
 		Raises:
-			BudgetExceededError: If budget would be exceeded
+			BudgetExceededError: If the budget would be exceeded
 		"""
-		budget = self.model_config.get("budget", {})
-		max_per_task = budget.get("max_per_task_usd")
-		max_workflow = budget.get("max_workflow_usd")
+		with self._lock:
+			previous = self._reserved_by_node.get(node_id, 0.0) if reserve else 0.0
+			reserved = self._reserved_cost_usd - previous
+			budget = self.model_config.get("budget", {})
+			max_per_task = budget.get("max_per_task_usd")
+			max_workflow = budget.get("max_workflow_usd")
 
-		if max_per_task and estimated_cost > max_per_task:
-			raise BudgetExceededError(
-				f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
-				f"exceeds per-task limit ${max_per_task}"
-			)
+			if max_per_task and estimated_cost > max_per_task:
+				raise BudgetExceededError(
+					f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
+					f"exceeds per-task limit ${max_per_task}"
+				)
 
-		if max_workflow and (self.cumulative_cost_usd + estimated_cost) > max_workflow:
-			remaining = max_workflow - self.cumulative_cost_usd
-			raise BudgetExceededError(
-				f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
-				f"would exceed workflow limit. Remaining: ${remaining:.4f}"
-			)
+			projected = self.cumulative_cost_usd + reserved + estimated_cost
+			if max_workflow and projected > max_workflow:
+				remaining = max_workflow - self.cumulative_cost_usd - reserved
+				raise BudgetExceededError(
+					f"Node {node_id}: estimated cost ${estimated_cost:.4f} "
+					f"would exceed workflow limit. Remaining: ${remaining:.4f}"
+				)
+
+			if reserve:
+				self._reserved_cost_usd += estimated_cost - previous
+				self._reserved_by_node[node_id] = estimated_cost
+
+	def release_budget(self, node_id: str) -> None:
+		"""Release a pending estimate after a call fails before recording cost."""
+		with self._lock:
+			reserved = self._reserved_by_node.pop(node_id, 0.0)
+			self._reserved_cost_usd -= reserved
 
 	def record_cost(self, node_id: str, cost: float) -> None:
-		"""Record actual cost for a node."""
-		self.node_costs[node_id] = cost
-		self.cumulative_cost_usd += cost
+		"""Record actual cost for a node and release its pending estimate."""
+		with self._lock:
+			reserved = self._reserved_by_node.pop(node_id, 0.0)
+			self._reserved_cost_usd -= reserved
+			self.node_costs[node_id] = cost
+			self.cumulative_cost_usd += cost

@@ -158,6 +158,20 @@ class TestTraceLoggerDesign:
 			assert summary["model_calls"] == 0
 			assert summary["node_costs"] == {}
 
+	def test_capture_defers_events_until_ordered_commit(self):
+		"""Captured worker events do not reach memory or disk before commit."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			logger = TraceLogger(tmpdir)
+			with logger.capture() as captured:
+				logger.log({"event": "worker", "node_id": "first"})
+				assert captured[0]["node_id"] == "first"
+				assert logger.events == []
+
+			logger.commit(captured)
+			assert [event["node_id"] for event in logger.events] == ["first"]
+			with open(logger.finalize()) as f:
+				assert json.loads(f.readline())["node_id"] == "first"
+
 	def test_finalize_returns_file_path(self):
 		"""Test that finalize returns trace file path."""
 		with tempfile.TemporaryDirectory() as tmpdir:
