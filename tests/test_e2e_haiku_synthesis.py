@@ -329,6 +329,12 @@ class TestHaikuSynthesisPipeline:
 
 	def test_workflow_execution_with_trace_evidence(self, workflow, output_dir):
 		"""Test full workflow execution with trace file evidence of model calls."""
+		if not os.environ.get("ANTHROPIC_API_KEY"):
+			pytest.skip(
+				"ANTHROPIC_API_KEY not set; export it or provide it in the "
+				"repository .env before running the credentialed E2E workflow"
+			)
+
 		from execution.runner import WorkflowRunner
 		import json
 		from pathlib import Path

@@ -555,9 +555,12 @@ class NodeExecutor:
                 cwd=cwd,  # Set working directory if specified
                 shell=use_shell,  # Use shell for complex commands
             )
+            error = None
+            if result.returncode != 0:
+                error = result.stderr or f"script exited with return code {result.returncode}"
             return {
                 "output": result.stdout,
-                "error": result.stderr if result.returncode != 0 else None,
+                "error": error,
                 "return_code": result.returncode,
             }
         except Exception as e:

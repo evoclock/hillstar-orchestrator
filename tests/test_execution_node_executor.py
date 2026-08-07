@@ -435,20 +435,20 @@ class TestFileOperations:
 class TestScriptExecution:
 	"""Test script execution."""
 
-	def test_execute_script_run_success(self, node_executor):
-		"""Test successful script execution."""
+	def test_execute_script_run_zero_exit_remains_success(self, node_executor):
+		"""A zero exit, including an intentional --soft check, remains successful."""
 		with patch("subprocess.run") as mock_run:
 			mock_run.return_value = MagicMock(
 				returncode=0,
-				stdout="output",
+				stdout="FAIL: semantic checks are reported in soft mode",
 				stderr=""
 			)
 
-			node = {"tool": "script_run", "parameters": {"script": "echo test"}}
+			node = {"tool": "script_run", "parameters": {"script": "verify --soft"}}
 			result = node_executor._execute_script_run("node1", node, {})
 
-		assert result is not None
-		assert isinstance(result, dict)
+		assert result["return_code"] == 0
+		assert result["error"] is None
 
 	def test_execute_script_run_timeout(self, node_executor):
 		"""Test script timeout."""
@@ -461,20 +461,19 @@ class TestScriptExecution:
 		assert isinstance(result, dict)
 
 	def test_execute_script_run_nonzero_exit(self, node_executor):
-		"""Test script with non-zero exit code."""
+		"""A non-zero exit fails even when the script writes no stderr."""
 		with patch("subprocess.run") as mock_run:
 			mock_run.return_value = MagicMock(
 				returncode=1,
 				stdout="",
-				stderr="error message"
+				stderr=""
 			)
 
 			node = {"tool": "script_run", "parameters": {"script": "false"}}
 			result = node_executor._execute_script_run("node1", node, {})
 
-		# Should capture non-zero exit
-		assert result is not None
-		assert isinstance(result, dict)
+		assert result["return_code"] == 1
+		assert result["error"] == "script exited with return code 1"
 
 
 class TestGitCommit:

@@ -4,6 +4,7 @@
 # Bounded iteration: an implementer-reviewer cycle that ends on success or on
 # a stated maximum, expressed without a back edge.
 
+import json
 import sys
 from pathlib import Path
 
@@ -13,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from execution.graph import WorkflowGraph  # noqa: E402
 from execution.loops import LoopError, compile_loops, condition_met  # noqa: E402
+from execution.runner import WorkflowRunner  # noqa: E402
 
 
 def _workflow(max_attempts=3, until=None):
@@ -293,3 +295,25 @@ class TestExitOnEvidenceAndOpinion:
 		w["graph"]["loops"][0]["until"] = {"all_of": [{"node": "publish", "contains": "x"}]}
 		with pytest.raises(LoopError, match="not in the body"):
 			compile_loops(w)
+
+
+class TestScriptRunFailurePropagation:
+	def test_nonzero_script_run_fails_the_workflow(self, tmp_path):
+		workflow = {
+			"id": "script-failure",
+			"graph": {
+				"nodes": {
+					"check": {
+						"tool": "script_run",
+						"parameters": {"script": "false"},
+					}
+				},
+				"edges": [],
+			},
+		}
+		workflow_path = tmp_path / "workflow.json"
+		workflow_path.write_text(json.dumps(workflow))
+		runner = WorkflowRunner(str(workflow_path), output_dir=str(tmp_path / "output"))
+
+		with pytest.raises(Exception, match="script exited with return code 1"):
+			runner.execute()
