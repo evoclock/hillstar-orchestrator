@@ -235,6 +235,23 @@
                 "properties": {
                   "system": {"type": "string", "description": "System prompt / developer instructions"},
                   "max_tokens": {"type": "integer", "minimum": 1},
+                  "reasoning_effort": {
+                    "type": "string",
+                    "enum": ["low", "medium", "high"],
+                    "description": "Per-seat reasoning effort forwarded unchanged to the selected backend"
+                  },
+                  "thinking": {
+                    "description": "Provider-specific thinking control forwarded unchanged to the selected backend",
+                    "oneOf": [
+                      {"type": "boolean"},
+                      {"type": "string", "enum": ["low", "medium", "high"]},
+                      {"type": "object"}
+                    ]
+                  },
+                  "chat_template_kwargs": {
+                    "type": "object",
+                    "description": "Provider-specific chat-template controls, such as enable_thinking"
+                  },
                   "temperature": {"type": "number", "minimum": 0.0, "maximum": 2.0},
                   "sandbox": {
                     "type": "string",

@@ -141,6 +141,7 @@ class JanCodeLocalModel:
 		max_tokens: int = 4096,
 		temperature: float | None = None,
 		system: str | None = None,
+		**kwargs: Any,
 	) -> dict[str, Any]:
 		"""
 		Call Jan-Code via llama.cpp OpenAI-compatible chat completions endpoint.
@@ -183,6 +184,9 @@ class JanCodeLocalModel:
 				"temperature": temperature,
 				"max_tokens": max_tokens,
 			}
+			for key in ("reasoning_effort", "thinking", "chat_template_kwargs"):
+				if key in kwargs:
+					payload[key] = kwargs[key]
 
 			response = requests.post(self.api_url, json=payload, timeout=300)
 			response.raise_for_status()

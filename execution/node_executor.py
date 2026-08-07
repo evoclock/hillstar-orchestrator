@@ -72,6 +72,12 @@ from .trace import TraceLogger
 from config.model_selector import ModelSelector
 
 
+# These fields are provider-facing controls, not arbitrary workflow kwargs.
+# The router forwards them unchanged so each seat/backend can interpret its
+# supported reasoning contract without Hillstar guessing or rewriting it.
+_REASONING_PARAMETER_KEYS = ("reasoning_effort", "thinking", "chat_template_kwargs")
+
+
 class NodeExecutor:
     """Execute individual workflow nodes with comprehensive error handling."""
 
@@ -311,6 +317,12 @@ class NodeExecutor:
                 provider_to_use, temperature
             )
 
+            reasoning_parameters = {
+                key: parameters[key]
+                for key in _REASONING_PARAMETER_KEYS
+                if key in parameters
+            }
+
             # Call model with retry logic for transient errors
             # In explicit mode, retry same provider with backoff instead of falling back
             max_retries = 3
@@ -323,6 +335,7 @@ class NodeExecutor:
                     max_tokens=parameters.get("max_tokens", 4096),
                     temperature=temperature,
                     system=parameters.get("system"),
+                    **reasoning_parameters,
                 )
 
                 # If success, break out of retry loop
@@ -433,6 +446,8 @@ class NodeExecutor:
                 "actual_cost_usd": actual_cost,
                 "cumulative_cost_usd": self.cost_manager.cumulative_cost_usd,
             }
+            if reasoning_parameters:
+                selection_log["reasoning_parameters"] = reasoning_parameters
             if fallback_attempts:
                 selection_log["fallback_attempts"] = fallback_attempts
 

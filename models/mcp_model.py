@@ -209,6 +209,7 @@ class MCPModel:
 		max_tokens: int = 4096,
 		temperature: float | None = None,
 		system: str | None = None,
+		**kwargs: Any,
 	) -> dict[str, Any]:
 		"""Execute task via MCP server.
 
