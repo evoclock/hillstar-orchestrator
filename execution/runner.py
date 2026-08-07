@@ -56,11 +56,13 @@ Last Edited
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 import json
 import os
 import time
+from threading import Lock
 from typing import Any, Optional
 
 from .checkpoint import CheckpointManager
@@ -71,6 +73,7 @@ from .cost_manager import CostManager
 from .config_validator import ConfigValidator
 from .model_selector import ModelFactory
 from .node_executor import NodeExecutor
+from .loops import condition_met
 from config import HillstarConfig
 
 
@@ -81,17 +84,22 @@ class WorkflowRunner:
 		self,
 		workflow_path: str,
 		output_dir: str = "./.hillstar",
+		max_concurrency: int | None = None,
 	):
 		"""
 		Args:
 			workflow_path: Path to workflow.json file
 			output_dir: Directory for traces and checkpoints
+			max_concurrency: Maximum number of dependency-ready nodes to run at once
 		"""
 		# Load .env file so API keys and credentials are available
 		ConfigValidator.load_env_file()
 
 		self.workflow_path = workflow_path
 		self.output_dir = output_dir
+		self._requested_max_concurrency = max_concurrency
+		self._single_client_locks: dict[str, Lock] = {}
+		self._single_client_locks_guard = Lock()
 
 		# Load workflow
 		with open(workflow_path) as f:
@@ -110,6 +118,18 @@ class WorkflowRunner:
 		user_config = config_manager._load_or_init_config()
 		workflow_model_config = self.workflow_json.get("model_config", {})
 		self.model_config = config_manager.merge_configs(user_config, workflow_model_config)
+		configured_concurrency = (
+			self._requested_max_concurrency
+			if self._requested_max_concurrency is not None
+			else self.model_config.get("max_concurrency", 4)
+		)
+		if (
+			isinstance(configured_concurrency, bool)
+			or not isinstance(configured_concurrency, int)
+			or configured_concurrency < 1
+		):
+			raise ValueError("max_concurrency must be a positive integer")
+		self.max_concurrency = configured_concurrency
 
 		# Initialize modular components with dependency injection
 		self.cost_manager = CostManager(self.model_config)
@@ -196,6 +216,276 @@ class WorkflowRunner:
 		self.trace_logger.log(compliance_log)
 		self._compliance_warnings_issued = True
 
+	def _prepare_concurrent_node(self, node_id: str) -> dict[str, Any]:
+		"""Resolve a ready node's inputs without mutating execution state."""
+		node = self.graph.nodes[node_id]
+		skip_if = node.get("skip_if")
+		if skip_if and condition_met(skip_if, self.graph.node_outputs):
+			return {
+				"node": node,
+				"inputs": None,
+				"skipped": True,
+				"result": self.graph.node_outputs.get(
+					skip_if.get("node"), {"skipped": True}
+				),
+			}
+
+		if self.graph.permissions.get(node_id) == "never":
+			raise PermissionError(f"Node {node_id} is blocked by permission policy")
+
+		return {
+			"node": node,
+			"inputs": self.graph.get_node_inputs(node_id),
+			"skipped": False,
+		}
+
+	def _single_client_key(self, node: dict[str, Any]) -> str | None:
+		"""Return a declared backend key that must be serialized locally.
+
+		Router-routed seats do not declare this metadata in Hillstar; the router
+		owns their per-backend queues. Direct/custom workflows may declare
+		``singleClient`` on the node or its custom-provider entry.
+		"""
+		provider = node.get("provider")
+		custom_providers = self.model_config.get("custom_providers", {})
+		custom = (
+			custom_providers.get(provider)
+			if isinstance(custom_providers, dict) and provider
+			else None
+		)
+		node_single_client = node.get("singleClient") is True or node.get("single_client") is True
+		custom_single_client = isinstance(custom, dict) and (
+			custom.get("singleClient") is True or custom.get("single_client") is True
+		)
+		if not node_single_client and not custom_single_client:
+			return None
+
+		backend = (
+			node.get("backend_id")
+			or node.get("backendId")
+			or node.get("backend")
+		)
+		if backend is None and isinstance(custom, dict):
+			backend = custom.get("backend_id") or custom.get("backendId")
+		if backend is None and isinstance(custom, dict):
+			backend = custom.get("endpoint")
+		if backend is None:
+			backend = f"{provider}:{node.get('model', '')}"
+		return str(backend)
+
+	def _single_client_lock(self, node: dict[str, Any]) -> Lock | None:
+		"""Get the process-local lock for a declared single-client backend."""
+		key = self._single_client_key(node)
+		if key is None:
+			return None
+		with self._single_client_locks_guard:
+			lock = self._single_client_locks.get(key)
+			if lock is None:
+				lock = Lock()
+				self._single_client_locks[key] = lock
+			return lock
+
+	def _run_prepared_node(
+		self,
+		node_id: str,
+		node: dict[str, Any],
+		inputs: Any,
+	) -> dict[str, Any]:
+		"""Execute one prepared node and buffer its evidence for ordered commit."""
+		started = time.monotonic()
+		events: list[dict[str, Any]] = []
+		try:
+			with self.trace_logger.capture() as captured_events:
+				events = captured_events
+				lock = self._single_client_lock(node)
+				if lock is None:
+					result = self.node_executor.execute_node(node_id, node, inputs)
+				else:
+					with lock:
+						result = self.node_executor.execute_node(node_id, node, inputs)
+			return {
+				"result": result,
+				"events": events,
+				"duration": time.monotonic() - started,
+				"exception": None,
+				"skipped": False,
+			}
+		except Exception as exc:
+			self.cost_manager.release_budget(node_id)
+			return {
+				"result": None,
+				"events": events,
+				"duration": time.monotonic() - started,
+				"exception": exc,
+				"skipped": False,
+			}
+
+	def _commit_concurrent_node(
+		self,
+		node_id: str,
+		node: dict[str, Any],
+		result: Any,
+		skipped: bool = False,
+	) -> None:
+		"""Commit one worker result to graph state in deterministic order."""
+		self.graph.node_outputs[node_id] = result
+		if skipped:
+			self.graph.trace.append({
+				"node_id": node_id,
+				"tool": node["tool"],
+				"status": "skipped",
+				"reason": "loop exit condition already met",
+			})
+			return
+
+		if isinstance(result, dict) and result.get("error"):
+			error_msg = result.get("error", "Unknown error")
+			raise Exception(f"Node execution error in {node_id}: {error_msg}")
+
+		self.graph.trace.append({
+			"node_id": node_id,
+			"tool": node["tool"],
+			"status": "success",
+			"output_keys": list(result.keys()) if isinstance(result, dict) else None,
+		})
+
+	def _execute_ready_nodes(
+		self,
+		execution_order: list[str],
+		start_index: int,
+		checkpoint_nodes: list[str],
+	) -> None:
+		"""Execute dependency-ready nodes in bounded, deterministic batches."""
+		predecessors = {node_id: set() for node_id in execution_order}
+		for edge in self.graph.edges:
+			predecessors[edge["to"]].add(edge["from"])
+
+		positions = {node_id: index for index, node_id in enumerate(execution_order)}
+		pending = list(execution_order[start_index:])
+		completed = set(execution_order[:start_index])
+		executor = ThreadPoolExecutor(max_workers=self.max_concurrency)
+		active_futures = {}
+
+		try:
+			while pending:
+				ready = [
+					node_id
+					for node_id in pending
+					if predecessors[node_id].issubset(completed)
+				]
+				if not ready:
+					raise RuntimeError("No dependency-ready nodes remain")
+
+				batch = ready[: self.max_concurrency]
+				pending = [node_id for node_id in pending if node_id not in batch]
+				outcomes: dict[str, dict[str, Any]] = {}
+				active_futures = {}
+
+				for node_id in batch:
+					node_index = positions[node_id]
+					print(
+						f" [{node_index + 1}/{len(execution_order)}] {node_id}...",
+						end=" ",
+						flush=True,
+					)
+					self.execution_observer.node_start(node_id, node_index)
+					try:
+						prepared = self._prepare_concurrent_node(node_id)
+					except Exception as exc:
+						outcomes[node_id] = {
+							"result": None,
+							"events": [],
+							"duration": 0.0,
+							"exception": exc,
+							"skipped": False,
+						}
+						continue
+
+					if prepared["skipped"]:
+						outcomes[node_id] = {
+							"result": prepared["result"],
+							"events": [],
+							"duration": 0.0,
+							"exception": None,
+							"skipped": True,
+						}
+					else:
+						active_futures[node_id] = executor.submit(
+							self._run_prepared_node,
+							node_id,
+							prepared["node"],
+							prepared["inputs"],
+						)
+
+				for node_id, future in active_futures.items():
+					try:
+						outcomes[node_id] = future.result()
+					except Exception as exc:
+						outcomes[node_id] = {
+							"result": None,
+							"events": [],
+							"duration": 0.0,
+							"exception": exc,
+							"skipped": False,
+						}
+
+				# Worker evidence is committed in stable topological order, not
+				# completion order.
+				for node_id in batch:
+					self.trace_logger.commit(outcomes[node_id]["events"])
+
+				failures: list[tuple[str, Exception, float]] = []
+				for node_id in batch:
+					node = self.graph.nodes[node_id]
+					outcome = outcomes[node_id]
+					duration = outcome["duration"]
+					exception = outcome["exception"]
+					if exception is not None:
+						print(f" Error: {exception}")
+						self.execution_observer.node_failure(
+							node_id, str(exception), duration
+						)
+						failures.append((node_id, exception, duration))
+						continue
+
+					try:
+						self._commit_concurrent_node(
+							node_id,
+							node,
+							outcome["result"],
+							outcome["skipped"],
+						)
+					except Exception as exc:
+						print(f" Error: {exc}")
+						self.execution_observer.node_failure(
+							node_id, str(exc), duration
+						)
+						failures.append((node_id, exc, duration))
+						continue
+
+					print("")
+					self.execution_observer.node_success(node_id, duration)
+					completed.add(node_id)
+					if node_id in checkpoint_nodes:
+						self.checkpoint_manager.create(
+							node_id, self.graph.export_state()
+						)
+
+				active_futures.clear()
+				if failures:
+					for node_id, exception, _duration in failures:
+						self.trace_logger.log({
+							"timestamp": datetime.now().isoformat(),
+							"node_id": node_id,
+							"status": "error",
+							"error": str(exception),
+						})
+					raise failures[0][1]
+		finally:
+			for future in active_futures.values():
+				future.cancel()
+			executor.shutdown(wait=True, cancel_futures=True)
+
 	def execute(self, resume_from: Optional[str] = None) -> dict[str, Any]:
 		"""Execute the workflow, optionally resuming from a checkpoint."""
 		print(f"Executing workflow: {self.graph.id}")
@@ -257,35 +547,15 @@ class WorkflowRunner:
 		except Exception as e:
 			print(f" [governance] Warning: could not write initial marker ({e})")
 
-		for i, node_id in enumerate(execution_order[start_index:], start=start_index):
-			print(f" [{i+1}/{len(execution_order)}] {node_id}...", end=" ", flush=True)
-			self.execution_observer.node_start(node_id, i)
-
-			try:
-				self.graph.execute_node(
-					node_id,
-					lambda nid, node, inp: self.node_executor.execute_node(nid, node, inp),
-				)
-
-				print("")
-				self.execution_observer.node_success(node_id, i)
-
-				if node_id in checkpoint_nodes:
-					self.checkpoint_manager.create(
-						node_id, self.graph.export_state()
-					)
-
-			except Exception as e:
-				print(f" Error: {e}")
-				duration = time.time() - self.execution_observer.node_start_time
-				self.execution_observer.node_failure(node_id, str(e), duration)
-				self.trace_logger.log({
-					"timestamp": datetime.now().isoformat(),
-					"node_id": node_id,
-					"status": "error",
-					"error": str(e),
-				})
-				raise
+		try:
+			self._execute_ready_nodes(
+				execution_order,
+				start_index,
+				checkpoint_nodes,
+			)
+		except Exception as exc:
+			self.execution_observer.workflow_error(str(exc))
+			raise
 
 		self.execution_observer.workflow_complete(self.cost_manager.cumulative_cost_usd)
 		return self._get_execution_result(execution_order)

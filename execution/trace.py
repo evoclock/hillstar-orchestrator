@@ -51,9 +51,11 @@ Last Edited
 """
 
 import json
+import threading
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, Iterator, List
 
 
 class TraceLogger:
@@ -73,10 +75,15 @@ class TraceLogger:
 			traces_dir / f"trace_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl"
 		)
 		self.events: List[Dict] = []
+		self._lock = threading.RLock()
+		self._local = threading.local()
 
 	def log(self, event: Dict[str, Any]) -> None:
 		"""
 		Log a single event.
+
+		Worker threads may capture events during concurrent execution. The
+		orchestrator commits those buffers in deterministic node order.
 
 		Args:
 			event: Event dictionary (will be timestamped if not present)
@@ -84,11 +91,39 @@ class TraceLogger:
 		if "timestamp" not in event:
 			event["timestamp"] = datetime.now().isoformat()
 
-		self.events.append(event)
+		buffer = getattr(self._local, "buffer", None)
+		if buffer is not None:
+			buffer.append(event)
+			return
 
-		# Write to file immediately (append)
-		with open(self.trace_file, "a") as f:
-			f.write(json.dumps(event) + "\n")
+		self._append_events([event])
+
+	@contextmanager
+	def capture(self) -> Iterator[List[Dict[str, Any]]]:
+		"""Capture events for one worker and return them without writing yet."""
+		previous = getattr(self._local, "buffer", None)
+		buffer: List[Dict[str, Any]] = []
+		self._local.buffer = buffer
+		try:
+			yield buffer
+		finally:
+			if previous is None:
+				del self._local.buffer
+			else:
+				self._local.buffer = previous
+
+	def commit(self, events: List[Dict[str, Any]]) -> None:
+		"""Append a captured event buffer in the caller's chosen order."""
+		if events:
+			self._append_events(events)
+
+	def _append_events(self, events: List[Dict[str, Any]]) -> None:
+		"""Append events atomically to memory and the JSONL trace."""
+		with self._lock:
+			self.events.extend(events)
+			with open(self.trace_file, "a") as f:
+				for event in events:
+					f.write(json.dumps(event) + "\n")
 
 	def finalize(self) -> str:
 		"""

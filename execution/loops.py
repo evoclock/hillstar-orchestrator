@@ -28,8 +28,8 @@ is stated in the workflow rather than discovered from a bill.
     ]
 
 Attempt 1 is the nodes as authored. Attempts 2..n are copies suffixed `@2`,
-`@3`, each carrying a `skip_if` naming the previous attempt's exit check: if
-the loop has already succeeded, the later attempts are skipped at run time
+`@3`, each carrying a `skip_if` naming the previous attempt's exit conditions:
+if the loop has already succeeded, the later attempts are skipped at run time
 rather than run and discarded.
 """
 
@@ -107,6 +107,21 @@ def _rewrite_references_to_last(value: Any, node_id: str, last: str) -> Any:
 	return value
 
 
+def _condition_for_attempt(
+	until: Mapping[str, Any], conditions: list[Mapping[str, Any]], attempt: int
+) -> dict:
+	"""Point an exit condition at the specified attempt's outputs."""
+	if isinstance(until.get("all_of"), list):
+		return {
+			**until,
+			"all_of": [
+				{**condition, "node": _suffixed(str(condition["node"]), attempt)}
+				for condition in conditions
+			],
+		}
+	return {**until, "node": _suffixed(str(conditions[0]["node"]), attempt)}
+
+
 def _validate(loop: Mapping[str, Any], nodes: Mapping[str, Any]) -> tuple[list[str], int, dict]:
 	body = loop.get("body")
 	if not isinstance(body, list) or not body:
@@ -168,12 +183,20 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		exits = [e for e in edges if e["from"] in body_set and e["to"] not in body_set]
 
 		conditions = until.get("all_of") if isinstance(until.get("all_of"), list) else [until]
-		# The attempt ends when its last condition node has produced output.
-		check_node = conditions[-1]["node"]
-		last = _suffixed(check_node, attempts)
+		condition_nodes = [str(condition["node"]) for condition in conditions]
+		final_conditions = [_suffixed(node_id, attempts) for node_id in condition_nodes]
+
+		# Every exit condition is a barrier. A retry must not start after only
+		# one member of `all_of` has produced output: evidence writers and panel
+		# normalizers may still be reading the previous attempt's artifacts.
 		for e in exits:
-			if e["from"] == check_node:
-				e["from"] = last
+			if e["from"] in condition_nodes:
+				e["from"] = _suffixed(e["from"], attempts)
+		for target in {e["to"] for e in exits}:
+			for condition_node in final_conditions:
+				barrier = {"from": condition_node, "to": target}
+				if barrier not in edges:
+					edges.append(barrier)
 
 		# A node outside the loop reads the loop's RESULT, which is the last
 		# attempt — the same one its edge now waits on. Leaving the reference on
@@ -184,16 +207,20 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		for node_id, node in nodes.items():
 			if node_id in body_set:
 				continue
-			nodes[node_id] = _rewrite_references_to_last(dict(node), check_node, last)
+			rewritten = dict(node)
+			for condition_node, final_condition in zip(condition_nodes, final_conditions):
+				rewritten = _rewrite_references_to_last(rewritten, condition_node, final_condition)
+			nodes[node_id] = rewritten
 
 		for attempt in range(2, attempts + 1):
-			prev_check = _suffixed(check_node, attempt - 1)
+			previous_conditions = [_suffixed(node_id, attempt - 1) for node_id in condition_nodes]
+			previous_exit = _condition_for_attempt(until, conditions, attempt - 1)
 			for node_id in body:
 				copy = _rewrite_references(dict(nodes[node_id]), body_set, attempt)
 				# The exit condition, carried on every node of the attempt: if
 				# the previous attempt already satisfied it, this attempt is
 				# skipped rather than run and thrown away.
-				copy["skip_if"] = {**until, "node": prev_check}
+				copy["skip_if"] = previous_exit
 				copy["loop"] = {"id": loop.get("id"), "attempt": attempt, "of": attempts}
 				nodes[_suffixed(node_id, attempt)] = copy
 
@@ -202,9 +229,11 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 					"from": _suffixed(e["from"], attempt),
 					"to": _suffixed(e["to"], attempt),
 				})
-			# Chain the attempts: this attempt begins after the previous
-			# attempt's check, which is what makes the expansion a DAG.
-			edges.append({"from": prev_check, "to": _suffixed(body[0], attempt)})
+			# Chain the attempts after every exit condition, not merely the last
+			# condition in the declaration. This keeps all prior-attempt evidence
+			# stable until every consumer has finished reading it.
+			for previous_condition in previous_conditions:
+				edges.append({"from": previous_condition, "to": _suffixed(body[0], attempt)})
 
 		for node_id in body:
 			nodes[node_id] = _rewrite_references(dict(nodes[node_id]), body_set, 1)

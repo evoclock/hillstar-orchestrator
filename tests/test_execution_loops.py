@@ -4,6 +4,7 @@
 # Bounded iteration: an implementer-reviewer cycle that ends on success or on
 # a stated maximum, expressed without a back edge.
 
+import json
 import sys
 from pathlib import Path
 
@@ -13,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from execution.graph import WorkflowGraph  # noqa: E402
 from execution.loops import LoopError, compile_loops, condition_met  # noqa: E402
+from execution.runner import WorkflowRunner  # noqa: E402
 
 
 def _workflow(max_attempts=3, until=None):
@@ -268,6 +270,21 @@ class TestExitOnEvidenceAndOpinion:
 		nodes = compile_loops(self._wf())["graph"]["nodes"]
 		assert "implement@2" in nodes and "check@3" in nodes
 
+	def test_next_attempt_waits_for_every_exit_condition(self):
+		order = WorkflowGraph(self._wf()).get_execution_order()
+		assert order.index("review") < order.index("implement@2")
+		assert order.index("check") < order.index("implement@2")
+
+	def test_downstream_waits_for_every_final_exit_condition(self):
+		edges = compile_loops(self._wf())["graph"]["edges"]
+		assert {"from": "review@3", "to": "publish"} in edges
+		assert {"from": "check@3", "to": "publish"} in edges
+
+	def test_skip_condition_uses_the_previous_attempt_for_all_members(self):
+		nodes = compile_loops(self._wf())["graph"]["nodes"]
+		skip = nodes["implement@3"]["skip_if"]
+		assert [condition["node"] for condition in skip["all_of"]] == ["review@2", "check@2"]
+
 	# The failure this prevents.
 	def test_keeps_going_when_the_reviewer_signs_off_on_failing_code(self):
 		ran, _ = self._run({"review": "VERDICT sign-off", "check": "FAIL: no_header"})
@@ -282,6 +299,11 @@ class TestExitOnEvidenceAndOpinion:
 		ran, _ = self._run({"review": "VERDICT sign-off", "check": "PASS: every case"})
 		assert "implement@2" not in ran
 
+	def test_stops_after_a_later_attempt_when_all_conditions_pass(self):
+		ran, _ = self._run({"review@2": "VERDICT sign-off", "check@2": "PASS: every case"})
+		assert "implement@2" in ran
+		assert "implement@3" not in ran
+
 	def test_a_single_condition_still_works(self):
 		w = self._wf()
 		w["graph"]["loops"][0]["until"] = {"node": "review", "contains": "sign-off"}
@@ -293,3 +315,25 @@ class TestExitOnEvidenceAndOpinion:
 		w["graph"]["loops"][0]["until"] = {"all_of": [{"node": "publish", "contains": "x"}]}
 		with pytest.raises(LoopError, match="not in the body"):
 			compile_loops(w)
+
+
+class TestScriptRunFailurePropagation:
+	def test_nonzero_script_run_fails_the_workflow(self, tmp_path):
+		workflow = {
+			"id": "script-failure",
+			"graph": {
+				"nodes": {
+					"check": {
+						"tool": "script_run",
+						"parameters": {"script": "false"},
+					}
+				},
+				"edges": [],
+			},
+		}
+		workflow_path = tmp_path / "workflow.json"
+		workflow_path.write_text(json.dumps(workflow))
+		runner = WorkflowRunner(str(workflow_path), output_dir=str(tmp_path / "output"))
+
+		with pytest.raises(Exception, match="script exited with return code 1"):
+			runner.execute()

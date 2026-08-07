@@ -63,6 +63,7 @@ Last Edited
 
 import subprocess
 import shutil
+import threading
 import urllib.request
 from datetime import datetime
 from .trace import TraceLogger
@@ -105,6 +106,8 @@ class ModelFactory:
 		self._provider_resolution_logged = False
 		self._resolved_provider_preference = None
 		self._ollama_available_cache = None
+		self._resolution_lock = threading.RLock()
+		self._model_lock = threading.RLock()
 
 	def select_model(
 		self,
@@ -165,6 +168,11 @@ class ModelFactory:
 		return (provider, model)
 
 	def resolve_provider_preference(self, provider_preference: list[str]) -> list[str]:
+		"""Resolve provider preferences once, safely across worker threads."""
+		with self._resolution_lock:
+			return self._resolve_provider_preference(provider_preference)
+
+	def _resolve_provider_preference(self, provider_preference: list[str]) -> list[str]:
 		"""Resolve provider preference list based on availability checks."""
 		if self._resolved_provider_preference is not None:
 			return self._resolved_provider_preference
@@ -333,6 +341,11 @@ class ModelFactory:
 		return JanCodeLocalModel(resolution.model_name, endpoint=resolution.endpoint)
 
 	def get_model(self, provider: str, model_name: str, **kwargs):
+		"""Get or create a cached model safely across worker threads."""
+		with self._model_lock:
+			return self._get_model(provider, model_name, **kwargs)
+
+	def _get_model(self, provider: str, model_name: str, **kwargs):
 		"""Get or create model instance with smart selection.
 
 		Args:

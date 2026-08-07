@@ -279,9 +279,12 @@ class NodeExecutor:
 
             # Check budget
             try:
-                self.cost_manager.check_budget(estimated_cost, node_id)
+                self.cost_manager.check_budget(
+                    estimated_cost, node_id, reserve=True
+                )
             except Exception as e:
                 # Log error and re-raise (budget errors don't trigger fallback)
+                self.cost_manager.release_budget(node_id)
                 self.trace_logger.log(
                     {
                         "timestamp": datetime.now().isoformat(),
@@ -401,6 +404,7 @@ class NodeExecutor:
 
                 # Error is not fallback-triggering or we're out of providers
                 # Log final error
+                self.cost_manager.release_budget(node_id)
                 final_log = {
                     "timestamp": datetime.now().isoformat(),
                     "node_id": node_id,
@@ -512,6 +516,7 @@ class NodeExecutor:
             return result
 
         # All providers exhausted - should not reach here
+        self.cost_manager.release_budget(node_id)
         return {
             "error": "All provider fallback attempts exhausted",
             "fallback_attempts": fallback_attempts,
@@ -570,9 +575,12 @@ class NodeExecutor:
                 cwd=cwd,  # Set working directory if specified
                 shell=use_shell,  # Use shell for complex commands
             )
+            error = None
+            if result.returncode != 0:
+                error = result.stderr or f"script exited with return code {result.returncode}"
             return {
                 "output": result.stdout,
-                "error": result.stderr if result.returncode != 0 else None,
+                "error": error,
                 "return_code": result.returncode,
             }
         except Exception as e:

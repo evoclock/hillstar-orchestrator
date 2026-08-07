@@ -58,10 +58,27 @@ is tested by existing unit tests for those modules.
 """
 
 import json
-import pytest
+import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
+
+import pytest
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+HILLSTAR_EXECUTABLE = REPO_ROOT / ".venv" / "bin" / "hillstar"
+if not HILLSTAR_EXECUTABLE.is_file():
+	HILLSTAR_EXECUTABLE = Path(sys.executable).with_name("hillstar")
+if not HILLSTAR_EXECUTABLE.is_file():
+	raise RuntimeError(
+		"Hillstar CLI entry point not found in the repository environment"
+	)
+os.environ["PATH"] = (
+	f"{HILLSTAR_EXECUTABLE.parent}{os.pathsep}"
+	f"{os.environ.get('PATH', '')}"
+)
 
 
 # Test fixtures: reusable workflow data

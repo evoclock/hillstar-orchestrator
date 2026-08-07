@@ -25,6 +25,7 @@ Created: 2026-02-22
 
 import os
 import json
+import shutil
 import time
 import pytest
 import requests
@@ -184,63 +185,82 @@ class TestConnectivityPing:
 		assert success, f"OpenAI API (API key mode) unreachable: {message}"
 		assert response_time < self.TIMEOUT, "OpenAI API response too slow"
 
+	def _get_codex_home(self) -> Path | None:
+		"""Find the Codex auth directory used by the installed CLI."""
+		configured_home = os.getenv("CODEX_HOME")
+		if configured_home:
+			candidates = [Path(configured_home)]
+		else:
+			candidates = [
+				Path.home() / ".codex",
+				Path.home() / ".config" / "openai" / "codex-home",
+			]
+
+		for codex_home in candidates:
+			if (codex_home / "auth.json").is_file():
+				return codex_home
+		return None
+
 	def _get_chatgpt_subscription_token(self) -> str | None:
-		"""Extract ChatGPT subscription token from ~/.codex/auth.json or standard location.
-
-		Tokens are stored in auth.json under tokens.access_token (JWT format).
-		Requires ~/.codex/auth.json which is created during Claude Code authentication.
-		"""
-		codex_home = os.getenv("CODEX_HOME")
-
-		# Fall back to standard location if env var not set
-		if not codex_home:
-			standard_codex_home = Path.home() / ".codex"
-			if standard_codex_home.exists():
-				codex_home = str(standard_codex_home)
-
-		if not codex_home:
-			return None
-
-		auth_file = Path(codex_home) / "auth.json"
-		if not auth_file.exists():
+		"""Extract the subscription access token from the active Codex auth file."""
+		codex_home = self._get_codex_home()
+		if codex_home is None:
 			return None
 
 		try:
-			with open(auth_file) as f:
+			with open(codex_home / "auth.json") as f:
 				auth_data = json.load(f)
-				# Extract JWT access token from nested tokens object
 				token = auth_data.get("tokens", {}).get("access_token")
 				return token if token else None
 		except Exception:
 			return None
 
 	def test_openai_subscription_token_connectivity(self):
-		"""Verify Codex CLI works with subscription token (Claude Code auth)."""
+		"""Verify Codex CLI works with the configured ChatGPT subscription auth."""
+		codex_home = self._get_codex_home()
 		token = self._get_chatgpt_subscription_token()
 
-		if not token:
-			pytest.skip("Subscription token not available in ~/.codex/auth.json")
+		if codex_home is None or not token:
+			pytest.skip(
+				"ChatGPT subscription auth unavailable; run `codex login` "
+				"and ensure CODEX_HOME/auth.json contains tokens.access_token"
+			)
 
-		# Test with subscription token via codex CLI (correct way to use subscription tokens)
+		codex_executable = shutil.which("codex")
+		if codex_executable is None:
+			pytest.skip("codex CLI not installed on PATH")
+
 		import subprocess
+
+		env = os.environ.copy()
+		env["CODEX_HOME"] = str(codex_home)
 
 		try:
 			start_time = time.time()
-			# Test codex exec with gpt-5.2 model (available with subscription)
-			# Codex CLI may take longer to initialize on first run
 			result = subprocess.run(
-				["codex", "exec", "--model", "gpt-5.2", "echo test"],
+				[
+					codex_executable,
+					"exec",
+					"--ephemeral",
+					"--sandbox",
+					"read-only",
+					"Reply with exactly OK",
+				],
 				capture_output=True,
 				text=True,
-				timeout=self.CODEX_TIMEOUT
+				timeout=self.CODEX_TIMEOUT,
+				env=env,
 			)
 			response_time = time.time() - start_time
 			success = result.returncode == 0
+			diagnostic = (result.stderr or result.stdout).strip()
+			if diagnostic:
+				diagnostic = diagnostic.splitlines()[-1][:500]
 			message = "OK" if success else f"codex exec returned {result.returncode}"
+			if diagnostic and not success:
+				message = f"{message}: {diagnostic}"
 		except subprocess.TimeoutExpired:
 			success, response_time, message = False, self.CODEX_TIMEOUT, f"Codex CLI timeout (>{self.CODEX_TIMEOUT}s)"
-		except FileNotFoundError:
-			pytest.skip("codex CLI not installed")
 		except Exception as e:
 			success, response_time, message = False, 0, str(e)
 

@@ -15,6 +15,8 @@ Tests the WorkflowRunner for:
 import sys
 import tempfile
 import json
+import threading
+import time
 import pytest
 from pathlib import Path
 
@@ -682,6 +684,204 @@ class TestWorkflowRunnerExecution:
 			except Exception:
 				# Some execution errors are OK
 				pass
+
+	def test_independent_ready_nodes_overlap_within_bound(self):
+		"""Independent branches run concurrently without exceeding the bound."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			workflow = {
+				"id": "fanout_test",
+				"graph": {
+					"nodes": {
+						"ornith": {"tool": "file_read", "backend_id": "ornith"},
+						"qwen": {"tool": "file_read", "backend_id": "qwen"},
+					},
+					"edges": [],
+				},
+			}
+			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
+			runner = WorkflowRunner(
+				workflow_path, output_dir=tmpdir, max_concurrency=2
+			)
+
+			active = 0
+			peak = 0
+			state_lock = threading.Lock()
+			both_started = threading.Barrier(2)
+
+			def execute(node_id, _node, _inputs):
+				nonlocal active, peak
+				with state_lock:
+					active += 1
+					peak = max(peak, active)
+				try:
+					both_started.wait(timeout=3)
+					return {"output": node_id}
+				finally:
+					with state_lock:
+						active -= 1
+
+			runner.node_executor.execute_node = execute
+			result = runner.execute()
+
+			assert peak == 2
+			assert set(result["outputs"]) == {"ornith", "qwen"}
+
+	def test_same_declared_single_client_backend_is_serialized(self):
+		"""A declared single-client backend never has two active calls."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			workflow = {
+				"id": "single_client_test",
+				"graph": {
+					"nodes": {
+						"first": {
+							"tool": "file_read",
+							"provider": "router",
+							"backend_id": "ds4-spark",
+							"singleClient": True,
+						},
+						"second": {
+							"tool": "file_read",
+							"provider": "router",
+							"backend_id": "ds4-spark",
+							"singleClient": True,
+						},
+					},
+					"edges": [],
+				},
+			}
+			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
+			runner = WorkflowRunner(
+				workflow_path, output_dir=tmpdir, max_concurrency=2
+			)
+
+			active = 0
+			peak = 0
+			state_lock = threading.Lock()
+
+			def execute(node_id, _node, _inputs):
+				nonlocal active, peak
+				with state_lock:
+					active += 1
+					peak = max(peak, active)
+				try:
+					time.sleep(0.04)
+					return {"output": node_id}
+				finally:
+					with state_lock:
+						active -= 1
+
+			runner.node_executor.execute_node = execute
+			runner.execute()
+
+			assert peak == 1
+
+	def test_dependency_join_waits_for_all_predecessors(self):
+		"""A join starts only after every dependency in the current wave commits."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			workflow = {
+				"id": "join_test",
+				"graph": {
+					"nodes": {
+						"left": {"tool": "file_read"},
+						"right": {"tool": "file_read"},
+						"join": {
+							"tool": "file_read",
+							"input": {
+								"left": "{{ left.output }}",
+								"right": "{{ right.output }}",
+							},
+						},
+					},
+					"edges": [
+						{"from": "left", "to": "join"},
+						{"from": "right", "to": "join"},
+					],
+				},
+			}
+			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
+			runner = WorkflowRunner(workflow_path, output_dir=tmpdir, max_concurrency=2)
+			calls = []
+			join_inputs = []
+
+			def execute(node_id, _node, inputs):
+				calls.append(node_id)
+				if node_id == "join":
+					join_inputs.append(inputs)
+				return {"output": node_id}
+
+			runner.node_executor.execute_node = execute
+			runner.execute()
+
+			assert set(calls[:2]) == {"left", "right"}
+			assert calls[2] == "join"
+			assert join_inputs == [{"left": "left", "right": "right"}]
+
+	def test_failure_does_not_schedule_downstream_nodes(self):
+		"""A failed wave records sibling work but never schedules its join."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			workflow = {
+				"id": "failure_cancellation_test",
+				"graph": {
+					"nodes": {
+						"fail": {"tool": "file_read"},
+						"sibling": {"tool": "file_read"},
+						"downstream": {"tool": "file_read"},
+					},
+					"edges": [
+						{"from": "fail", "to": "downstream"},
+						{"from": "sibling", "to": "downstream"},
+					],
+				},
+			}
+			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
+			runner = WorkflowRunner(workflow_path, output_dir=tmpdir, max_concurrency=2)
+			calls = []
+
+			def execute(node_id, _node, _inputs):
+				calls.append(node_id)
+				if node_id == "fail":
+					raise RuntimeError("boom")
+				if node_id == "sibling":
+					time.sleep(0.02)
+				return {"output": node_id}
+
+			runner.node_executor.execute_node = execute
+			with pytest.raises(RuntimeError, match="boom"):
+				runner.execute()
+
+			assert set(calls) == {"fail", "sibling"}
+			assert "downstream" not in calls
+
+	def test_worker_evidence_commits_in_topological_order(self):
+		"""Completion timing cannot reorder the persisted evidence stream."""
+		with tempfile.TemporaryDirectory() as tmpdir:
+			workflow = {
+				"id": "ordered_trace_test",
+				"graph": {
+					"nodes": {
+						"first": {"tool": "file_read"},
+						"second": {"tool": "file_read"},
+					},
+					"edges": [],
+				},
+			}
+			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
+			runner = WorkflowRunner(workflow_path, output_dir=tmpdir, max_concurrency=2)
+
+			def execute(node_id, _node, _inputs):
+				if node_id == "first":
+					time.sleep(0.04)
+				runner.trace_logger.log({"event": "worker", "node_id": node_id})
+				return {"output": node_id}
+
+			runner.node_executor.execute_node = execute
+			runner.execute()
+
+			worker_events = [
+				event for event in runner.trace_logger.get_events()
+				if event.get("event") == "worker"
+			]
+			assert [event["node_id"] for event in worker_events] == ["first", "second"]
 
 	def test_execute_preserves_workflow_metadata(self):
 		"""Test execute() preserves workflow metadata (Deep Assertions)."""
