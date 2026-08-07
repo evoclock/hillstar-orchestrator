@@ -136,6 +136,7 @@ class AnthropicModel:
 		max_tokens: int = 4096,
 		temperature: float | None = None,
 		system: str | None = None,
+		**kwargs: Any,
 	) -> dict[str, Any]:
 		"""
 		Call Claude model with automatic prompt caching.
@@ -170,12 +171,15 @@ class AnthropicModel:
 			else:
 				system_with_cache = ""
 
-			message = self.client.messages.create(
-				model=self.model_name,
-				max_tokens=max_tokens,
-				system=system_with_cache,
-				messages=[{"role": "user", "content": prompt}],
-			)
+			request = {
+				"model": self.model_name,
+				"max_tokens": max_tokens,
+				"system": system_with_cache,
+				"messages": [{"role": "user", "content": prompt}],
+			}
+			if isinstance(kwargs.get("thinking"), dict):
+				request["thinking"] = kwargs["thinking"]
+			message = self.client.messages.create(**request)
 
 			# Extract text from first TextBlock
 			text_output = None

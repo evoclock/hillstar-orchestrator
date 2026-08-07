@@ -324,6 +324,46 @@ class TestModelCall:
 		assert result is not None
 		assert isinstance(result, dict)
 
+	def test_execute_model_call_forwards_reasoning_controls_and_records_them(
+		self, node_executor, mock_model_factory, mock_trace_logger
+	):
+		"""Per-seat reasoning controls reach the backend and execution trace."""
+		mock_model_factory.select_model.return_value = ("custom", "router-reviewer")
+		mock_model = mock_model_factory.get_model.return_value
+		mock_model.call.return_value = {"output": "response text", "tokens_used": 100}
+
+		node = {
+			"tool": "model_call",
+			"provider": "router",
+			"model": "router-reviewer",
+			"parameters": {
+				"max_tokens": 16000,
+				"reasoning_effort": "high",
+				"thinking": {"type": "enabled"},
+				"chat_template_kwargs": {"enable_thinking": True},
+				"untrusted_parameter": "must not be forwarded",
+			},
+		}
+
+		result = node_executor._execute_model_call("review", node, "review this")
+
+		assert result["output"] == "response text"
+		call_kwargs = mock_model.call.call_args.kwargs
+		assert call_kwargs["reasoning_effort"] == "high"
+		assert call_kwargs["thinking"] == {"type": "enabled"}
+		assert call_kwargs["chat_template_kwargs"] == {"enable_thinking": True}
+		assert "untrusted_parameter" not in call_kwargs
+		selection = next(
+			event
+			for event in reversed(mock_trace_logger.log.call_args_list)
+			if event.args[0].get("tool") == "model_call"
+		)
+		assert selection.args[0]["reasoning_parameters"] == {
+			"reasoning_effort": "high",
+			"thinking": {"type": "enabled"},
+			"chat_template_kwargs": {"enable_thinking": True},
+		}
+
 	def test_execute_model_call_with_retry(self, node_executor, mock_model_factory):
 		"""Test model call with provider fallback on error."""
 		mock_model_factory.select_model.return_value = ("anthropic", "claude-opus-4-6")
