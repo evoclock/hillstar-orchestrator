@@ -304,6 +304,15 @@ class TestProviderChain:
 		assert isinstance(chain, list)
 		assert len(chain) >= 1
 
+	def test_router_provider_never_falls_back(self, node_executor):
+		"""A router seat must not be rerouted to a different provider."""
+		node = {
+			"tool": "model_call",
+			"provider": "router",
+			"model": "router-reviewer-cloud",
+		}
+		assert node_executor._get_provider_chain("node1", node) == ["router"]
+
 
 class TestModelCall:
 	"""Test model call execution."""

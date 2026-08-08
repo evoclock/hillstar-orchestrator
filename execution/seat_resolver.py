@@ -243,13 +243,19 @@ def resolve_seat(
 	env: Mapping[str, str] | None = None,
 	installed_models: Callable[[], Iterable[str]] | None = None,
 	which: Callable[[str], str | None] | None = None,
+	require_router: bool = False,
 ) -> Resolution:
 	"""Resolve `seat_name` through the chain, most specific step first.
 
 	1. explicit `custom_providers` pin in the workflow
 	2. host-supplied router endpoint (Vogelkop injects; or HILLSTAR_ROUTER_URL)
-	3. local discovery
+	3. local discovery, unless the caller explicitly requires a router
 	4. typed failure
+
+	`require_router` is the transport contract for a node whose provider is
+	`router`: a seat must not silently become whichever local chat model happens
+	to be installed. Direct-provider and standalone callers leave it false and
+	retain the portable local-discovery path.
 
 	Never falls through to a metered API because nothing local was found:
 	unbounded cost is an explicit act, not a consolation prize.
@@ -269,13 +275,23 @@ def resolve_seat(
 	installed_models = _ollama_models if installed_models is None else installed_models
 	which = shutil.which if which is None else which
 
-	for resolution in (
+	resolutions = [
 		_pinned(seat_name, custom_providers),
 		_host_router(seat_name, env),
-		_local(seat_name, seat.capability, installed_models()),
-	):
+	]
+	if not require_router:
+		resolutions.append(_local(seat_name, seat.capability, installed_models()))
+
+	for resolution in resolutions:
 		if resolution is not None:
 			return resolution
+
+	if require_router:
+		raise SeatResolutionError(
+			f"router required for seat {seat_name!r} (capability {seat.capability}); "
+			"provide a router endpoint through HILLSTAR_ROUTER_URL or "
+			"custom_providers"
+		)
 
 	raise SeatResolutionError(
 		f"no backend for seat {seat_name!r} (capability {seat.capability}). "

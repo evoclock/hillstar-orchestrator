@@ -214,8 +214,8 @@
               },
               "provider": {
                 "type": "string",
-                "enum": ["anthropic", "anthropic_mcp", "openai", "mistral", "google", "local", "devstral", "codex_messages", "codex_mcp"],
-                "description": "Model provider (if tool is model_call). codex_mcp uses Codex CLI as MCP server (no API key required). anthropic_mcp uses Claude API via MCP (no env var required)"
+                "enum": ["router", "anthropic", "anthropic_mcp", "openai", "mistral", "google", "local", "devstral", "codex_messages", "codex_mcp"],
+                "description": "Model provider (if tool is model_call). router requires a host-supplied or explicitly pinned OpenAI-compatible router for seat models. codex_mcp uses Codex CLI as MCP server (no API key required). anthropic_mcp uses Claude API via MCP (no env var required)"
               },
               "model": {
                 "type": "string",

@@ -192,12 +192,15 @@ class JanCodeLocalModel:
 			response.raise_for_status()
 
 			data = response.json()
-			content = (
-				data.get("choices", [{}])[0]
-				.get("message", {})
-				.get("content", "")
-				.strip()
-			)
+			message = (data.get("choices") or [{}])[0].get("message") or {}
+			raw_content = message.get("content")
+			if not isinstance(raw_content, str) or not raw_content.strip():
+				return {
+					"output": None,
+					"error": "model response contained no text content",
+					"provider": "jan_code_local",
+				}
+			content = raw_content.strip()
 			usage = data.get("usage", {})
 
 			return {

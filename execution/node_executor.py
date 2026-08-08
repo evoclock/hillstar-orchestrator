@@ -219,6 +219,11 @@ class NodeExecutor:
         # If node has explicit provider, prioritize it
         if node.get("provider"):
             preferred = [node.get("provider")]
+            # A router seat is an explicit transport contract. Do not send it
+            # to another provider when the router is unavailable; that would
+            # silently change the deployment binding the workflow requested.
+            if node.get("provider") == "router":
+                return preferred
             # In explicit mode, honor the node's provider strictly — no fallback
             mode = self.model_config.get("mode", "auto")
             if mode == "explicit":
