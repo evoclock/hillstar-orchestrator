@@ -107,6 +107,25 @@ class TestChainPrecedence:
 		assert res.model_name == "jan-code-4b:latest"
 		assert res.endpoint is None
 
+	def test_router_required_does_not_fall_back_to_local_discovery(self):
+		with pytest.raises(SeatResolutionError, match="router required"):
+			resolve_seat(
+				"router-reviewer-cloud",
+				require_router=True,
+				env={},
+				installed_models=_models("jan-code-4b:latest"),
+			)
+
+	def test_router_required_still_accepts_a_host_router(self):
+		res = resolve_seat(
+			"router-reviewer-cloud",
+			require_router=True,
+			env={"HILLSTAR_ROUTER_URL": "http://127.0.0.1:18100"},
+			installed_models=_models("jan-code-4b:latest"),
+		)
+		assert res.source == "host-config"
+		assert res.endpoint == "http://127.0.0.1:18100"
+
 
 class TestWorkflowPin:
 	def test_generic_router_key_also_matches(self):

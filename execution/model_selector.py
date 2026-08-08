@@ -301,12 +301,16 @@ class ModelFactory:
 			return None
 		return entry
 
-	def _model_for_seat(self, seat_name: str):
+	def _model_for_seat(self, seat_name: str, *, require_router: bool = False):
 		"""Build the model a seat resolves to on THIS machine.
 
 		Resolution is deliberately not cached across calls beyond the existing
 		model cache: the answer depends on what the machine currently has, and
 		a router that comes up mid-session should be usable without a restart.
+
+		A node that explicitly names the ``router`` provider requires the router;
+		it must not silently fall back to local model discovery. Direct-provider
+		and legacy standalone seat callers retain the existing local path.
 
 		The chosen model is recorded in the trace. Portability makes the model
 		vary by machine, so an execution receipt is the only place that record
@@ -315,6 +319,7 @@ class ModelFactory:
 		resolution = resolve_seat(
 			seat_name,
 			custom_providers=self.model_config.get("custom_providers"),
+			require_router=require_router,
 		)
 
 		self.trace_logger.log(
@@ -377,12 +382,13 @@ class ModelFactory:
 			# Get API key from config or environment (for providers that need it)
 			api_key = self.config_validator.get_api_key_for_provider(provider)
 
-			# A SEAT names a role, not a model. Resolve it through the chain
-			# (workflow pin -> host router -> local discovery -> typed failure)
-			# so the same workflow runs under Vogelkop, standalone, or on
-			# another machine without carrying a host address.
+			# A SEAT names a role, not a model. Router-provider nodes resolve
+			# through the configured router only; direct/legacy standalone calls
+			# may still use the portable local-discovery path.
 			if is_seat(model_name):
-				self._models[key] = self._model_for_seat(model_name)
+				self._models[key] = self._model_for_seat(
+					model_name, require_router=provider == "router"
+				)
 				return self._models[key]
 
 			custom = self._custom_provider(provider)

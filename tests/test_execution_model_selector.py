@@ -602,18 +602,29 @@ class TestSeatDispatch:
 		assert model.endpoint == "http://127.0.0.1:18100"
 		assert model.model_name == "router-reviewer"
 
-	def test_seat_falls_back_to_a_local_model(
+	def test_router_seat_does_not_fall_back_to_a_local_model(
 		self, monkeypatch, mock_trace_logger, mock_config_validator
 	):
-		"""No router: the seat resolves against what the machine has."""
+		"""A router-provider seat fails instead of becoming a local model."""
 		monkeypatch.delenv("HILLSTAR_ROUTER_URL", raising=False)
 		monkeypatch.setattr(
 			"execution.seat_resolver._ollama_models", lambda: ["jan-code-4b:latest"]
 		)
 		factory = self._factory(mock_trace_logger, mock_config_validator)
-		model = factory.get_model("router", "router-planner")
+		with pytest.raises(SeatResolutionError, match="router required"):
+			factory.get_model("router", "router-reviewer-cloud")
+
+	def test_legacy_standalone_seat_call_can_still_use_local_discovery(
+		self, monkeypatch, mock_trace_logger, mock_config_validator
+	):
+		"""Non-router callers retain Hillstar's standalone local path."""
+		monkeypatch.delenv("HILLSTAR_ROUTER_URL", raising=False)
+		monkeypatch.setattr(
+			"execution.seat_resolver._ollama_models", lambda: ["jan-code-4b:latest"]
+		)
+		factory = self._factory(mock_trace_logger, mock_config_validator)
+		model = factory.get_model("local", "router-planner")
 		assert model.model_name == "jan-code-4b:latest"
-		# Local discovery leaves the endpoint unset so the client default applies.
 		assert model.endpoint == "http://127.0.0.1:11434"
 
 	def test_unresolvable_seat_raises_rather_than_escalating(
