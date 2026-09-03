@@ -1,6 +1,4 @@
 # Provider Model Reference
-
-**Status:** This document no longer maintains a model catalog, pricing
 tables, or cost guidance. Model identifiers and prices change too fast for a
 hand-edited markdown file to stay truthful — a stale catalog is worse than
 none. Workflows do not manage costs; there is no pricing-based logic to feed.
@@ -45,4 +43,6 @@ check your provider's usage dashboard.
 
 ---
 
-*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*
+---
+
+*Version: 1.2.0-rc.1 (Release candidate) · Last updated: 2026-09-03*

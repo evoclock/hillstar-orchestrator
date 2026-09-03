@@ -581,7 +581,7 @@ class DocumentationGenerator:
 				print(f"Error analyzing {py_file}: {e}")
 
 	def extract_setup_metadata(self) -> Dict[str, Any]:
-		"""Extract metadata from setup.py."""
+		"""Extract package metadata from pyproject.toml (single source of truth)."""
 		metadata = {
 			"name": "",
 			"version": "",
@@ -595,6 +595,21 @@ class DocumentationGenerator:
 		}
 
 		try:
+			import tomllib
+			with open(Path(self.package_path) / "pyproject.toml", "rb") as f:
+				proj = tomllib.load(f)["project"]
+			metadata.update({
+				"name": proj.get("name", ""),
+				"version": proj.get("version", ""),
+				"description": proj.get("description", ""),
+				"author": (proj.get("authors") or [{}])[0].get("name", ""),
+				"author_email": (proj.get("authors") or [{}])[0].get("email", ""),
+				"url": (proj.get("urls") or {}).get("Repository", ""),
+				"license": "AGPL-3.0-or-later",
+				"python_requires": proj.get("requires-python", ""),
+			})
+			return metadata
+
 			with open(self.setup_py_path, "r", encoding="utf-8") as f:
 				content = f.read()
 

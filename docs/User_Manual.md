@@ -3,12 +3,12 @@
 | | |
 |---|---|
 | **Package** | hillstar-orchestrator |
-| **Version** | 1.1.0 |
+| **Version** | 1.2.0-rc.1 |
 | **Description** | Security and reproducibility-first workflow orchestrator for research environments |
-| **Author** |  |
-| **License** |  |
-| **Repository** | <> |
-| **Python** |  |
+| **Author** | Julen Gamboa |
+| **License** | AGPL-3.0-or-later |
+| **Repository** | <https://github.com/evoclock/hillstar-orchestrator.git> |
+| **Python** | >=3.11 |
 
 ## Table of Contents
 
@@ -2047,7 +2047,7 @@ __init__(self, preset_name: str, configured_providers: List[str])
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `preset_name` | `str` | - | One of cost_saver, balanced, quality_first, premium |
+| `preset_name` | `str` | - | One of lightweight, balanced, quality_first, premium |
 | `configured_providers` | `List[str]` | - | List of provider names in preference order |
 
 **Methods:**
@@ -24001,6 +24001,14 @@ __init__(self, registry: Optional[ProviderRegistry] = None)
 - `declared_runtime_deps()`
 - `resolve_licence()`
 
+### hillstar-orchestrator.scripts.stamp_docs
+
+- `doc_files()`
+- `doc_status()`
+- `footer()`
+- `project_version()`
+- `stamp()`
+
 ### hillstar-orchestrator.utils.credential_redactor
 
 - `contains_credentials()`
@@ -41548,8 +41556,9 @@ Depends on:
 ---
 
 Generated with AST-based documentation generator.
-Last Updated: 2026
 
 ---
 
-*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*
+---
+
+*Version: 1.2.0-rc.1 (Release candidate) · Last updated: 2026-09-03*

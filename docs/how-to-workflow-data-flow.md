@@ -288,4 +288,6 @@ python -m pytest tests/test_e2e_haiku_synthesis.py -v
 
 ---
 
-*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*
+---
+
+*Version: 1.2.0-rc.1 (Release candidate) · Last updated: 2026-09-03*
