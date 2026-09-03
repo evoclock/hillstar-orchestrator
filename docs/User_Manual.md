@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Package** | hillstar-orchestrator |
-| **Version** | 1.2.0-rc.1 |
+| **Version** | 1.2.0 |
 | **Description** | Security and reproducibility-first workflow orchestrator for research environments |
 | **Author** | Julen Gamboa |
 | **License** | AGPL-3.0-or-later |
@@ -129,7 +129,7 @@ hillstar/
 
 #### Module: `hillstar-orchestrator (package)`
 
-Hillstar Orchestrator v1.1.0.
+Hillstar Orchestrator.
 
 ---
 
@@ -24004,7 +24004,6 @@ __init__(self, registry: Optional[ProviderRegistry] = None)
 ### hillstar-orchestrator.scripts.stamp_docs
 
 - `doc_files()`
-- `doc_status()`
 - `footer()`
 - `project_version()`
 - `stamp()`
@@ -41557,6 +41556,4 @@ Depends on:
 
 Generated with AST-based documentation generator.
 
----
-
-*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*
+*Version: 1.2.0 · Last updated: 2026-09-03*

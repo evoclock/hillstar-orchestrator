@@ -1,4 +1,4 @@
-# Hillstar Orchestrator v1.2.0-rc.1
+# Hillstar Orchestrator v1.2.0
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
@@ -26,7 +26,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 
 ---
 
-## Current Features (v1.2.0-rc.1)
+## Current Features (v1.2.0)
 
 - **DAG-based workflows** - Define complex research pipelines as
  directed acyclic graphs
@@ -541,7 +541,7 @@ If you use Hillstar Orchestrator in research, please cite:
 ```bibtex
 
 @software{gamboa2026hillstar,
- title={Hillstar Orchestrator v1.2.0-rc.1},
+ title={Hillstar Orchestrator v1.2.0},
  author={Gamboa, Julen},
  year={2026},
  doi={10.5281/zenodo.18829921},
@@ -553,12 +553,12 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟡 **v1.2.0-rc.1** (Sep 3, 2026) - Reliability hardening, provider cleanup,
+🟡 **v1.2.0** (Sep 3, 2026) - Reliability hardening, provider cleanup,
 and removal of cost management. See the
 [CHANGELOG](https://github.com/evoclock/hillstar-orchestrator/blob/main/CHANGELOG.md)
 for the full list.
 
-**New in v1.2.0-rc.1:**
+**New in v1.2.0:**
 
 - **Honest failures** - Retired Ollama models (HTTP 410), empty MCP
  responses, and script timeouts now fail closed with typed errors instead
