@@ -292,35 +292,6 @@ class ProviderRegistry:
 
 		return (best["provider"], best["model_id"], best)
 
-	def estimate_cost(
-		self,
-		provider_name: str,
-		model_id: str,
-		input_tokens: int,
-		output_tokens: int,
-	) -> float:
-		"""
-		Estimate cost for a model call.
-
-		Args:
-			provider_name: Provider identifier
-			model_id: Model identifier
-			input_tokens: Number of input tokens
-			output_tokens: Number of output tokens
-
-		Returns:
-			Estimated cost in USD
-		"""
-		model = self.get_model(provider_name, model_id)
-		if not model:
-			return 0.0
-
-		pricing = model.get("pricing", {})
-		input_cost = (input_tokens / 1_000_000) * pricing.get("input_per_1m_usd", 0)
-		output_cost = (output_tokens / 1_000_000) * pricing.get("output_per_1m_usd", 0)
-
-		return input_cost + output_cost
-
 	def get_fallback_chain(
 		self,
 		complexity: str,

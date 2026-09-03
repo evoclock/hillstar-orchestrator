@@ -119,22 +119,6 @@ class TestWorkflowRunnerDesign:
 			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
 			assert runner.checkpoint_manager is not None
 
-	def test_runner_has_cost_manager(self):
-		"""Test runner has cost tracking."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "cost_test",
-				"graph": {
-					"nodes": {"node_1": {"task": "model_call"}},
-					"edges": []
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-			# Runner should have cost manager
-			assert runner.cost_manager is not None
-
 	def test_runner_validates_model_config(self):
 		"""Test runner validates model configuration."""
 		with tempfile.TemporaryDirectory() as tmpdir:
@@ -325,38 +309,6 @@ class TestWorkflowRunnerExecutionOrchestration:
 			for i in range(node_count):
 				assert f"node_{i}" in runner.graph.nodes
 
-	def test_runner_cost_manager_initialization(self):
-		"""Test cost manager properly initialized (Deep Assertions + Side Effects)."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "cost_init_test",
-				"graph": {
-					"nodes": {"node_1": {"task": "model_call"}},
-					"edges": []
-				},
-				"model_config": {
-					"mode": "auto",
-					"provider_preference": ["anthropic"]
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Deep Assertion #1: Check structure
-			assert runner.cost_manager is not None
-			assert isinstance(runner.cost_manager, object)
-
-			# Deep Assertion #2: Check initial state
-			assert hasattr(runner.cost_manager, 'cumulative_cost_usd')
-			assert isinstance(runner.cost_manager.cumulative_cost_usd, (int, float))
-			assert runner.cost_manager.cumulative_cost_usd >= 0
-
-			# Deep Assertion #3: Check side effects (initial state)
-			assert hasattr(runner.cost_manager, 'node_costs')
-			assert isinstance(runner.cost_manager.node_costs, dict)
-			assert len(runner.cost_manager.node_costs) == 0 # Should be empty initially
-
 	def test_runner_model_factory_configuration(self):
 		"""Test model factory configured with correct preferences (Deep Assertions)."""
 		with tempfile.TemporaryDirectory() as tmpdir:
@@ -479,7 +431,6 @@ class TestWorkflowRunnerExecutionOrchestration:
 
 			# Deep Assertion #3: Has required dependencies
 			assert hasattr(runner.node_executor, 'model_factory')
-			assert hasattr(runner.node_executor, 'cost_manager')
 
 	@pytest.mark.parametrize("workflow_size,expected_nodes", [
 		(1, 1),
@@ -631,29 +582,6 @@ class TestWorkflowRunnerExecution:
 				trace_path = Path(result["trace_file"])
 				# Trace file should exist or path should be valid
 				assert isinstance(trace_path, Path)
-
-	def test_execute_updates_cumulative_cost(self):
-		"""Test execute() updates cost_manager cumulative cost (Side Effects)."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "cost_tracking_test",
-				"graph": {
-					"nodes": {"node_1": {"tool": "file_read", "parameters": {"path": "/dev/null"}}},
-					"edges": []
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Cost should start at 0
-			initial_cost = runner.cost_manager.cumulative_cost_usd
-			assert initial_cost >= 0
-
-			# After execution, cost tracking should be in place
-			result = runner.execute()
-			assert result is not None
-			assert runner.cost_manager.cumulative_cost_usd >= initial_cost
 
 	def test_execute_handles_multiple_nodes(self):
 		"""Test execute() handles workflows with multiple nodes (Parameterized)."""
@@ -915,91 +843,6 @@ class TestWorkflowRunnerCostTracking:
 			json.dump(workflow_dict, f)
 		return str(workflow_path)
 
-	@pytest.mark.parametrize("cost_value", [0.0, 0.01, 1.0, 10.0, 100.0])
-	def test_cost_manager_tracks_various_costs(self, cost_value):
-		"""Test cost manager tracks different cost values (Parameterized + Deep Assertions)."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "cost_test",
-				"graph": {
-					"nodes": {"node_1": {"tool": "test"}},
-					"edges": []
-				},
-				"model_config": {
-					"budget": {"max_workflow_usd": 1000}
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Record a cost
-			runner.cost_manager.record_cost("node_1", cost_value)
-
-			# Verify cost was recorded
-			assert "node_1" in runner.cost_manager.node_costs
-			assert runner.cost_manager.node_costs["node_1"] == cost_value
-			assert runner.cost_manager.cumulative_cost_usd == cost_value
-
-	def test_cost_manager_accumulates_multiple_costs(self):
-		"""Test cost manager accumulates costs from multiple nodes (Side Effects)."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "accumulate_cost_test",
-				"graph": {
-					"nodes": {
-						"node_1": {"tool": "test"},
-						"node_2": {"tool": "test"},
-						"node_3": {"tool": "test"}
-					},
-					"edges": []
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Record costs for multiple nodes
-			runner.cost_manager.record_cost("node_1", 5.0)
-			runner.cost_manager.record_cost("node_2", 10.0)
-			runner.cost_manager.record_cost("node_3", 15.0)
-
-			# Verify cumulative
-			assert runner.cost_manager.cumulative_cost_usd == 30.0
-			assert len(runner.cost_manager.node_costs) == 3
-
-	@pytest.mark.parametrize("estimate_case", [
-		("anthropic", "claude-opus-4-6", 1000, 500),
-		("openai", "gpt-4o", 2000, 1000),
-		("local", "ollama", 100, 50),
-	])
-	def test_cost_estimation_various_providers(self, estimate_case):
-		"""Test cost estimation for different providers (Parameterized)."""
-		provider, model, input_tokens, output_tokens = estimate_case
-
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "cost_estimate_test",
-				"graph": {
-					"nodes": {"node_1": {"tool": "test"}},
-					"edges": []
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Estimate cost
-			cost = runner.cost_manager.estimate_cost(provider, model, input_tokens, output_tokens)
-
-			# Deep Assertion: Cost should be non-negative and reasonable
-			assert isinstance(cost, (int, float))
-			assert cost >= 0
-			# Local providers should be free
-			if provider == "local":
-				assert cost == 0.0
-
-
 class TestWorkflowRunnerConfigValidation:
 	"""Test configuration validation and merging (Quality Standards)."""
 
@@ -1039,28 +882,3 @@ class TestWorkflowRunnerConfigValidation:
 
 			# Should accept all modes
 			assert runner.model_config["mode"] == config_mode
-
-	def test_runner_validates_budget_config(self):
-		"""Test runner validates budget configuration (Deep Assertions)."""
-		with tempfile.TemporaryDirectory() as tmpdir:
-			workflow = {
-				"id": "budget_config_test",
-				"model_config": {
-					"budget": {
-						"max_per_task_usd": 10.0,
-						"max_workflow_usd": 100.0
-					}
-				},
-				"graph": {
-					"nodes": {"node_1": {"tool": "test"}},
-					"edges": []
-				}
-			}
-			workflow_path = self.create_test_workflow_file(tmpdir, workflow)
-
-			runner = WorkflowRunner(workflow_path, output_dir=tmpdir)
-
-			# Budget should be loaded
-			assert runner.cost_manager is not None
-			assert runner.model_config is not None
-			assert runner.model_config.get("budget") is not None

@@ -46,9 +46,7 @@ Flexibility:
 
 **Models Supported:**
 
-- claude-opus-4-6
-- claude-sonnet-4-5-20250929
-- claude-haiku-4-5-20251001
+Any Claude model identifier (see Anthropic model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -76,11 +74,7 @@ Flexibility:
 
 **Models Supported:**
 
-- gpt-5.2-pro
-- gpt-5.2
-- gpt-5-mini
-- o3, o3-mini
-- Legacy: gpt-4o, gpt-4, gpt-3.5-turbo
+Any OpenAI model identifier (see OpenAI model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -108,11 +102,8 @@ Flexibility:
 
 **Models Supported:**
 
-- mistral-large-3
-- mistral-medium-3.1
-- ministral-3b, ministral-8b
-- codestral
-- devstral-2
+See https://docs.mistral.ai/getting-started/models for the current catalog
+(any Mistral model identifier works).
 
 **Implementation:**
 
@@ -133,11 +124,7 @@ Flexibility:
 
 **Models Supported:**
 
-- gemini-3.1-pro-preview
-- gemini-3-flash-preview
-- gemini-2.5-pro
-- gemini-2.5-flash
-- gemini-2.5-flash-lite
+Any Gemini model identifier (see Google AI Studio model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -159,10 +146,8 @@ Flexibility:
 
 **Models Supported:**
 
-- devstral-2:123b-cloud
-- minimax-m2.1:cloud
-- glm-4.7:cloud
-- Custom models (via Ollama)
+Any model pulled into your local Ollama instance — see
+https://ollama.com/library. No hard-coded list.
 
 **Implementation:**
 
@@ -182,35 +167,11 @@ Flexibility:
 # Start Ollama
 ollama serve
 
-# Pull model
-ollama pull devstral-2
+# Pull a model (example)
+ollama pull qwen3:8b
 
 # Hillstar will auto-detect and use
 ```
-
-### 6. Devstral Local MCP Server
-
-**Location:** mcp-server/devstral_local_mcp_server.py
-
-**Responsibility:** Handle local Devstral inference
-
-**Model Supported:**
-
-- devstral-small-2-24b
-
-**Implementation:**
-
-- Subprocess wrapper around local inference
-- Configurable inference engine
-- Resource management
-
-**Configuration:**
-
-- MODEL_PATH: Path to model weights
-- DEVICE: cuda / cpu
-- QUANTIZATION: Optional quantization settings
-
----
 
 ## MCP Protocol Details
 
@@ -242,7 +203,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "id": 1,
  "result": {
  "provider": "anthropic",
- "models": ["claude-opus-4-6", "claude-sonnet-4-5"],
+ "models": ["<claude-model-1>", "<claude-model-2>"],
  "status": "ready"
  }
 }
@@ -256,7 +217,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "id": 2,
  "method": "call",
  "params": {
- "model": "claude-opus-4-6",
+ "model": "<claude-model>",
  "messages": [
  {
  "role": "user",
@@ -279,8 +240,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "content": "Hello! How can I help?",
  "stop_reason": "end_turn",
  "input_tokens": 10,
- "output_tokens": 5,
- "cost_usd": 0.15
+ "output_tokens": 5
  }
 }
 ```
@@ -358,13 +318,6 @@ ollama serve # In separate terminal
 python mcp-server/ollama_mcp_server.py
 ```
 
-#### Devstral Local
-
-```bash
-export MODEL_PATH="/path/to/devstral-24b"
-python mcp-server/devstral_local_mcp_server.py
-```
-
 ### Test Server Connectivity
 
 ```bash
@@ -429,7 +382,6 @@ Each server implements:
 - Exponential backoff on rate limits
 - Quota tracking per provider
 - Fallback to alternate providers
-- Cost limiting to prevent bill shock
 
 ---
 
@@ -469,14 +421,12 @@ Solutions:
 3. Reduce batch size
 4. Implement timeouts
 
-### Token/Cost Issues
+### Token Issues
 
 Check:
 
 1. Model context window (max_tokens)
-2. Actual vs. estimated costs
-3. Provider billing dashboard
-4. Request token counts
+2. Request token counts
 
 ---
 
@@ -510,8 +460,7 @@ class CustomMCPServer:
  "content": "response",
  "stop_reason": "end_turn",
  "input_tokens": 10,
- "output_tokens": 5,
- "cost_usd": 0.01
+ "output_tokens": 5
  }
 
  def handle_request(self, request: dict) -> dict:
@@ -615,8 +564,8 @@ SDK Versions (pinned in requirements.txt):
 
 ---
 
-**Document Status:** Sprint 1 Release
-**Last Updated:** 2026-02-28
-**Version:** 1.1.0
-
 See PROVIDER_MODEL_REFERENCE.md for provider-specific details and capabilities.
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

@@ -307,7 +307,7 @@ class ExecutionObserver:
 			},
 		)
 
-	def workflow_complete(self, cumulative_cost_usd: float = 0.0):
+	def workflow_complete(self):
 		"""Record workflow completion."""
 		elapsed = time.time() - self.workflow_start_epoch
 
@@ -327,9 +327,6 @@ class ExecutionObserver:
 		summary_lines.extend([
 			f" Total time: {elapsed:.2f}s ({elapsed / 60:.2f}m)",
 		])
-		if cumulative_cost_usd > 0:
-			summary_lines.append(f" Cost: ${cumulative_cost_usd:.4f}")
-
 		trace_path = self.trace_file.relative_to(self.output_dir.parent)
 		log_path = self.log_file.relative_to(self.output_dir.parent)
 		summary_lines.extend([
@@ -355,7 +352,6 @@ class ExecutionObserver:
 				"nodes_completed": self.nodes_completed,
 				"nodes_failed": self.nodes_failed,
 				"total_time_seconds": elapsed,
-				"cumulative_cost_usd": cumulative_cost_usd,
 				"trace_file": str(self.trace_file),
 				"log_file": str(self.log_file),
 				"node_times": self.node_times,
@@ -374,7 +370,6 @@ class ExecutionObserver:
 			"nodes_completed": self.nodes_completed,
 			"nodes_failed": self.nodes_failed,
 			"total_time_seconds": elapsed,
-			"cumulative_cost_usd": cumulative_cost_usd,
 			"node_times": self.node_times,
 			"log_file": str(self.audit_log_file),
 			"trace_file": str(self.audit_trace_file),

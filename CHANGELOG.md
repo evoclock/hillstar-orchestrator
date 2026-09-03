@@ -2,6 +2,31 @@
 
 All notable changes to Hillstar are documented in this file.
 
+## 1.2.0-rc.1 (2026-09-03)
+
+### Removed (breaking)
+
+- **Cost management entirely**: cost estimation, budget enforcement, and cost recording. Required a manually maintained pricing table (provider_registry) — an unacceptable maintenance burden for data Hillstar does not use. `budget:` keys in workflow JSONs are now simply unused. `BudgetExceededError` removed.
+- **Devstral/Jan-Code local providers** (`devstral_local`, `jan_code` models and MCP servers): replaced by a single generic `local` provider (`models/local_model.py`) configurable via `custom_providers` for any OpenAI-compatible server (vLLM on a DGX Spark, llama.cpp, LM Studio, Ollama).
+- **claude_ollama_bridge_server** (unsupported).
+- Hard-coded model catalogs removed from code defaults and all documentation; docs link to provider model pages instead.
+
+### Changed
+
+- Documentation version footers are now stamped by `scripts/stamp_docs.py` from the pyproject version (run at release; `--check` mode for CI). Never edit doc footers by hand.
+- OpenAI MCP server: subscription authentication works without an API key; new opt-in `HILLSTAR_OPENAI_SUBSCRIPTION_ONLY=true` mode hard-fails instead of falling back to an API key (used by the MPD reproducibility image). Default fallback behavior unchanged.
+- Model-selection presets renamed to quality wording: `cost_saver`→`lightweight`, `minimize_cost`→`lightweight` (validator/discovery); "budget_conscious" scoring renamed "lightweight_preference".
+- `NodeExecutor` constructor signature: `(model_factory, trace_logger, model_config)`.
+- pyright/ruff target versions aligned (3.13/3.11); documentation regenerated and dated.
+
+### Fixed
+
+- Ollama HTTP 410 retired-model responses return a typed `model_retired` result.
+- Empty or malformed MCP responses fail closed (`empty_mcp_response`) instead of returning a successful "No output".
+- `script_run` timeouts return a typed non-empty error so the runner commits failure rather than success.
+- Pyright errors cleared in loops.py, model_selector.py, node_executor.py.
+
+
 ## 1.1.0 (2026-06-28)
 
 ### Added

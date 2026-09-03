@@ -7,7 +7,7 @@ Model Selection Presets
 PURPOSE:
 --------
 Data-driven preset system for intelligent model selection with
-temperature constraint enforcement. Provides four strategies (cost_saver,
+temperature constraint enforcement. Provides four strategies (lightweight,
 balanced, quality_first, premium) for different research contexts.
 
 ARCHITECTURE:
@@ -54,7 +54,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # Preset tier sequences - each preset uses a sequence of tiers
 # Resolver escalates through these tiers based on complexity
 PRESET_TIERS: Dict[str, List[str]] = {
-	"cost_saver": [
+	"lightweight": [
 		"free",
 		"affordable",
 	],
@@ -189,7 +189,7 @@ class PresetResolver:
 		Uses global provider registry (read-only) from config.provider_registry.get_registry().
 
 		Args:
-		preset_name: One of cost_saver, balanced, quality_first, premium
+		preset_name: One of lightweight, balanced, quality_first, premium
 		configured_providers: List of provider names in preference order
 		"""
 		if preset_name not in PRESET_TIERS:
@@ -523,7 +523,7 @@ class ModelPresets:
 
 	# Tier mapping for preset selection
 	TIER_MAPPING = {
-		"minimize_cost": "cheap",
+		"lightweight": "cheap",
 		"balanced": "standard",
 		"maximize_quality": "expensive",
 		"local_only": "free",
@@ -547,7 +547,7 @@ class ModelPresets:
 		Select model from a preset strategy (legacy).
 
 		Args:
-		preset_name: One of "minimize_cost", "balanced", "maximize_quality", "local_only"
+		preset_name: One of "lightweight", "balanced", "maximize_quality", "local_only"
 		complexity: Task complexity ("simple", "moderate", "complex", "critical")
 		provider_preference: Optional list of preferred providers in order
 
@@ -629,11 +629,11 @@ class ModelPresets:
 	def describe_preset(preset_name: str) -> Dict:
 		"""Get description of a preset strategy."""
 		descriptions = {
-			"minimize_cost": {
-				"description": "Cheapest reasoning models (Haiku, GPT-5-nano, o3-mini)",
-				"use_case": "Budget-constrained labs, high-volume experimentation",
+			"lightweight": {
+				"description": "Smallest capable reasoning models",
+				"use_case": "High-volume experimentation, simple tasks",
 				"pros": [
-					"Minimum cost ($0.10-5.00 per 1M tokens)",
+					"Efficient, fast models",
 					"Good for simple/moderate tasks",
 					"Free local option available",
 				],
@@ -697,7 +697,7 @@ class ModelPresets:
 		Preset name recommendation
 		"""
 		if budget_constraint:
-			return "minimize_cost"
+			return "lightweight"
 		elif has_local_gpu:
 			return "local_only" if use_case in ["experimentation", "research"] else "balanced"
 		elif use_case == "publication":

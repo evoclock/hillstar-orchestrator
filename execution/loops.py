@@ -146,7 +146,12 @@ def _validate(loop: Mapping[str, Any], nodes: Mapping[str, Any]) -> tuple[list[s
 	# measured, two reviewers signed off unanimously on code failing two
 	# ground-truth cases, and the loop stopped iterating with the defects in
 	# place. Evidence and opinion both have to agree before the work is done.
-	conditions = until.get("all_of") if isinstance(until.get("all_of"), list) else [until]
+	conditions: list[Mapping[str, Any]]
+	raw_all_of = until.get("all_of")
+	if isinstance(raw_all_of, list):
+		conditions = list(raw_all_of)
+	else:
+		conditions = [until]
 	for c in conditions:
 		if not isinstance(c, Mapping) or "node" not in c:
 			raise LoopError(f"loop {loop.get('id')!r}: every until condition must name a node")
@@ -182,7 +187,9 @@ def compile_loops(workflow: Mapping[str, Any]) -> dict:
 		# LAST attempt, so downstream sees the final result.
 		exits = [e for e in edges if e["from"] in body_set and e["to"] not in body_set]
 
-		conditions = until.get("all_of") if isinstance(until.get("all_of"), list) else [until]
+		conditions: list[Mapping[str, Any]] = (
+			list(until["all_of"]) if isinstance(until.get("all_of"), list) else [until]
+		)
 		condition_nodes = [str(condition["node"]) for condition in conditions]
 		final_conditions = [_suffixed(node_id, attempts) for node_id in condition_nodes]
 
@@ -260,7 +267,7 @@ def _single_condition_met(condition: Mapping[str, Any], outputs: Mapping[str, An
 	exiting on a node that failed to run.
 	"""
 	node = condition.get("node")
-	if node not in outputs:
+	if not isinstance(node, str) or node not in outputs:
 		return False
 	value = outputs[node]
 	if isinstance(value, Mapping):

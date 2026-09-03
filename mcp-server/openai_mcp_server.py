@@ -21,6 +21,9 @@ ARCHITECTURE:
 - Single tool: execute_task (run model with prompt)
 - Model-specific parameter handling (e.g., reasoning models skip temperature)
 - Automatic mode selection and fallback to API key if subscription unavailable
+- Subscription-only mode: set HILLSTAR_OPENAI_SUBSCRIPTION_ONLY=true to disable
+  API-key fallback entirely; a missing/expired subscription token exits with an
+  error instead (used by the reproducibility image)
 
 USAGE:
 ------
@@ -117,6 +120,13 @@ class OpenAIMCPServer(BaseMCPServer):
 
 		# Check if ChatGPT subscription mode is enabled
 		use_subscription = os.getenv("OPENAI_CHATGPT_LOGIN_MODE", "false").lower() == "true"
+		# Subscription-only mode (opt-in, e.g. reproducibility image): a missing
+		# or expired subscription token is a hard failure and must never fall
+		# back to API-key authentication.
+		subscription_only = os.getenv(
+			"HILLSTAR_OPENAI_SUBSCRIPTION_ONLY", "false"
+		).lower() == "true"
+		self.subscription_only = subscription_only
 		self.subscription_token = None
 		self.client = None
 		self.auth_mode = None
@@ -131,7 +141,17 @@ class OpenAIMCPServer(BaseMCPServer):
 				logger.info("OpenAI MCP server initialized in subscription token mode")
 				return
 
-		# Fall back to API key mode
+		if subscription_only:
+			# Hard failure: no API-key fallback permitted in this mode.
+			logger.error(
+				"Subscription-only mode (HILLSTAR_OPENAI_SUBSCRIPTION_ONLY=true) "
+				"requires OPENAI_CHATGPT_LOGIN_MODE=true and a valid ChatGPT "
+				"subscription token, but none was available. API-key fallback is "
+				"disabled in this mode. Run: codex login"
+			)
+			sys.exit(1)
+
+		# Fall back to API key mode (never reached when subscription_only is set)
 		api_key = os.getenv("OPENAI_API_KEY")
 		if not api_key:
 			logger.error(

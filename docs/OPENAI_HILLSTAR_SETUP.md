@@ -11,7 +11,20 @@ The OpenAI MCP server supports **dual authentication modes**:
 | **Subscription Mode** | ChatGPT Plus/Pro OAuth tokens | ChatGPT subscribers | Run `codex login` |
 | **API Key Mode** | OpenAI API key | Developers, API access | Set `OPENAI_API_KEY` env var |
 
-The server prefers subscription mode if available, falling back to API key mode automatically.
+The server uses whichever mode you select via environment variables:
+
+- Set `OPENAI_CHATGPT_LOGIN_MODE=true` to use subscription authentication
+  (requires `codex login` first). If the token is unavailable, the server
+  falls back to `OPENAI_API_KEY` when set — this is the default behavior.
+- Set `HILLSTAR_OPENAI_SUBSCRIPTION_ONLY=true` to disable API-key fallback
+  entirely: a missing or expired subscription token is a hard failure. This
+  is the mode used by the MPD reproducibility image.
+- Otherwise (neither flag set), the server uses `OPENAI_API_KEY`.
+
+There is deliberately **no hard-coded model list**. Any model identifier the
+OpenAI API or `codex exec` accepts works; specify the model per workflow node
+(`"model": "..."`) or set `MODEL_DEFAULT`. If a model is not in the server's
+internal token-limit hints, a conservative default applies.
 
 **Scope**: Subscription token support (CODEX_HOME) applies **exclusively to OpenAI**:
 
@@ -128,7 +141,7 @@ If you prefer to skip auto-discovery for a provider, simply select "Skip" when p
 ### Prerequisites
 
 - ChatGPT Plus or Pro subscription
-- Codex CLI installed (`pip install codex-cli` or similar)
+- Codex CLI installed (`npm install -g @openai/codex`)
 
 ### Project Layer Setup (Hillstar)
 
@@ -315,28 +328,21 @@ chmod 600 ~/.config/openai/codex-home/auth.json
 | `OPENAI_CHATGPT_LOGIN_MODE` | Enable subscription token mode | No | `false` |
 | `OPENAI_API_KEY` | OpenAI API key (API key mode) | If not subscription | — |
 | `CODEX_HOME` | Location of Codex auth directory | No | `~/.config/openai/codex-home` |
-| `MODEL_DEFAULT` | Default model if not specified | No | `gpt-5.2` |
+| `MODEL_DEFAULT` | Default model if not specified | Recommended | (unset — set it to a current model id) |
 
 ---
 
 ## Supported Models
 
-### Standard Models
+No model list is maintained here on purpose: OpenAI model identifiers change
+frequently and hard-coding them guarantees stale documentation. Use any
+current model identifier accepted by:
 
-- `gpt-5.2-pro` - Latest, highest quality
-- `gpt-5.2` - Fast flagship (recommended)
-- `gpt-5-mini` - Cost-optimized
-- `gpt-5-nano` - Minimal, lowest cost
+- the OpenAI API (API-key mode), e.g. as listed on platform.openai.com/docs/models; or
+- `codex exec --model <id>` (subscription mode).
 
-### Reasoning Models
-
-- `o3` - Advanced reasoning
-- `o3-mini` - Lightweight reasoning
-
-### Legacy
-
-- `gpt-4o` - Previous generation
-- `gpt-4-turbo` - Older
+Set the model per workflow node or via the `MODEL_DEFAULT` environment
+variable. Unknown model names fall back to conservative token limits.
 
 ---
 
@@ -368,7 +374,7 @@ python3 -c "from pathlib import Path; print((Path.home() / '.config/openai/codex
 **Solution**: Install Codex CLI:
 
 ```bash
-pip install codex-cli
+npm install -g @openai/codex
 ```
 
 Or verify it's in PATH:
@@ -383,7 +389,7 @@ The MCP server allows up to 60 seconds for codex CLI commands. If commands consi
 
 - Check network connectivity
 - Verify codex CLI is properly installed
-- Try running directly: `codex exec --model gpt-5.2 "echo test"`
+- Try running directly: `codex exec --model <model-id> "echo test"`
 
 ### Token Expired (Subscription Mode)
 
@@ -423,7 +429,7 @@ Example workflow node:
 {
   "task": "Analyze this data: {{data}}",
   "provider": "openai",
-  "model": "gpt-5.2"
+  "model": "<openai-model>"
 }
 ```
 
@@ -455,6 +461,4 @@ The server handles authentication transparently.
 
 ---
 
-**Last Updated**: 2026-02-28
-**Version**: 1.1.0
-**Project**: Hillstar v1.1.0 (Production Release)
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

@@ -131,7 +131,7 @@ class HillstarConfig:
 				"google_ai_studio",
 				"mistral",
 				"ollama",
-				"devstral_local",
+				"local",
 				"anthropic_ollama",
 			]
 

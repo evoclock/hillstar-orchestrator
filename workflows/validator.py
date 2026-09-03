@@ -172,7 +172,7 @@ class WorkflowValidator:
 				errors.append("mode=preset requires 'preset' field")
 			else:
 				valid_presets = [
-					"minimize_cost",
+					"lightweight",
 					"balanced",
 					"maximize_quality",
 					"local_only",
@@ -183,18 +183,8 @@ class WorkflowValidator:
 						f"Valid: {', '.join(valid_presets)}"
 					)
 
-		# Validate budget constraints
-		budget = model_config.get("budget", {})
-		if budget:
-			max_per_task = budget.get("max_per_task_usd")
-			max_workflow = budget.get("max_workflow_usd")
-
-			if max_per_task and max_workflow:
-				if max_per_task > max_workflow:
-					errors.append(
-						f"max_per_task_usd ({max_per_task}) "
-						f"cannot exceed max_workflow_usd ({max_workflow})"
-					)
+		# Cost/budget management is intentionally not supported: Hillstar does
+		# not price-model or price-gate workflow execution.
 
 		# Validate provider preferences
 		provider_prefs = model_config.get("provider_preferences", {})

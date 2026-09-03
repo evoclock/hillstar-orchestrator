@@ -210,7 +210,7 @@ class TestClassifyTask:
 		assert "implementation" in result
 		assert "testing" in result
 		assert "quality" in result
-		assert "budget_conscious" in result
+		assert "lightweight_preference" in result
 		assert "local_only" in result
 		assert "speed_critical" in result
 
@@ -257,7 +257,7 @@ class TestClassifyTask:
 		"""Integration: Recognizes budget-conscious keywords."""
 		result = AutoDiscover.classify_task("minimize cost and save money")
 
-		assert result["budget_conscious"] > 0.3
+		assert result["lightweight_preference"] > 0.3
 
 	def test_classify_task_detects_local_keywords(self):
 		"""Integration: Recognizes local/offline keywords."""
@@ -276,7 +276,7 @@ class TestClassifyTask:
 		("implement the code", "implementation"),
 		("test the system", "testing"),
 		("ensure quality", "quality"),
-		("minimize cost", "budget_conscious"),
+		("minimize cost", "lightweight_preference"),
 		("keep it local", "local_only"),
 		("make it fast", "speed_critical"),
 	])
@@ -302,7 +302,7 @@ class TestGetPresetSuggestions:
 	def test_get_preset_suggestions_returns_list(self):
 		"""Deep: Returns a list of tuples."""
 		task_scores = {"planning": 0.2, "implementation": 0.2, "testing": 0.2,
-			"quality": 0.2, "budget_conscious": 0.1, "local_only": 0.05,
+			"quality": 0.2, "lightweight_preference": 0.1, "local_only": 0.05,
 			"speed_critical": 0.05}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
@@ -312,27 +312,27 @@ class TestGetPresetSuggestions:
 	def test_get_preset_suggestions_suggests_local_only_when_high_score(self):
 		"""Deep: Suggests local_only when local_only score > 0.3."""
 		task_scores = {"planning": 0.1, "implementation": 0.1, "testing": 0.1,
-			"quality": 0.1, "budget_conscious": 0.1, "local_only": 0.35,
+			"quality": 0.1, "lightweight_preference": 0.1, "local_only": 0.35,
 			"speed_critical": 0.14}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
 		preset_names = [p[0] for p in result]
 		assert "local_only" in preset_names
 
-	def test_get_preset_suggestions_suggests_minimize_cost_when_high_score(self):
-		"""Deep: Suggests minimize_cost when budget_conscious score > 0.3."""
+	def test_get_preset_suggestions_suggests_lightweight_when_high_score(self):
+		"""Deep: Suggests lightweight when lightweight_preference score > 0.3."""
 		task_scores = {"planning": 0.1, "implementation": 0.1, "testing": 0.1,
-			"quality": 0.1, "budget_conscious": 0.35, "local_only": 0.1,
+			"quality": 0.1, "lightweight_preference": 0.35, "local_only": 0.1,
 			"speed_critical": 0.14}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
 		preset_names = [p[0] for p in result]
-		assert "minimize_cost" in preset_names
+		assert "lightweight" in preset_names
 
 	def test_get_preset_suggestions_suggests_maximize_quality_when_high_score(self):
 		"""Deep: Suggests maximize_quality when quality score > 0.4."""
 		task_scores = {"planning": 0.1, "implementation": 0.1, "testing": 0.1,
-			"quality": 0.45, "budget_conscious": 0.1, "local_only": 0.1,
+			"quality": 0.45, "lightweight_preference": 0.1, "local_only": 0.1,
 			"speed_critical": 0.05}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
@@ -342,7 +342,7 @@ class TestGetPresetSuggestions:
 	def test_get_preset_suggestions_default_balanced_when_no_matches(self):
 		"""Boundary: Returns balanced preset when no scores exceed thresholds."""
 		task_scores = {"planning": 0.143, "implementation": 0.143, "testing": 0.143,
-			"quality": 0.143, "budget_conscious": 0.143, "local_only": 0.142,
+			"quality": 0.143, "lightweight_preference": 0.143, "local_only": 0.142,
 			"speed_critical": 0.143}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
@@ -352,7 +352,7 @@ class TestGetPresetSuggestions:
 	def test_get_preset_suggestions_sorted_by_confidence_descending(self):
 		"""Deep: Suggestions sorted by confidence score, highest first."""
 		task_scores = {"planning": 0.1, "implementation": 0.1, "testing": 0.1,
-			"quality": 0.5, "budget_conscious": 0.1, "local_only": 0.05,
+			"quality": 0.5, "lightweight_preference": 0.1, "local_only": 0.05,
 			"speed_critical": 0.05}
 		result = AutoDiscover.get_preset_suggestions(task_scores)
 
@@ -534,15 +534,15 @@ class TestGetRecommendations:
 		text = recommendations["recommendation_text"]
 		assert "Local" in text or "local" in text or "offline" in text
 
-	def test_get_recommendations_mentions_cost_when_detected(self):
-		"""Integration: Recommendation text mentions cost when budget-conscious detected."""
+	def test_get_recommendations_mentions_lightweight_when_detected(self):
+		"""Integration: Recommendation text mentions lightweight models when efficiency-conscious input detected."""
 		recommendations = AutoDiscover.get_recommendations(
 			"minimize cost and save money",
 			[]
 		)
 
 		text = recommendations["recommendation_text"]
-		assert "Cost" in text or "cost" in text or "budget" in text
+		assert "Lightweight" in text or "lightweight" in text
 
 
 class TestFormatRecommendations:

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-"""Hillstar Orchestrator v1.1.0."""
+"""Hillstar Orchestrator."""
 
 from execution.runner import WorkflowRunner
 from execution.graph import WorkflowGraph
@@ -11,7 +11,19 @@ from governance.enforcer import GovernanceEnforcer
 from governance.hooks import HookManager
 from governance.policy import GovernancePolicy
 
-__version__ = "1.1.0"
+import tomllib
+from pathlib import Path
+
+try:
+	__version__ = tomllib.loads(
+		(Path(__file__).resolve().parent / "pyproject.toml").read_text()
+	)["project"]["version"]
+except Exception:
+	try:
+		from importlib.metadata import version as _v
+		__version__ = _v("hillstar-orchestrator")
+	except Exception:
+		__version__ = "0.0.0"
 __author__ = "Julen Gamboa"
 
 __all__ = [

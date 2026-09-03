@@ -137,7 +137,7 @@ class TestExecutionObserverDesign:
 			)
 
 			# Complete workflow
-			observer.workflow_complete(cumulative_cost_usd=0.42)
+			observer.workflow_complete()
 			# Should not crash
 			assert observer.nodes_completed >= 0
 

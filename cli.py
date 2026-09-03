@@ -50,6 +50,11 @@ import argparse
 
 from pathlib import Path
 
+try:
+	from __init__ import __version__
+except ImportError:
+	__version__ = "unknown"
+
 # Auto-load secrets from ~/.config/hillstar/secrets.env if it exists
 _secrets_file = Path.home() / ".config" / "hillstar" / "secrets.env"
 if _secrets_file.exists():
@@ -91,8 +96,6 @@ def cmd_discover(args):
 		print(f" Mode: {workflow['mode']}")
 		if workflow['preset']:
 			print(f" Preset: {workflow['preset']}")
-		if workflow['has_budget']:
-			print(" Budget: [x] configured")
 		if workflow['uses_custom_provider']:
 			print(" Custom: [x] uses custom providers")
 		print()
@@ -129,10 +132,6 @@ def cmd_validate(args):
 			print(f" Mode: {model_config.get('mode', 'explicit')}")
 			if model_config.get('preset'):
 				print(f" Preset: {model_config.get('preset')}")
-			if model_config.get('budget'):
-				budget = model_config['budget']
-				if budget.get('max_workflow_usd'):
-					print(f" Budget: ${budget.get('max_workflow_usd'):.2f} total")
 
 		return 0
 	else:
@@ -173,10 +172,6 @@ def cmd_execute(args):
 		print("[x] Workflow executed successfully\n")
 		print(f" Workflow ID: {result.get('workflow_id')}")
 		print(f" Trace file: {result.get('trace_file')}")
-
-		cost = result.get('cumulative_cost_usd', 0)
-		if cost:
-			print(f" Cost: ${cost:.4f}")
 
 		return 0
 
@@ -403,7 +398,7 @@ Examples:
 	"""
 	)
 
-	parser.add_argument('--version', action='version', version='hillstar 1.1.0')
+	parser.add_argument('--version', action='version', version=f'hillstar {__version__}')
 
 	subparsers = parser.add_subparsers(dest='command', help='Command to run')
 

@@ -218,7 +218,7 @@ class AutoDiscover:
 		- implementation: float
 		- testing: float
 		- quality: float
-		- budget_conscious: float
+		- lightweight_preference: float
 		- local_only: float
 		- speed_critical: float
 		"""
@@ -255,7 +255,7 @@ class AutoDiscover:
 			"implementation": impl_score / total,
 			"testing": testing_score / total,
 			"quality": quality_score / total,
-			"budget_conscious": budget_score / total,
+			"lightweight_preference": budget_score / total,
 			"local_only": local_score / total,
 			"speed_critical": speed_score / total,
 		}
@@ -279,8 +279,8 @@ class AutoDiscover:
 		if task_scores["local_only"] > 0.3:
 			suggestions.append(("local_only", task_scores["local_only"]))
 
-		if task_scores["budget_conscious"] > 0.3:
-			suggestions.append(("minimize_cost", task_scores["budget_conscious"]))
+		if task_scores["lightweight_preference"] > 0.3:
+			suggestions.append(("lightweight", task_scores["lightweight_preference"]))
 
 		if task_scores["quality"] > 0.4:
 			suggestions.append(("maximize_quality", task_scores["quality"]))
@@ -398,8 +398,8 @@ class AutoDiscover:
 				"Local-only execution recommended (sensitive data)"
 			)
 
-		if task_scores["budget_conscious"] > 0.3:
-			recommendation_parts.append("Cost optimization recommended")
+		if task_scores["lightweight_preference"] > 0.3:
+			recommendation_parts.append("Lightweight models recommended")
 
 		if task_scores["quality"] > 0.4:
 			recommendation_parts.append("Quality-focused approach recommended")

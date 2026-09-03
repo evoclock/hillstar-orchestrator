@@ -32,3 +32,7 @@ If you see two different sets of MCP servers, it is usually because of global us
 - To change what Claude launches: edit global config (`~/.config/claude/mcp_config.json`).
 - To change Hillstar provider behavior: edit in-repo files under `mcp-server/` and provider registry config.
 - For OpenAI auth mode switching in Claude, prefer selecting the appropriate server entry (`codex-subscription` vs `codex-api`) rather than repeatedly editing env blocks.
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

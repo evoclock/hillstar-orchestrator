@@ -182,52 +182,6 @@ class TestCheapestModelSelection:
 			assert len(model) == 3
 
 
-class TestCostEstimation:
-	"""Test cost estimation for model calls."""
-
-	def test_estimate_cost_anthropic_opus(self):
-		"""Deep: Estimate cost for Anthropic Claude Opus call."""
-		registry = ProviderRegistry()
-
-		cost = registry.estimate_cost("anthropic", "claude-opus-4-6", 1000, 500)
-
-		assert cost is not None
-		assert isinstance(cost, (float, int))
-		assert cost >= 0
-
-	def test_estimate_cost_nonexistent_model(self):
-		"""Boundary: Cost for nonexistent model returns None or 0."""
-		registry = ProviderRegistry()
-
-		cost = registry.estimate_cost("anthropic", "nonexistent-xyz", 1000, 500)
-
-		assert cost is None or cost == 0
-
-	def test_estimate_cost_zero_tokens(self):
-		"""Boundary: Cost with zero tokens."""
-		registry = ProviderRegistry()
-
-		cost = registry.estimate_cost("anthropic", "claude-opus-4-6", 0, 0)
-
-		assert cost is not None
-		assert cost >= 0
-
-	@pytest.mark.parametrize("input_tokens,output_tokens", [
-		(1000, 500),
-		(10000, 5000),
-		(0, 0),
-		(100, 0),
-		(0, 100),
-	])
-	def test_estimate_cost_parametrized(self, input_tokens, output_tokens):
-		"""Parameterized: Cost estimation with various token counts."""
-		registry = ProviderRegistry()
-
-		cost = registry.estimate_cost("anthropic", "claude-opus-4-6", input_tokens, output_tokens)
-
-		assert cost is not None
-		assert cost >= 0
-
 
 class TestFallbackChain:
 	"""Test provider fallback chain selection."""
@@ -474,10 +428,9 @@ class TestRegistryIntegration:
 		assert all_models is not None
 		assert isinstance(all_models, dict)
 
-		# Step 3: Estimate cost for a model
-		cost = registry.estimate_cost("anthropic", "claude-opus-4-6", 1000, 500)
-		assert cost is not None
-		assert cost >= 0
+		# Step 3: Look up a model (cost estimation intentionally removed)
+		model = registry.get_model("anthropic", "claude-opus-4-6")
+		assert model is not None
 
 	def test_provider_selection_with_constraints(self):
 		"""Integration: Select provider based on capabilities and cost."""
@@ -522,11 +475,10 @@ class TestErrorHandling:
 
 		assert result is None or result == {}
 
-	def test_estimate_cost_with_negative_tokens(self):
-		"""Boundary: estimate_cost with negative token counts."""
+	def test_get_model_with_unknown_model(self):
+		"""Boundary: unknown model returns None."""
 		registry = ProviderRegistry()
 
-		# Should handle gracefully
-		result = registry.estimate_cost("anthropic", "claude-opus-4-6", -100, -50)
+		result = registry.get_model("anthropic", "definitely-not-a-real-model")
 
-		assert result is None or isinstance(result, (float, int))
+		assert result is None or result == {}

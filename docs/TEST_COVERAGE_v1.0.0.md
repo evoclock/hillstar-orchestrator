@@ -1,3 +1,6 @@
+# Coverage snapshot from v1.0.0; regenerated numbers may differ after the
+# 2026-09 provider cleanup (Devstral/Jan removal, cost tracking removal).
+
 # Test Coverage Evidence - Hillstar v1.0.0
 
 User-facing evidence of testing quality and scope achieved in v1.0.0 production release.
@@ -27,7 +30,6 @@ User-facing evidence of testing quality and scope achieved in v1.0.0 production 
 | execution/**init**.py | 6 | 0 | 0 | 100% |
 | execution/checkpoint.py | 39 | 3 | 0 | 92% |
 | execution/config_validator.py | 88 | 27 | 0 | 69% |
-| execution/cost_manager.py | 37 | 2 | 0 | 95% |
 | execution/graph.py | 105 | 15 | 0 | 86% |
 | execution/model_selector.py | 111 | 6 | 0 | 95% |
 | execution/node_executor.py | 183 | 28 | 0 | 85% |
@@ -44,7 +46,6 @@ User-facing evidence of testing quality and scope achieved in v1.0.0 production 
 | models/anthropic_mcp_model.py | 4 | 1 | 0 | 75% |
 | models/anthropic_model.py | 27 | 5 | 0 | 81% |
 | models/anthropic_ollama_api_model.py | 40 | 5 | 0 | 88% |
-| models/devstral_local_model.py | 34 | 7 | 0 | 79% |
 | models/mcp_model.py | 99 | 27 | 0 | 73% |
 | models/mistral_api_model.py | 14 | 6 | 0 | 57% |
 | models/mistral_mcp_model.py | 4 | 0 | 0 | 100% |
@@ -63,7 +64,6 @@ User-facing evidence of testing quality and scope achieved in v1.0.0 production 
 | tests/test_e2e_workflow.py | 321 | 105 | 0 | 67% |
 | tests/test_execution_checkpoint.py | 105 | 0 | 0 | 100% |
 | tests/test_execution_config_validator.py | 156 | 10 | 0 | 94% |
-| tests/test_execution_cost_manager.py | 111 | 0 | 0 | 100% |
 | tests/test_execution_graph.py | 73 | 1 | 0 | 99% |
 | tests/test_execution_model_selector.py | 208 | 0 | 0 | 100% |
 | tests/test_execution_node_executor.py | 333 | 1 | 0 | 99% |
@@ -120,3 +120,7 @@ User-facing evidence of testing quality and scope achieved in v1.0.0 production 
 - models/mistral_api_model.py: 57%
 
 Report generated: February 28, 2026
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

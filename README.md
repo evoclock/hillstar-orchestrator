@@ -18,7 +18,7 @@ Hillstar is an open-source workflow orchestrator built for scientific research l
 
 Hillstar is designed with auditability, security, and governance as first-class concerns, so it fits naturally in tightly regulated environments.
 
-The core design principle: explicit over implicit. No unrestricted API access. No magic. You define workflows as composable DAGs where each node performs one action and data flows explicitly between stages. Every decision is auditable: which model was called, what parameters were used, how much it cost, whether review was required before the output moved downstream.
+The core design principle: explicit over implicit. No unrestricted API access. No magic. You define workflows as composable DAGs where each node performs one action and data flows explicitly between stages. Every decision is auditable: which model was called, what parameters were used, whether review was required before the output moved downstream.
 
 This matters in environments where highly sensitive data is in use—teams working with human genomic data, clinical trials, or proprietary research—where governance isn't a nice-to-have, it's the foundation. Hillstar bakes in compliance checking, credential security, and comprehensive logging from the start.
 
@@ -33,7 +33,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 - **Workflow visualization** - Mermaid diagrams for GitHub, Obsidian,
  and Markdown
 - **Multi-provider support** - Integration with cloud and local models
-- **Flexible model selection** - Presets for cost, quality, and
+- **Flexible model selection** - Presets for efficiency, quality, and
  air-gapped setups
 - **Full auditability** - Comprehensive trace logs with model selection
  reasoning
@@ -257,9 +257,9 @@ Hillstar provides flexible model selection with four preset strategies:
 
 **Four Built-in Presets**:
 
-- `minimize_cost` - Cheapest models per complexity level
-- `balanced` - Mix of cost and quality
-- `maximize_quality` - Highest quality models regardless of cost
+- `lightweight` - Smallest capable models per complexity level
+- `balanced` - Balance between capability and efficiency
+- `maximize_quality` - Highest capability models available
 - `local_only` - Air-gapped: Local models only (no cloud APIs)
 
 ---
@@ -313,10 +313,6 @@ with explicit permissions, auditability, and governance boundaries to
 prevent systems operating with unrestricted access to user data and
 external systems.
 
-**NOT Supported (no exceptions):**
-
-- xAI (Groq/Grok)
-- Palantir
 
 ---
 
@@ -368,7 +364,7 @@ hillstar-orchestrator/
 │ ├── mistral_api_model.py
 │ ├── mistral_mcp_model.py
 │ ├── ollama_mcp_model.py
-│ └── devstral_local_model.py
+│ └── local_model.py
 │
 ├── workflows/ # Workflow discovery & validation
 │ ├── validator.py

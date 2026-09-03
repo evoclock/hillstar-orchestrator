@@ -173,7 +173,7 @@ def _host_router(seat_name: str, env: Mapping[str, str]) -> Resolution | None:
 # against whatever ollama actually reports, so a tag suffix (":latest",
 # ":cloud") does not have to be spelled out.
 _LOCAL_PREFERENCES: Mapping[Capability, tuple[str, ...]] = {
-	Capability.CHAT: ("jan-code", "qwen", "deepseek", "glm", "minimax", "kimi"),
+	Capability.CHAT: ("qwen", "deepseek", "glm", "minimax", "kimi"),
 	Capability.EMBEDDING: ("bge", "embed", "nomic", "minilm"),
 }
 

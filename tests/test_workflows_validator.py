@@ -205,7 +205,7 @@ class TestValidateModelConfig:
 		assert any("preset" in e.lower() for e in errors)
 
 	@pytest.mark.parametrize("preset", [
-		"minimize_cost",
+		"lightweight",
 		"balanced",
 		"maximize_quality",
 		"local_only",
@@ -222,18 +222,6 @@ class TestValidateModelConfig:
 		valid, errors = WorkflowValidator().validate_model_config(config)
 		assert valid is False
 		assert any("unknown" in e.lower() and "preset" in e.lower() for e in errors)
-
-	def test_validate_model_config_detects_budget_incoherence(self):
-		"""Deep: max_per_task cannot exceed max_workflow."""
-		config = {
-			"budget": {
-				"max_per_task_usd": 100,
-				"max_workflow_usd": 50
-			}
-		}
-		valid, errors = WorkflowValidator().validate_model_config(config)
-		assert valid is False
-		assert any("max_per_task" in e and "max_workflow" in e for e in errors)
 
 	def test_validate_model_config_detects_allowlist_blocklist_overlap(self):
 		"""Deep: Providers cannot be in both allowlist and blocklist."""

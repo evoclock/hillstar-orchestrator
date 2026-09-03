@@ -68,7 +68,7 @@ is_valid = validator.validate('workflows/my_workflow.json')
 
 ```python
 runner = WorkflowRunner('workflow.json', 'output/')
-model = runner.get_model('anthropic', 'claude-opus-4-6')
+model = runner.get_model('anthropic', '<claude-model>')
 result = model.call("Your prompt here")
 ```
 
@@ -176,13 +176,13 @@ Cloud:
 
 - **anthropic** - Claude models (Opus, Sonnet, Haiku)
 - **openai** - GPT and o-series models
-- **mistral** - Mistral, Codestral, Devstral models
+- **mistral** - Mistral and Codestral models
 - **google_ai_studio** - Gemini models
 
 Local:
 
 - **ollama** - Local models via Ollama
-- **devstral_local** - Local Devstral (GPU required)
+- **local** - Generic local/self-hosted OpenAI-compatible server (configurable endpoint; see `models/local_model.py`)
 
 MCP (subprocess-based):
 
@@ -216,7 +216,7 @@ export GOOGLE_API_KEY="AIza..."
    "id": "node_1",
    "type": "model",
    "provider": "anthropic",
-   "model": "claude-opus-4-6",
+   "model": "<model-id>",
    "prompt": "Your prompt template"
   }
  ],
@@ -349,8 +349,10 @@ python -c "import hillstar; print(hillstar.__version__)"
 
 ---
 
-**Last Updated:** 2026-03-01
-**Version:** 1.1.0
-**Status:** Production Ready
+**Version:** 1.2.0-rc.1
 
 For complete documentation, see [User_Manual.md](User_Manual.md)
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

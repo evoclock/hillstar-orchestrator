@@ -7,12 +7,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from models.jan_code_local_model import JanCodeLocalModel
+from models.local_model import LocalModel
 from models.ollama_api_model import OllamaAPIModel
 
 
 @pytest.fixture(params=[
-    (JanCodeLocalModel, "models.jan_code_local_model", "jan_code_local"),
+    (LocalModel, "models.local_model", "local"),
     (OllamaAPIModel, "models.ollama_api_model", "ollama"),
 ])
 def model_case(request):

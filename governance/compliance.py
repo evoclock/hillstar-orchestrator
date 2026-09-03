@@ -152,7 +152,7 @@ class ComplianceEnforcer:
 		from ..models import (
 			AnthropicModel,
 			OpenAIMCPModel,
-			DevstralLocalModel,
+			LocalModel,
 			AnthropicOllamaAPIModel,
 		)
 
@@ -160,7 +160,7 @@ class ComplianceEnforcer:
 			("anthropic", AnthropicModel),
 			("anthropic_ollama", AnthropicOllamaAPIModel),
 			("openai_mcp", OpenAIMCPModel),
-			("devstral", DevstralLocalModel),
+			("local", LocalModel),
 		]
 
 		all_compliant = True

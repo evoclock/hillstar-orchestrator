@@ -148,7 +148,7 @@ class TestIntegration:
 			("Plan and analyze data", "planning"),
 			("Implement feature quickly", "implementation"),
 			("Review for quality", "testing"),
-			("Minimize cost", "budget_conscious"),
+			("Minimize cost", "lightweight_preference"),
 			("Air-gapped sensitive data", "local_only"),
 		]
 
@@ -168,7 +168,7 @@ class TestIntegration:
 		classification = AutoDiscover.classify_task(task)
 		presets = AutoDiscover.get_preset_suggestions(classification)
 		assert len(presets) > 0, "Should suggest presets"
-		assert presets[0][0] == 'minimize_cost', "Should suggest minimize_cost"
+		assert presets[0][0] == 'lightweight', "Should suggest lightweight"
 		print(f" Budget-conscious {presets[0][0]}")
 
 		# Quality-focused task
@@ -238,7 +238,7 @@ class TestIntegration:
 		presets = ModelPresets.get_available_presets()
 		assert len(presets) >= 4, "Should have at least 4 presets"
 
-		expected = ['minimize_cost', 'balanced', 'maximize_quality', 'local_only']
+		expected = ['lightweight', 'balanced', 'maximize_quality', 'local_only']
 		for preset in expected:
 			assert preset in presets, f"Should have {preset} preset"
 			desc = ModelPresets.describe_preset(preset)
