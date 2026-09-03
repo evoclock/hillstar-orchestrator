@@ -509,9 +509,7 @@ See coverage.md for test coverage details.
 
 ---
 
-__Document Status:__ Sprint 1 Release
-__Last Updated:__ 2026-02-28
-__Version:__ 1.0.0
+__Document Status:__ Release candidate (post-sprint provider cleanup, cost management removed)
 
 ---
 

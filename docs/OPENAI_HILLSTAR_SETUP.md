@@ -461,9 +461,8 @@ The server handles authentication transparently.
 
 ---
 
-**Last Updated**: 2026-02-28
-**Version**: 1.1.0
-**Project**: Hillstar v1.1.0 (Production Release)
+**Version**: 1.2.0-rc.1
+**Project**: Hillstar v1.2.0-rc.1
 
 ---
 

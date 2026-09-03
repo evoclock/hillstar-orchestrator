@@ -349,9 +349,9 @@ python -c "import hillstar; print(hillstar.__version__)"
 
 ---
 
-**Last Updated:** 2026-03-01
-**Version:** 1.1.0
-**Status:** Production Ready
+**Last Updated:** 2026-09-03
+**Version:** 1.2.0-rc.1
+**Status:** Release candidate
 
 For complete documentation, see [User_Manual.md](User_Manual.md)
 
