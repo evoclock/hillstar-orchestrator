@@ -275,10 +275,35 @@ class MCPModel:
 					"provider": self.provider,
 				}
 
-			# Extract output
-			output = "No output"
-			if result.get("content"):
-				output = result["content"][0].get("text", output)
+			# Fail closed: empty or malformed content must not become a
+			# successful "No output" result.
+			content = result.get("content")
+			if not content or not isinstance(content, list):
+				return {
+					"output": None,
+					"error": (
+						"MCP response contained no content "
+						"(empty or malformed result)"
+					),
+					"error_type": "empty_mcp_response",
+					"provider": self.provider,
+				}
+			text = content[0].get("text") if isinstance(content[0], dict) else None
+			if not isinstance(text, str):
+				return {
+					"output": None,
+					"error": "MCP response content was malformed (no text field)",
+					"error_type": "empty_mcp_response",
+					"provider": self.provider,
+				}
+			if not text.strip():
+				return {
+					"output": None,
+					"error": "MCP response contained empty text content",
+					"error_type": "empty_mcp_response",
+					"provider": self.provider,
+				}
+			output = text
 
 			return {
 				"output": output,

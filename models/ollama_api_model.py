@@ -35,7 +35,9 @@ Assumptions
 Failure Modes
 -------------
 - Server not running: connection error
-- Model not available: Ollama returns error
+- Model retired: Ollama returns HTTP 410, reported as a typed `model_retired`
+  result rather than a generic HTTP exception
+- Model not available: Ollama returns another error
 - Timeout: requests.exceptions.Timeout
 
 Author: Julen Gamboa <julen.gamboa.ds@gmail.com>
@@ -133,7 +135,22 @@ class OllamaAPIModel:
 					payload[key] = kwargs[key]
 
 			response = requests.post(self.api_url, json=payload, timeout=600)
-			response.raise_for_status()
+			try:
+				response.raise_for_status()
+			except requests.exceptions.HTTPError as exc:
+				if response.status_code == 410:
+					return {
+						"output": None,
+						"error": (
+							f"model retired: Ollama model {self.model_name!r} "
+							"returned HTTP 410 Gone and is no longer available"
+						),
+						"error_type": "model_retired",
+						"status_code": 410,
+						"model": self.model_name,
+						"provider": "ollama",
+					}
+				raise exc
 
 			data = response.json()
 			message = (data.get("choices") or [{}])[0].get("message") or {}

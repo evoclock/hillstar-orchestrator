@@ -588,6 +588,16 @@ class NodeExecutor:
                 "error": error,
                 "return_code": result.returncode,
             }
+        except subprocess.TimeoutExpired as exc:
+            # Timeout must fail deterministically with a non-empty error so the
+            # runner treats the node as failed (an empty error string is falsy
+            # and would otherwise be committed as success).
+            return {
+                "output": "",
+                "error": f"script timed out after {exc.timeout} seconds",
+                "error_type": "script_timeout",
+                "return_code": None,
+            }
         except Exception as e:
             return {"error": str(e)}
 
