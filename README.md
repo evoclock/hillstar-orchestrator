@@ -302,6 +302,7 @@ See `spec/workflow-schema.json` for complete schema.
 - `file_write` - Write output
 - `script_run` - Execute a script
 - `checkpoint` - Save workflow state
+- `git_commit` - Create a git commit
 
 ---
 
