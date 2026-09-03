@@ -14,8 +14,8 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "Hillstar Orchestrator"
 copyright = "2026, Julen Gamboa"
 author = "Julen Gamboa"
-release = "1.1.0"
-version = "1.1.0"
+release = "1.2.0-rc.1"
+version = "1.2.0-rc.1"
 
 # -- General configuration ----------------------------------------------------
 extensions = [

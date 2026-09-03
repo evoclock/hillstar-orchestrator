@@ -50,6 +50,11 @@ import argparse
 
 from pathlib import Path
 
+try:
+	from __init__ import __version__
+except ImportError:
+	__version__ = "unknown"
+
 # Auto-load secrets from ~/.config/hillstar/secrets.env if it exists
 _secrets_file = Path.home() / ".config" / "hillstar" / "secrets.env"
 if _secrets_file.exists():
@@ -393,7 +398,7 @@ Examples:
 	"""
 	)
 
-	parser.add_argument('--version', action='version', version='hillstar 1.1.0')
+	parser.add_argument('--version', action='version', version=f'hillstar {__version__}')
 
 	subparsers = parser.add_subparsers(dest='command', help='Command to run')
 

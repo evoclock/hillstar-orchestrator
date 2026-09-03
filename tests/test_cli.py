@@ -347,15 +347,18 @@ class TestCommandHelp:
 		assert 'usage' in result.stdout.lower() or 'hillstar' in result.stdout.lower()
 
 	def test_version_flag(self):
-		"""Deep: --version shows version."""
+		"""Deep: --version shows the pyproject-derived version."""
+		import sys
+		from pathlib import Path as _Path
 		result = subprocess.run(
-			['hillstar', '--version'],
+			[sys.executable, str(_Path(__file__).resolve().parents[1] / 'cli.py'), '--version'],
 			capture_output=True,
 			text=True
 		)
 
 		assert result.returncode == 0
-		assert '1.1.0' in result.stdout
+		from __init__ import __version__
+		assert __version__ in result.stdout
 
 
 class TestCLIIntegration:
