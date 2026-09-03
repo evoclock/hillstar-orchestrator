@@ -13,6 +13,7 @@ All notable changes to Hillstar are documented in this file.
 
 ### Changed
 
+- Documentation version footers are now stamped by `scripts/stamp_docs.py` from the pyproject version (run at release; `--check` mode for CI). Never edit doc footers by hand.
 - OpenAI MCP server: subscription authentication works without an API key; new opt-in `HILLSTAR_OPENAI_SUBSCRIPTION_ONLY=true` mode hard-fails instead of falling back to an API key (used by the MPD reproducibility image). Default fallback behavior unchanged.
 - Model-selection presets renamed to quality wording: `cost_saver`→`lightweight`, `minimize_cost`→`lightweight` (validator/discovery); "budget_conscious" scoring renamed "lightweight_preference".
 - `NodeExecutor` constructor signature: `(model_factory, trace_logger, model_config)`.
