@@ -7,7 +7,7 @@
   <a href="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml"><img src="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml/badge.svg" alt="Docs"/></a>
   <a href="https://pypi.org/project/hillstar-orchestrator/"><img src="https://img.shields.io/pypi/v/hillstar-orchestrator?style=flat" alt="PyPI"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL%20v3-blue?style=flat" alt="License: AGPL v3"/></a>
-  <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.10+"/>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/>
 </p>
 
 **[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/User_Manual.md)** | **[Setup Guide](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/SETUP_GUIDE.md)**
@@ -244,13 +244,13 @@ Check model constraints before setting sampling parameters:
 
 - **Anthropic Claude**: Cannot use `temperature` and `top_p`
  simultaneously
-- **OpenAI o-series & GPT-5**: Do not support `temperature` (use
+- **OpenAI reasoning models**: Do not support `temperature` (use
  `reasoning_effort` instead)
-- **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
+- **Google Gemini**: Keep `temperature` at default (1.0) to avoid
  performance issues
 
-See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
-for complete constraints by model and provider.
+Consult **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
+for provider API links to assess model parameters.
 
 ### Model Selection & Presets
 
@@ -324,24 +324,27 @@ external systems.
 ```bash
 hillstar-orchestrator/
 ├── README.md # This file
+├── CHANGELOG.md # Release history
 ├── LICENSE # AGPLv3
+├── CITATION.cff # Citation metadata
 ├── requirements.txt # Python dependencies
-├── pyproject.toml # Package configuration
-├── .gitignore
+├── pyproject.toml # Package configuration (single version source)
 │
 ├── cli.py # Command-line interface
 │
 ├── config/ # Configuration management
 │ ├── config.py
-│ ├── config_manager.py
 │ ├── model_selector.py
 │ ├── provider_registry.py
-│ └── provider_registry.default.json
+│ ├── provider_registry.default.json
+│ └── setup_wizard.py
 │
 ├── execution/ # Workflow execution engine
 │ ├── runner.py # Main orchestration
 │ ├── node_executor.py # Node execution and provider chains
 │ ├── model_selector.py # Model selection and fallback logic
+│ ├── loops.py # Bounded loop expansion
+│ ├── seat_resolver.py # Router-seat resolution
 │ ├── config_validator.py # Configuration validation
 │ ├── graph.py # DAG execution with topological ordering
 │ ├── checkpoint.py # Checkpoint persistence
@@ -356,52 +359,62 @@ hillstar-orchestrator/
 │ └── project_init.py
 │
 ├── models/ # LLM provider integrations
-│ ├── mcp_model.py
+│ ├── local_model.py # Generic local OpenAI-compatible provider
+│ ├── mcp_model.py # MCP base class
 │ ├── anthropic_model.py
 │ ├── anthropic_mcp_model.py
 │ ├── anthropic_ollama_api_model.py
 │ ├── openai_mcp_model.py
 │ ├── mistral_api_model.py
 │ ├── mistral_mcp_model.py
-│ ├── ollama_mcp_model.py
-│ └── local_model.py
+│ ├── ollama_api_model.py
+│ └── ollama_mcp_model.py
 │
 ├── workflows/ # Workflow discovery & validation
 │ ├── validator.py
 │ ├── discovery.py
 │ ├── auto_discover.py
+│ ├── agent_scanner.py # Static MCP/skill security scanning
 │ └── model_presets.py
 │
 ├── utils/ # Utility functions
 │ ├── credential_redactor.py
 │ ├── exceptions.py
+│ ├── json_output_viewer.py
 │ └── report.py
 │
 ├── spec/ # Workflow JSON schema
 │ └── workflow-schema.json
 │
-├── tests/ # Unit tests
-│ ├── test_credential_redactor.py
-│ ├── test_integration.py
-│ ├── test_mcp_error_handling.py
-│ └── test_workflow_execution.py
+├── scripts/ # Release & maintenance tooling
+│ ├── stamp_docs.py # Stamp doc version footers
+│ └── check_licences.py
+│
+├── tests/ # Unit and integration tests
 │
 ├── examples/ # Example workflows
 │ ├── simple-workflow.json
 │ └── multi-provider-workflow.json
 │
 ├── docs/ # User documentation
-│ ├── INSTALLATION.md
-│ ├── QUICK_START.md
-│ ├── USER_MANUAL.md
+│ ├── SETUP_GUIDE.md
+│ ├── QUICK_REFERENCE.md
+│ ├── User_Manual.md # Generated from source
 │ ├── PROVIDER_MODEL_REFERENCE.md
-│ └── PROVIDER_SETUP.md
+│ ├── OPENAI_HILLSTAR_SETUP.md
+│ ├── MCP_SERVERS.md
+│ ├── ARCHITECTURE.md
+│ └── agent_scan_presentation.md
 │
 └── mcp-server/ # MCP server implementations
+ ├── base_mcp_server.py
  ├── anthropic_mcp_server.py
  ├── openai_mcp_server.py
  ├── mistral_mcp_server.py
- └── ... (other MCP servers)
+ ├── google_ai_studio_mcp_server.py
+ ├── ollama_mcp_server.py
+ ├── file_operations_mcp_server.py
+ └── secure_logger.py
 ```
 
 ### Local Development
@@ -453,7 +466,7 @@ hillstar wizard
 
 - Model does not support temperature (reasoning model families; use `reasoning_effort`)
 - See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
- for constraints
+ and your provider's model documentation for constraints
 - Remove temperature from parameters, or use a different model
 
 #### Error: "Model not found" or "Model not accessible"
