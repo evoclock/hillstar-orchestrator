@@ -215,8 +215,8 @@ Some nodes run independently, later node uses outputs of multiple nodes:
 
 ## Limitations
 
-### 1. No Circular References
-The workflow is a DAG (Directed Acyclic Graph). You cannot create cycles:
+### 1. No Cyclic Data Dependencies
+The workflow graph itself is a DAG. You cannot create data-dependency cycles:
 
 ```json
 // Invalid - circular dependency
@@ -228,11 +228,25 @@ The workflow is a DAG (Directed Acyclic Graph). You cannot create cycles:
 }
 ```
 
+Loops (bounded retry with iteration) ARE supported: declare a `loop` with
+`max_attempts` and an `until` exit condition. The validator expands each
+iteration into a suffixed copy of the body, so the executed graph remains a
+DAG while the workflow semantics include retry. Exit conditions can inspect
+node outputs (`contains`, `not_contains`, `equals`) and multiple conditions
+can be combined with `all_of` — see `workflows/validator.py` and
+`execution/loops.py`.
+
 ### 2. Output Type
 Currently, outputs are treated as strings/text. For complex structured data, you should return it as formatted text (JSON, CSV, etc.) that the next node can parse.
 
-### 3. No Conditional Logic
-All referenced nodes must execute. There's no conditional branching (Node C runs if A succeeds, else run D).
+### 3. Conditional Logic Is Loop-Mediated
+There is no standalone if/else branching node. Conditional behavior is
+expressed through loop exit conditions: a loop's `until` condition can end
+iteration early based on a node's output content (e.g. retry until the
+reviewer output contains "APPROVED"). Unconditional fan-out/fan-in and
+concurrent execution within an iteration are supported. Node failures fail
+the workflow (or trigger provider fallback for model calls) rather than
+switching to an alternate branch.
 
 ## Debugging Template References
 
