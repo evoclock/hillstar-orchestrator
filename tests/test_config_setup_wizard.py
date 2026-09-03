@@ -43,7 +43,7 @@ class TestSetupWizardInitialization:
 	def test_local_providers_defined(self):
 		"""Test local providers list is correctly defined."""
 		wizard = SetupWizard()
-		expected = ["ollama", "devstral_local", "anthropic_ollama"]
+		expected = ["ollama", "anthropic_ollama"]
 		assert wizard.LOCAL_PROVIDERS == expected
 
 
@@ -425,7 +425,6 @@ class TestSetupWizardParametrized:
 
 	@pytest.mark.parametrize("provider", [
 		"ollama",
-		"devstral_local",
 		"anthropic_ollama",
 	])
 	def test_all_local_providers_defined(self, provider):
@@ -517,11 +516,6 @@ GOOGLE_API_KEY=AIzaSyD_abc123ABC123abc123ABC123abc123ABC1
 						"endpoint": "http://localhost:11434",
 						"tested": True,
 						"status": "online"
-					},
-					"devstral_local": {
-						"endpoint": "http://localhost:8000",
-						"tested": False,
-						"status": "untested"
 					}
 				}
 			}

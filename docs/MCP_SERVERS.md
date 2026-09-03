@@ -188,30 +188,6 @@ ollama pull devstral-2
 # Hillstar will auto-detect and use
 ```
 
-### 6. Devstral Local MCP Server
-
-**Location:** mcp-server/devstral_local_mcp_server.py
-
-**Responsibility:** Handle local Devstral inference
-
-**Model Supported:**
-
-- devstral-small-2-24b
-
-**Implementation:**
-
-- Subprocess wrapper around local inference
-- Configurable inference engine
-- Resource management
-
-**Configuration:**
-
-- MODEL_PATH: Path to model weights
-- DEVICE: cuda / cpu
-- QUANTIZATION: Optional quantization settings
-
----
-
 ## MCP Protocol Details
 
 ### JSON-RPC 2.0 Protocol
@@ -356,13 +332,6 @@ python mcp-server/google_ai_studio_mcp_server.py
 ```bash
 ollama serve # In separate terminal
 python mcp-server/ollama_mcp_server.py
-```
-
-#### Devstral Local
-
-```bash
-export MODEL_PATH="/path/to/devstral-24b"
-python mcp-server/devstral_local_mcp_server.py
 ```
 
 ### Test Server Connectivity

@@ -11,8 +11,8 @@ Supported providers:
     - openai: OpenAI GPT (cloud API)
     - anthropic_ollama: Anthropic via Ollama (local proxy)
     - ollama: Local Ollama models
-    - devstral_local: Devstral local (GPU required)
-    - jan_code_local: Jan-Code 4B local (GPU required)
+    - local: Generic local/self-hosted OpenAI-compatible server
+      (configurable; see models/local_model.py)
     - google_ai_studio: Google Gemini (API key auth)
     - mistral: Mistral AI (cloud API)
 """
@@ -20,8 +20,7 @@ Supported providers:
 # Phase 1 - Core provider integrations
 from .anthropic_ollama_api_model import AnthropicOllamaAPIModel
 from .anthropic_model import AnthropicModel
-from .devstral_local_model import DevstralLocalModel
-from .jan_code_local_model import JanCodeLocalModel
+from .local_model import LocalModel
 from .mistral_api_model import MistralAPIModel
 from .mcp_model import MCPModel
 from .anthropic_mcp_model import AnthropicMCPModel
@@ -41,8 +40,7 @@ from .ollama_mcp_model import OllamaMCPModel
 __all__ = [
 	"AnthropicOllamaAPIModel",
 	"AnthropicModel",
-	"DevstralLocalModel",
-	"JanCodeLocalModel",
+	"LocalModel",
 	"MistralAPIModel",
 	"MCPModel",
 	"AnthropicMCPModel",

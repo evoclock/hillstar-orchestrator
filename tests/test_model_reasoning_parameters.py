@@ -5,17 +5,15 @@ from unittest.mock import patch
 
 import pytest
 
-from models.devstral_local_model import DevstralLocalModel
-from models.jan_code_local_model import JanCodeLocalModel
+from models.local_model import LocalModel
 from models.ollama_api_model import OllamaAPIModel
 
 
 @pytest.mark.parametrize(
     ("module", "model"),
     [
-        ("models.jan_code_local_model", JanCodeLocalModel("jan-code")),
+        ("models.local_model", LocalModel("local-model")),
         ("models.ollama_api_model", OllamaAPIModel("jan-code")),
-        ("models.devstral_local_model", DevstralLocalModel("devstral")),
     ],
 )
 def test_openai_compatible_adapters_forward_reasoning_controls(module, model):

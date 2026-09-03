@@ -274,34 +274,6 @@ export DEVSTRAL_ENDPOINT="http://localhost:8080"
 
 ---
 
-### Jan-Code Local (GPU Required)
-
-**Requirements:**
-
-- NVIDIA GPU with 16GB+ VRAM
-- Q8_0 GGUF model (~4.4GB on disk); 32K context tuned for 16GB
-- llama.cpp server (`jan_code_server.sh`) running on port 8081
-
-**Setup:**
-
-```bash
-# Start the llama.cpp server with the Jan-Code 4B Q8_0 GGUF model
-./jan_code_server.sh
-# Serves an OpenAI-compatible API on http://127.0.0.1:8081
-```
-
-**Configure Hillstar:**
-
-The `jan_code` provider talks to the endpoint above; no API key is needed.
-Health is checked via `GET /health`. Jan-Code runs deterministically
-(temperature 0) by default.
-
-```bash
-hillstar presets  # Should show the jan_code provider
-```
-
----
-
 ## Using the Setup Wizard
 
 **Interactive Configuration (Recommended):**

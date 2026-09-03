@@ -165,9 +165,9 @@ class TestLocalDiscovery:
 		res = resolve_seat(
 			"router-planner",
 			env={},
-			installed_models=_models("llama2:7b", "jan-code-4b:latest"),
+			installed_models=_models("llama2:7b", "qwen3:8b"),
 		)
-		assert res.model_name == "jan-code-4b:latest"
+		assert res.model_name == "qwen3:8b"
 
 	def test_falls_back_to_any_chat_model(self):
 		"""A chat seat can use any chat model; something is better than nothing."""

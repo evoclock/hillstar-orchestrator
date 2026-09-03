@@ -182,7 +182,7 @@ Cloud:
 Local:
 
 - **ollama** - Local models via Ollama
-- **devstral_local** - Local Devstral (GPU required)
+- **local** - Generic local/self-hosted OpenAI-compatible server (configurable endpoint; see `models/local_model.py`)
 
 MCP (subprocess-based):
 

@@ -9,7 +9,6 @@ SERVERS=(
   "mcp-server/anthropic_mcp_server.py"
   "mcp-server/openai_mcp_server.py"
   "mcp-server/mistral_mcp_server.py"
-  "mcp-server/devstral_local_mcp_server.py"
   "mcp-server/ollama_mcp_server.py"
 )
 

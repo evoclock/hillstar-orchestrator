@@ -313,10 +313,6 @@ with explicit permissions, auditability, and governance boundaries to
 prevent systems operating with unrestricted access to user data and
 external systems.
 
-**NOT Supported (no exceptions):**
-
-- xAI (Groq/Grok)
-- Palantir
 
 ---
 
@@ -368,7 +364,7 @@ hillstar-orchestrator/
 │ ├── mistral_api_model.py
 │ ├── mistral_mcp_model.py
 │ ├── ollama_mcp_model.py
-│ └── devstral_local_model.py
+│ └── local_model.py
 │
 ├── workflows/ # Workflow discovery & validation
 │ ├── validator.py

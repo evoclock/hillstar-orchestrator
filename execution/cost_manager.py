@@ -94,7 +94,7 @@ class CostManager:
 		Estimate cost of a model call using provider_registry pricing.
 
 		Args:
-			provider: Provider name (anthropic, openai, local, devstral_local, etc.)
+			provider: Provider name (anthropic, openai, local, ollama, etc.)
 			model_name: Model name/API ID
 			input_tokens: Estimated input tokens
 			output_tokens: Estimated output tokens
@@ -103,7 +103,7 @@ class CostManager:
 			Estimated cost in USD (0.0 if pricing not available)
 		"""
 		# Local/free models have no charge
-		if provider in ["devstral_local", "local", "ollama"]:
+		if provider in ["local", "ollama"]:
 			return 0.0
 
 		try:

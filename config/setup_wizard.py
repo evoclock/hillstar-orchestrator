@@ -19,7 +19,7 @@ system keyring for secure storage. API keys are ESSENTIAL for using LLMs in Hill
 
 Guides users through:
 1. Cloud provider API key setup (Anthropic, OpenAI, Google, Mistral) - stored in keyring
-2. Local provider testing (Ollama, Devstral local)
+2. Local provider testing (Ollama, Anthropic-via-Ollama)
 3. Provider configuration saved to ~/.hillstar/provider_registry.json
 
 Inputs
@@ -79,7 +79,7 @@ class SetupWizard:
     CLOUD_PROVIDERS = ["anthropic", "openai", "google_ai_studio", "mistral"]
 
     # Local providers that need connection testing
-    LOCAL_PROVIDERS = ["ollama", "devstral_local", "anthropic_ollama"]
+    LOCAL_PROVIDERS = ["ollama", "anthropic_ollama"]
 
     # Phase 2 providers (skip for now)
     PHASE_2_PROVIDERS = ["google_vertex", "amazon_bedrock", "azure_ai", "cohere", "meta_llama"]
@@ -336,10 +336,6 @@ class SetupWizard:
         # Test Ollama
         if self.registry.get_provider("ollama"):
             self._test_provider("ollama", "http://localhost:11434", "Ollama")
-
-        # Test Devstral local (llama.cpp server)
-        if self.registry.get_provider("devstral_local"):
-            self._test_provider("devstral_local", "http://localhost:8080", "Devstral Local (llama.cpp)")
 
         # Test Anthropic via Ollama
         if self.registry.get_provider("anthropic_ollama"):

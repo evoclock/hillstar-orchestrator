@@ -427,7 +427,10 @@ class NodeExecutor:
                 # Return error dict (will be caught by graph.execute_node)
                 return result
 
-            # Success - record cost and log
+            # Success - record cost and log. Defensive: the retry loop always
+            # assigns a dict on completion, but keep the type honest for None.
+            if result is None:
+                result = {"error": "model call produced no result", "provider": provider_to_use}
             actual_tokens_used = result.get("tokens_used", 0)
             if actual_tokens_used > 0:
                 actual_cost = self.cost_manager.estimate_cost(

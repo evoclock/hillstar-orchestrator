@@ -72,8 +72,7 @@ from models import (
 	AnthropicOllamaAPIModel,
 	AnthropicModel,
 	AnthropicMCPModel,
-	DevstralLocalModel,
-	JanCodeLocalModel,
+	LocalModel,
 	MistralAPIModel,
 	OpenAIMCPModel,
 	MistralMCPModel,
@@ -129,9 +128,6 @@ class ModelFactory:
 			provider = node["provider"]
 			# Use explicit model if given, else fall back to provider default
 			_defaults = {
-				"devstral": "devstral",
-				"jan_code": "jan-code",
-				"jan_code_local": "jan-code",
 				"local": "local",
 				"anthropic": "claude-haiku-4-5-20251001",
 				"openai": "gpt-5-mini-2025-08-07",
@@ -207,12 +203,12 @@ class ModelFactory:
 
 		return resolved
 
-	# Local llama.cpp providers and their default endpoints
+	# Generic local OpenAI-compatible provider and its default endpoint.
+	# Users point it at any server (DGX Spark/vLLM, llama.cpp, Ollama, ...)
+	# via custom_providers; see models/local_model.py. The devstral/jan_code
+	# names are kept as deprecated aliases routed to LocalModel.
 	LOCAL_LLAMA_PROVIDERS = {
-		"devstral": "http://127.0.0.1:8080",
-		"devstral_local": "http://127.0.0.1:8080",
-		"jan_code": "http://127.0.0.1:8081",
-		"jan_code_local": "http://127.0.0.1:8081",
+		"local": "http://127.0.0.1:8080",
 	}
 
 	def provider_is_available(self, provider: str) -> bool:
@@ -341,9 +337,9 @@ class ModelFactory:
 				return OllamaAPIModel(resolution.model_name, endpoint=resolution.endpoint)
 			return OllamaAPIModel(resolution.model_name)
 
-		# llamacpp and custom both speak OpenAI-compatible
+		# local and custom both speak OpenAI-compatible
 		# /v1/chat/completions, which is what the router serves.
-		return JanCodeLocalModel(resolution.model_name, endpoint=resolution.endpoint)
+		return LocalModel(resolution.model_name, endpoint=resolution.endpoint)
 
 	def get_model(self, provider: str, model_name: str, **kwargs):
 		"""Get or create a cached model safely across worker threads."""
@@ -406,7 +402,7 @@ class ModelFactory:
 				else:
 					# llamacpp and custom both speak OpenAI-compatible
 					# /v1/chat/completions, which is also what the router serves.
-					self._models[key] = JanCodeLocalModel(effective_model, endpoint=endpoint)
+					self._models[key] = LocalModel(effective_model, endpoint=endpoint)
 				return self._models[key]
 
 			if provider == "anthropic":
@@ -426,9 +422,7 @@ class ModelFactory:
 			elif provider == "ollama_mcp":
 				self._models[key] = OllamaMCPModel(model_name)
 			elif provider in ["devstral", "devstral_local", "local"]:
-				self._models[key] = DevstralLocalModel(model_name)
-			elif provider in ["jan_code", "jan_code_local"]:
-				self._models[key] = JanCodeLocalModel(model_name)
+				self._models[key] = LocalModel(model_name)
 			else:
 				raise ValueError(f"Unknown provider: {provider}")
 

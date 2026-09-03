@@ -80,8 +80,8 @@ This example shows a 5-node pipeline where each node processes the output of the
 {
  "entity_extraction": {
  "tool": "model_call",
- "provider": "devstral_local",
- "model": "devstral-small-2-24b",
+ "provider": "local",
+ "model": "my-local-model",
  "parameters": {
  "prompt": "Here is condensed text:\n\n{{ mistral_condense.output }}\n\nExtract all key concepts and list them as bullet points.",
  "max_tokens": 200

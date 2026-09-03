@@ -46,8 +46,8 @@
       },
       "validate_reconstruction": {
         "tool": "model_call",
-        "provider": "devstral_local",
-        "model": "devstral-small-2-24b",
+        "provider": "local",
+        "model": "my-local-model",
         "task": "Compare the reconstruction with what you know about haiku poetry. Does it capture the essence of haikus about nature, birds, and connectedness?",
         "input": "Original reconstruction: {{ reconstruct_from_representation.output }}\n\nCompare this with what you know about haiku poetry. Does it capture the essence of haikus about nature, birds, and connectedness? Provide a brief validation.",
         "parameters": {
@@ -94,7 +94,8 @@
       "tos_accepted": true,
       "audit_enabled": true
     },
-    "devstral_local": {
+    "local": {
+      "endpoint": "http://127.0.0.1:8080",
       "tos_accepted": true,
       "audit_enabled": true
     }
