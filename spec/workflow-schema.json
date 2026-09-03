@@ -57,7 +57,7 @@
         },
         "preset": {
           "type": "string",
-          "enum": ["minimize_cost", "balanced", "maximize_quality", "local_only"],
+          "enum": ["lightweight", "balanced", "maximize_quality", "local_only"],
           "description": "Named preset strategy (only used when mode=preset)"
         },
         "budget": {
@@ -84,7 +84,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+                "enum": [["anthropic", "anthropic_ollama", "anthropic_mcp", "openai", "openai_mcp", "mistral", "mistral_mcp", "google_ai_studio", "ollama", "ollama_mcp", "local", "router", "codex_mcp", "codex_messages"]]
               },
               "description": "Priority order for provider selection"
             },
@@ -92,7 +92,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+                "enum": [["anthropic", "anthropic_ollama", "anthropic_mcp", "openai", "openai_mcp", "mistral", "mistral_mcp", "google_ai_studio", "ollama", "ollama_mcp", "local", "router", "codex_mcp", "codex_messages"]]
               },
               "description": "Only use these providers"
             },
@@ -100,7 +100,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["devstral", "anthropic", "anthropic_mcp", "openai", "local", "mistral", "google", "codex_mcp", "codex_messages"]
+                "enum": [["anthropic", "anthropic_ollama", "anthropic_mcp", "openai", "openai_mcp", "mistral", "mistral_mcp", "google_ai_studio", "ollama", "ollama_mcp", "local", "router", "codex_mcp", "codex_messages"]]
               },
               "description": "Never use these providers"
             }
@@ -210,11 +210,11 @@
               },
               "tool": {
                 "type": "string",
-                "enum": ["model_call", "file_read", "file_write", "script_run", "checkpoint"]
+                "enum": ["model_call", "file_read", "file_write", "script_run", "checkpoint", "git_commit"]
               },
               "provider": {
                 "type": "string",
-                "enum": ["router", "anthropic", "anthropic_mcp", "openai", "mistral", "google", "local", "devstral", "codex_messages", "codex_mcp"],
+                "enum": [["anthropic", "anthropic_ollama", "anthropic_mcp", "openai", "openai_mcp", "mistral", "mistral_mcp", "google_ai_studio", "ollama", "ollama_mcp", "local", "router", "codex_mcp", "codex_messages"]],
                 "description": "Model provider (if tool is model_call). router requires a host-supplied or explicitly pinned OpenAI-compatible router for seat models. codex_mcp uses Codex CLI as MCP server (no API key required). anthropic_mcp uses Claude API via MCP (no env var required)"
               },
               "model": {
