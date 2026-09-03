@@ -15,7 +15,6 @@ Purpose
 Custom exceptions for Hillstar Orchestrator.
 
 Provides domain-specific exceptions for error handling:
-- BudgetExceededError: Workflow exceeded cost limits
 - ModelSelectionError: Failed to select valid model
 - ConfigurationError: Invalid workflow configuration
 
@@ -33,11 +32,6 @@ Last Edited
 
 class HillstarException(Exception):
 	"""Base exception for Hillstar Orchestrator."""
-	pass
-
-
-class BudgetExceededError(HillstarException):
-	"""Raised when workflow cost exceeds budget limits."""
 	pass
 
 

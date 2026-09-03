@@ -118,12 +118,14 @@ export MISTRAL_API_KEY="your-api-key"
 **Model Options:**
 
 - `magistral-medium-1.2` (multimodal reasoning, agentic tasks)
-- `mistral-large-3` (general purpose, cost-effective)
-- `devstral-2` (coding agent, codebase exploration, software engineering)
+- `mistral-large-3` (general purpose, efficient)
 - `mistral-medium-3.1` (multimodal, general tasks)
 - `codestral` (code completion, code generation, low-latency)
 - `mistral-small-3.2` (lightweight general purpose)
 - `ministral-8b` / `ministral-3b` (small tasks, edge deployment)
+
+No model list is maintained here — see https://docs.mistral.ai/getting-started/models
+for the current catalog.
 
 **Parameter Support:** Mistral fully supports temperature and top_p tuning. Recommended: fix temperature, then adjust top_p for exploration.
 
@@ -159,7 +161,7 @@ Advanced Reasoning (Gemini 2.5):
 
 - `gemini-2.5-pro` (SOTA thinking for code, math, STEM, codebases)
 - `gemini-2.5-flash` (fast multimodal inference)
-- `gemini-2.5-flash-lite` (cost-efficient)
+- `gemini-2.5-flash-lite` (lightweight)
 - `gemini-2.5-computer-user` (agentic browser automation, UI testing)
 
 **Important:** Keep temperature at default (1.0). Changing temperature causes performance degradation on reasoning tasks. Use thinking mode for complex problems.
@@ -206,10 +208,8 @@ by default and need no API key.
 
 **Available Models (via ollama pull):**
 
-- `mistral` - Fast, general purpose
-- `neural-chat` - Conversational
-- `devstral-2:123b-cloud` - Coding-focused (if available)
-- `glm-4.7:cloud` - Multilingual
+See https://ollama.com/library for the current catalog. Any pulled model
+works through the `ollama` provider or the OpenAI-compatible `local` provider.
 
 ---
 
@@ -246,31 +246,36 @@ Edit `~/.hillstar/provider_registry.json`:
 
 ---
 
-### Devstral Local (GPU Required)
+### Generic local servers (GPU optional)
 
-**Requirements:**
+Hillstar no longer ships hard-coded local model providers (the old
+Devstral/Jan-Code models are removed). Use the generic `local` provider with
+any OpenAI-compatible server — vLLM, llama.cpp server, LM Studio, Ollama:
 
-- NVIDIA GPU with 16GB+ VRAM (for 24B model)
-- CUDA toolkit installed
-
-**Setup:**
+**Setup (vLLM example):**
 
 ```bash
-# Using vLLM
 pip install vllm
-
-# Download model from HuggingFace
-# Run locally on port 8080
 python -m vllm.entrypoints.openai.api_server \
-  --model "Devstral-small-2-24b-GGUF" \
+  --model "<your-model>" \
   --port 8080
 ```
 
-**Configure Hillstar:**
+**Configure Hillstar** (workflow `model_config` or provider registry):
 
-```bash
-export DEVSTRAL_ENDPOINT="http://localhost:8080"
+```json
+{
+  "custom_providers": {
+    "local": {
+      "endpoint": "http://localhost:8080",
+      "model_name": "<your-model>"
+    }
+  }
+}
 ```
+
+Local execution is optional and generally not recommended; hosted providers
+(e.g. OpenAI) are simpler and reproducible. See `models/local_model.py`.
 
 ---
 
@@ -307,23 +312,6 @@ hillstar execute workflow.json
 
 ---
 
-## Cost Estimation
-
-Before running expensive models:
-
-```bash
-# Estimate cost in workflow.json
-# Hillstar tracks:
-# - Input tokens × input_price
-# - Output tokens × output_price
-# - Per-provider pricing from registry
-
-# View estimated costs in trace output
-rg "cost" .hillstar/
-```
-
----
-
 ## Resilience and Retries
 
 Hillstar automatically retries transient provider failures during node
@@ -338,8 +326,10 @@ Errors that are not transient (for example quota exhaustion, context-length
 overflow, or provider overload) are not retried on the same provider;
 instead the configured provider fallback chain is tried. When a model is
 pinned in `explicit` mode the fallback chain is disabled, so only the
-single provider is retried. A budget-exceeded condition stops execution
-immediately.
+single provider is retried.
+
+Hillstar does not perform cost estimation or budget enforcement; check your
+provider's usage dashboard for spend.
 
 ---
 
@@ -372,3 +362,7 @@ immediately.
 - Git ignores credential files (.gitignore)
 - Hillstar automatically redacts credentials from error messages and logs (24 pattern types)
 - Audit logging captures all model calls
+
+---
+
+*Last updated: 2026-09-03*

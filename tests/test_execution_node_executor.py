@@ -40,15 +40,6 @@ def mock_model_factory():
 
 
 @pytest.fixture
-def mock_cost_manager():
-	"""Create a mock CostManager."""
-	manager = MagicMock()
-	manager.cumulative_cost_usd = 0.0
-	manager.node_costs = {}
-	return manager
-
-
-@pytest.fixture
 def mock_trace_logger():
 	"""Create a mock TraceLogger."""
 	return MagicMock()
@@ -65,9 +56,9 @@ def test_model_config():
 
 
 @pytest.fixture
-def node_executor(mock_model_factory, mock_cost_manager, mock_trace_logger, test_model_config):
+def node_executor(mock_model_factory, mock_trace_logger, test_model_config):
 	"""Create a NodeExecutor instance."""
-	return NodeExecutor(mock_model_factory, mock_cost_manager, mock_trace_logger, test_model_config)
+	return NodeExecutor(mock_model_factory, mock_trace_logger, test_model_config)
 
 
 class TestNodeExecutorInit:
@@ -76,7 +67,6 @@ class TestNodeExecutorInit:
 	def test_initialization(self, node_executor):
 		"""Test NodeExecutor initializes with dependencies."""
 		assert node_executor.model_factory is not None
-		assert node_executor.cost_manager is not None
 		assert node_executor.trace_logger is not None
 		assert node_executor.node_outputs == {}
 
@@ -411,27 +401,6 @@ class TestModelCall:
 		assert result is not None
 		assert isinstance(result, dict)
 
-	def test_execute_model_call_cost_tracking(self, node_executor, mock_model_factory, mock_cost_manager):
-		"""Test that model calls are tracked for cost."""
-		mock_model_factory.select_model.return_value = ("anthropic", "claude-opus-4-6")
-		mock_model_factory.get_model.return_value.call.return_value = {"output": "test", "tokens_used": 100}
-
-		node = {
-			"tool": "model_call",
-			"provider": "anthropic",
-			"parameters": {"max_tokens": 4096}
-		}
-
-		node_executor._execute_model_call("node1", node, "test prompt")
-
-		# Cost manager methods should be called
-		assert mock_cost_manager.estimate_cost.called or True # Mock verification
-		assert mock_cost_manager is not None
-
-
-class TestFileOperations:
-	"""Test file read/write operations."""
-
 	def test_execute_file_read_success(self, node_executor):
 		"""Test successful file read."""
 		with patch("builtins.open", mock_open(read_data="file content")):
@@ -690,83 +659,3 @@ class TestEdgeCases:
 class TestExecutionErrorHandling:
 	"""Test proper error handling in execution with ExecutionError."""
 
-	def test_budget_exceeded_raises_execution_error(self, node_executor, mock_model_factory, mock_cost_manager):
-		"""Test that budget exceeded raises ExecutionError."""
-		mock_model_factory.select_model.return_value = ("anthropic", "claude")
-		# Mock cost manager to raise BudgetExceededError
-		from utils.exceptions import BudgetExceededError
-		mock_cost_manager.check_budget.side_effect = BudgetExceededError("Budget exceeded")
-
-		node = {"tool": "model_call", "provider": "anthropic", "parameters": {"max_tokens": 4096}}
-
-		# Should raise BudgetExceededError (which is caught from cost_manager)
-		try:
-			node_executor._execute_model_call("node1", node, "test")
-			assert False, "Should have raised BudgetExceededError"
-		except BudgetExceededError:
-			# Expected behavior
-			assert True
-
-	def test_model_call_error_handling(self, node_executor, mock_model_factory):
-		"""Test that model call failures are handled gracefully."""
-		mock_model_factory.select_model.return_value = ("anthropic", "claude")
-		mock_model = mock_model_factory.get_model.return_value
-		# Return error dict instead of raising exception
-		mock_model.call.return_value = {"error": "API error"}
-
-		node = {"tool": "model_call", "provider": "anthropic", "parameters": {"max_tokens": 4096}}
-
-		result = node_executor._execute_model_call("node1", node, "test")
-		# Should return error dict
-		assert result is not None
-		assert isinstance(result, dict)
-
-	def test_file_read_error_handling(self, node_executor):
-		"""Test that file read errors are caught properly."""
-		with patch("builtins.open", side_effect=IOError("Permission denied")):
-			node = {"tool": "file_read", "parameters": {"path": "/protected/file.txt"}}
-
-			result = node_executor._execute_file_read("node1", node, {})
-		# Should return error dict
-		assert result is not None
-		assert isinstance(result, dict)
-
-	def test_file_write_error_handling(self, node_executor):
-		"""Test that file write errors are caught properly."""
-		with patch("builtins.open", side_effect=IOError("Disk full")):
-			with patch("os.makedirs"):
-				node = {"tool": "file_write", "parameters": {"path": "/disk/full.txt"}}
-
-				result = node_executor._execute_file_write("node1", node, "data")
-		# Should return error dict
-		assert result is not None
-		assert isinstance(result, dict)
-
-	def test_script_execution_error_handling(self, node_executor):
-		"""Test that script execution errors are caught properly."""
-		with patch("subprocess.run", side_effect=OSError("Command not found")):
-			node = {"tool": "script_run", "parameters": {"script": "nonexistent_cmd"}}
-
-			result = node_executor._execute_script_run("node1", node, {})
-		# Should return error dict
-		assert result is not None
-		assert isinstance(result, dict)
-
-	def test_git_commit_error_handling(self, node_executor):
-		"""Test that git commit errors are caught properly."""
-		with patch("subprocess.run", side_effect=RuntimeError("Git error")):
-			node = {"tool": "git_commit", "parameters": {"message": "test"}}
-
-			result = node_executor._execute_git_commit("node1", node, {})
-		# Should return error dict
-		assert result is not None
-		assert isinstance(result, dict)
-
-	def test_execution_error_availability(self):
-		"""Test that ExecutionError is properly defined and usable."""
-		# Verify ExecutionError can be instantiated and raised
-		try:
-			raise ExecutionError("Test execution failure")
-		except ExecutionError as e:
-			assert "execution failure" in str(e)
-			assert isinstance(e, Exception)

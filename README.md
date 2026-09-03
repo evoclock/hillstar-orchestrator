@@ -18,7 +18,7 @@ Hillstar is an open-source workflow orchestrator built for scientific research l
 
 Hillstar is designed with auditability, security, and governance as first-class concerns, so it fits naturally in tightly regulated environments.
 
-The core design principle: explicit over implicit. No unrestricted API access. No magic. You define workflows as composable DAGs where each node performs one action and data flows explicitly between stages. Every decision is auditable: which model was called, what parameters were used, how much it cost, whether review was required before the output moved downstream.
+The core design principle: explicit over implicit. No unrestricted API access. No magic. You define workflows as composable DAGs where each node performs one action and data flows explicitly between stages. Every decision is auditable: which model was called, what parameters were used, whether review was required before the output moved downstream.
 
 This matters in environments where highly sensitive data is in use—teams working with human genomic data, clinical trials, or proprietary research—where governance isn't a nice-to-have, it's the foundation. Hillstar bakes in compliance checking, credential security, and comprehensive logging from the start.
 

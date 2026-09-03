@@ -147,9 +147,6 @@ class WorkflowDiscovery:
 			),
 			"preset": workflow.get("model_config", {}).get("preset"),
 			"mode": workflow.get("model_config", {}).get("mode", "explicit"),
-			"has_budget": bool(
-				workflow.get("model_config", {}).get("budget")
-			),
 			"checkpoints": len(workflow.get("state", {}).get("checkpoints", [])),
 		}
 

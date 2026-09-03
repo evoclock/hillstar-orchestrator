@@ -199,7 +199,7 @@ Exit code: **1** if any HIGH or CRITICAL findings, **0** otherwise.
 
 **Scope note:** This presentation reflects the agent-scan capability set at
 the time of writing (March 2026). It does not claim feature parity with other
-scanners in this space — notably Testudo, which covers detection surface that
+scanners in this space, notably our own Testudo, which covers detection surface that
 agent-scan does not yet reach. agent-scan is being actively expanded in that
 direction; treat the head-to-head table below as a point-in-time comparison,
 not a complete capability map.
@@ -246,3 +246,7 @@ not a complete capability map.
 *Built as part of Hillstar, an open-source research workflow orchestrator.*
 
 *Repository: github.com/evoclock/hillstar-orchestrator (feature/agent-scan branch)*
+
+---
+
+*Last updated: 2026-09-03*

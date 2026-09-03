@@ -270,7 +270,7 @@ class TestGetWorkflowInfo:
 			expected_keys = {
 				"path", "filename", "directory", "id", "version", "description",
 				"node_count", "edge_count", "uses_custom_provider", "preset",
-				"mode", "has_budget", "checkpoints"
+				"mode", "checkpoints"
 			}
 			assert set(info.keys()) == expected_keys
 

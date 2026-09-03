@@ -7,7 +7,6 @@
 from .exceptions import (
 	HillstarException,
 	ConfigurationError,
-	BudgetExceededError,
 	ModelSelectionError,
 )
 from .credential_redactor import redact, contains_credentials, CredentialRedactor
@@ -19,7 +18,6 @@ from .credential_redactor import redact, contains_credentials, CredentialRedacto
 __all__ = [
 	"HillstarException",
 	"ConfigurationError",
-	"BudgetExceededError",
 	"ModelSelectionError",
 	"redact",
 	"contains_credentials",

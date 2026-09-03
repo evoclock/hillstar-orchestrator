@@ -42,3 +42,7 @@ catalogs:
 Hillstar does not price-gate or cost-manage workflow execution. Any cost
 estimates previously shown here are historical. If you need cost visibility,
 check your provider's usage dashboard.
+
+---
+
+*Last updated: 2026-09-03*

@@ -20,7 +20,6 @@ def make_executor():
 	return NodeExecutor(
 		MagicMock(),
 		MagicMock(),
-		MagicMock(),
 		{"anthropic": {"models": ["claude-opus-4-6"]}},
 	)
 

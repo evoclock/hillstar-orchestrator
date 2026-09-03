@@ -176,7 +176,7 @@ Cloud:
 
 - **anthropic** - Claude models (Opus, Sonnet, Haiku)
 - **openai** - GPT and o-series models
-- **mistral** - Mistral, Codestral, Devstral models
+- **mistral** - Mistral and Codestral models
 - **google_ai_studio** - Gemini models
 
 Local:
@@ -354,3 +354,7 @@ python -c "import hillstar; print(hillstar.__version__)"
 **Status:** Production Ready
 
 For complete documentation, see [User_Manual.md](User_Manual.md)
+
+---
+
+*Last updated: 2026-09-03*

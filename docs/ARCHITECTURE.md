@@ -42,14 +42,12 @@ NodeExecutor (for each node in order)
  +---> Determine operation type
  +---> Dispatch to appropriate handler
  +---> Track inputs/outputs
- +---> Record cost
  |
  v
 Results and Audit Trail
  |
  +---> Final workflow outputs
  +---> Complete trace log
- +---> Cost breakdown
  +---> Compliance report
 ```
 
@@ -60,7 +58,7 @@ Responsible for:
 
 - Loading and parsing workflow definitions
 - Initializing graph, trace logger, and checkpoints
-- Instantiating model selector, cost manager, and config validator
+- Instantiating model selector and config validator
 - Orchestrating the execution loop
 - Writing final results and metadata
 
@@ -91,7 +89,6 @@ Responsible for:
 - Executing individual nodes
 - Managing provider chains and fallbacks
 - Handling different operation types
-- Cost tracking for each node
 - Error detection and retry logic
 
 Operation Types:
@@ -127,20 +124,6 @@ Key Methods:
 - provider_is_available: Check provider readiness
 - ollama_available: Detect local Ollama
 - get_model: Factory with caching
-
-#### execution/cost_manager.py (Cost Tracking)
-Responsible for:
-
-- Estimating costs before/after calls
-- Tracking cumulative costs
-- Per-node cost recording
-- Budget enforcement
-
-Key Methods:
-
-- estimate_cost: Calculate cost for model call
-- check_budget: Enforce budget limits
-- record_cost: Track per-node costs
 
 #### execution/config_validator.py (Configuration)
 Responsible for:
@@ -202,7 +185,6 @@ For each node (topological order):
  |
  +---> Execute node
  +---> Record outputs
- +---> Track costs
  +---> Log to trace
  +---> Check compliance gates
  |
@@ -210,7 +192,6 @@ For each node (topological order):
 Aggregate Results
  |
  +---> Final outputs
- +---> Cost summary
  +---> Trace log
  +---> Compliance report
 ```
@@ -243,7 +224,6 @@ Handle Errors
 Record Results
  |
  +---> Store output
- +---> Log cost
  +---> Add to trace
  +---> Check compliance
 ```
@@ -314,8 +294,6 @@ Workflow Execution
  |
  +---> During execution:
  | Log all decisions
- | Track costs in real-time
- | Enforce budget limits
  |
  +---> At completion:
  | Generate compliance report
@@ -348,9 +326,7 @@ runner.py (Orchestrator)
  +---> node_executor.py (Node dispatch)
  | |
  | +---> model_selector.py (Get model)
- | +---> cost_manager.py (Track cost)
  |
- +---> cost_manager.py (Budget tracking)
  +---> config_validator.py (Config validation)
  +---> checkpoint.py (State persistence)
  +---> observability.py (Logging/tracing)
@@ -363,9 +339,8 @@ All modules receive dependencies via constructor:
 
 ```python
 class NodeExecutor:
- def __init__(self, model_factory, cost_manager, trace_logger, model_config):
+ def __init__(self, model_factory, trace_logger, model_config):
  self.model_factory = model_factory
- self.cost_manager = cost_manager
  self.trace_logger = trace_logger
  self.model_config = model_config
 ```
@@ -393,8 +368,6 @@ Structure:
  "models": {
  "model_id": {
  "display_name": "Human readable name",
- "input_cost_per_token": 0.01,
- "output_cost_per_token": 0.03,
  "context_window": 200000
  }
  }
@@ -405,7 +378,6 @@ Structure:
 Used by:
 
 - model_selector.py: Find available models
-- cost_manager.py: Calculate costs
 - validator.py: Validate model references
 
 ### Workflow Configuration
@@ -497,7 +469,6 @@ Strategy: Return error, log for investigation
 
 - Full workflow execution
 - Multiple providers
-- Real cost calculation
 - Compliance validation
 
 See coverage.md for test coverage details.
@@ -541,3 +512,7 @@ See coverage.md for test coverage details.
 __Document Status:__ Sprint 1 Release
 __Last Updated:__ 2026-02-28
 __Version:__ 1.0.0
+
+---
+
+*Last updated: 2026-09-03*

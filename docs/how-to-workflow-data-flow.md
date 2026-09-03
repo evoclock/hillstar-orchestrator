@@ -290,3 +290,7 @@ To run the E2E tests:
 ```bash
 python -m pytest tests/test_e2e_haiku_synthesis.py -v
 ```
+
+---
+
+*Last updated: 2026-09-03*

@@ -69,7 +69,6 @@ from .checkpoint import CheckpointManager
 from .graph import WorkflowGraph
 from .observability import ExecutionObserver
 from .trace import TraceLogger
-from .cost_manager import CostManager
 from .config_validator import ConfigValidator
 from .model_selector import ModelFactory
 from .node_executor import NodeExecutor
@@ -132,11 +131,10 @@ class WorkflowRunner:
 		self.max_concurrency = configured_concurrency
 
 		# Initialize modular components with dependency injection
-		self.cost_manager = CostManager(self.model_config)
 		self.config_validator = ConfigValidator(self.model_config, self.graph, self.trace_logger)
 		self.config_validator.validate_model_config()
 		self.model_factory = ModelFactory(self.model_config, self.trace_logger, self.config_validator)
-		self.node_executor = NodeExecutor(self.model_factory, self.cost_manager, self.trace_logger, self.model_config)
+		self.node_executor = NodeExecutor(self.model_factory, self.trace_logger, self.model_config)
 
 		# Ensure output directory exists and create standard subdirectories
 		os.makedirs(output_dir, exist_ok=True)
@@ -201,7 +199,6 @@ class WorkflowRunner:
 				],
 				"platform_responsibilities": [
 					"Enforce API authentication for orchestration",
-					"Provide cost tracking and budget enforcement",
 					"Log compliance-related events"
 				],
 				"compliance_warnings": [
@@ -311,7 +308,6 @@ class WorkflowRunner:
 				"skipped": False,
 			}
 		except Exception as exc:
-			self.cost_manager.release_budget(node_id)
 			return {
 				"result": None,
 				"events": events,
@@ -557,7 +553,7 @@ class WorkflowRunner:
 			self.execution_observer.workflow_error(str(exc))
 			raise
 
-		self.execution_observer.workflow_complete(self.cost_manager.cumulative_cost_usd)
+		self.execution_observer.workflow_complete()
 		return self._get_execution_result(execution_order)
 
 	def _write_step_metadata(self, trace_file: str, execution_order: list) -> None:
@@ -577,7 +573,6 @@ class WorkflowRunner:
 			"executed_at": datetime.now().isoformat(),
 			"nodes_executed": len(execution_order),
 			"total_nodes": len(execution_order),
-			"cumulative_cost_usd": self.cost_manager.cumulative_cost_usd,
 			"trace_file": trace_file,
 		}
 
@@ -602,29 +597,8 @@ class WorkflowRunner:
 		final_state = self.graph.export_state()
 		trace_file = self.trace_logger.finalize()
 
-		if self.model_config.get("explainability", {}).get("log_cost_estimates"):
-			budget = self.model_config.get("budget", {})
-			max_workflow = budget.get("max_workflow_usd")
-
-			summary = {
-				"timestamp": datetime.now().isoformat(),
-				"type": "budget_summary",
-				"cumulative_cost_usd": self.cost_manager.cumulative_cost_usd,
-				"node_costs": self.cost_manager.node_costs,
-			}
-
-			if max_workflow:
-				remaining = max_workflow - self.cost_manager.cumulative_cost_usd
-				summary["max_workflow_usd"] = max_workflow
-				summary["remaining_budget_usd"] = remaining
-				summary["utilization_percent"] = (self.cost_manager.cumulative_cost_usd / max_workflow) * 100
-
-			self.trace_logger.log(summary)
-
 		print("\n Workflow completed")
 		print(f" Trace: {trace_file}")
-		if self.cost_manager.cumulative_cost_usd > 0:
-			print(f" Cost: ${self.cost_manager.cumulative_cost_usd:.4f}")
 
 		try:
 			from governance import GovernanceEnforcer
@@ -648,5 +622,4 @@ class WorkflowRunner:
 			"status": "success",
 			"outputs": final_state["node_outputs"],
 			"trace_file": trace_file,
-			"cumulative_cost_usd": self.cost_manager.cumulative_cost_usd,
 		}

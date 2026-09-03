@@ -67,7 +67,6 @@ import time
 from datetime import datetime
 from typing import Any
 from .model_selector import ModelFactory
-from .cost_manager import CostManager
 from .trace import TraceLogger
 from config.model_selector import ModelSelector
 
@@ -84,19 +83,16 @@ class NodeExecutor:
     def __init__(
         self,
         model_factory: ModelFactory,
-        cost_manager: CostManager,
         trace_logger: TraceLogger,
         model_config: dict,
     ):
         """
         Args:
                 model_factory: ModelFactory for model instantiation
-                cost_manager: CostManager for cost tracking
                 trace_logger: TraceLogger for execution logging
                 model_config: Model configuration dict
         """
         self.model_factory = model_factory
-        self.cost_manager = cost_manager
         self.trace_logger = trace_logger
         self.model_config = model_config
         self.node_outputs: dict = {}  # node_id -> output text
@@ -251,7 +247,7 @@ class NodeExecutor:
         return chain
 
     def _execute_model_call(self, node_id: str, node: dict, inputs: Any) -> dict:
-        """Execute model call with smart selection, budget checking, and provider fallback.
+        """Execute model call with smart selection and provider fallback.
 
         Provider fallback chain: Tries providers in order, falling back on quota/rate limit errors.
         Supports automatic file output writing via the 'outputs' field in node definition:
@@ -271,36 +267,6 @@ class NodeExecutor:
             node_copy = node.copy()
             node_copy["provider"] = provider_to_use
             _, model_name = self.model_factory.select_model(node_id, node_copy)
-
-            # Estimate cost for this provider
-            input_estimate = len(prompt.split()) * 1.3  # ~1.3 tokens per word
-            output_estimate = parameters.get("max_tokens", 4096)
-            estimated_cost = self.cost_manager.estimate_cost(
-                provider_to_use,
-                model_name,
-                int(input_estimate),
-                output_estimate,
-            )
-
-            # Check budget
-            try:
-                self.cost_manager.check_budget(
-                    estimated_cost, node_id, reserve=True
-                )
-            except Exception as e:
-                # Log error and re-raise (budget errors don't trigger fallback)
-                self.cost_manager.release_budget(node_id)
-                self.trace_logger.log(
-                    {
-                        "timestamp": datetime.now().isoformat(),
-                        "node_id": node_id,
-                        "status": "budget_exceeded",
-                        "estimated_cost": estimated_cost,
-                        "cumulative_cost": self.cost_manager.cumulative_cost_usd,
-                        "error": str(e),
-                    }
-                )
-                raise
 
             # Get model (pass codex_mcp-specific params if present)
             model_kwargs = {}
@@ -409,7 +375,6 @@ class NodeExecutor:
 
                 # Error is not fallback-triggering or we're out of providers
                 # Log final error
-                self.cost_manager.release_budget(node_id)
                 final_log = {
                     "timestamp": datetime.now().isoformat(),
                     "node_id": node_id,
@@ -418,7 +383,6 @@ class NodeExecutor:
                     "model": model_name,
                     "status": "error",
                     "error": error_msg,
-                    "estimated_cost_usd": estimated_cost,
                 }
                 if fallback_attempts:
                     final_log["fallback_attempts"] = fallback_attempts
@@ -432,17 +396,6 @@ class NodeExecutor:
             if result is None:
                 result = {"error": "model call produced no result", "provider": provider_to_use}
             actual_tokens_used = result.get("tokens_used", 0)
-            if actual_tokens_used > 0:
-                actual_cost = self.cost_manager.estimate_cost(
-                    provider_to_use,
-                    model_name,
-                    actual_tokens_used // 2,  # Rough split (could be refined)
-                    actual_tokens_used // 2,
-                )
-            else:
-                actual_cost = estimated_cost
-
-            self.cost_manager.record_cost(node_id, actual_cost)
 
             # Log successful execution (with fallback history if applicable)
             selection_log = {
@@ -454,9 +407,6 @@ class NodeExecutor:
                 "temperature": temperature,
                 "output_length": len(result.get("output", "")),
                 "tokens_used": result.get("tokens_used", 0),
-                "estimated_cost_usd": estimated_cost,
-                "actual_cost_usd": actual_cost,
-                "cumulative_cost_usd": self.cost_manager.cumulative_cost_usd,
             }
             if reasoning_parameters:
                 selection_log["reasoning_parameters"] = reasoning_parameters
@@ -524,7 +474,6 @@ class NodeExecutor:
             return result
 
         # All providers exhausted - should not reach here
-        self.cost_manager.release_budget(node_id)
         return {
             "error": "All provider fallback attempts exhausted",
             "fallback_attempts": fallback_attempts,

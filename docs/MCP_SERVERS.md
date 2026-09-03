@@ -108,11 +108,8 @@ Flexibility:
 
 **Models Supported:**
 
-- mistral-large-3
-- mistral-medium-3.1
-- ministral-3b, ministral-8b
-- codestral
-- devstral-2
+See https://docs.mistral.ai/getting-started/models for the current catalog
+(any Mistral model identifier works).
 
 **Implementation:**
 
@@ -159,10 +156,8 @@ Flexibility:
 
 **Models Supported:**
 
-- devstral-2:123b-cloud
-- minimax-m2.1:cloud
-- glm-4.7:cloud
-- Custom models (via Ollama)
+Any model pulled into your local Ollama instance — see
+https://ollama.com/library. No hard-coded list.
 
 **Implementation:**
 
@@ -182,8 +177,8 @@ Flexibility:
 # Start Ollama
 ollama serve
 
-# Pull model
-ollama pull devstral-2
+# Pull a model (example)
+ollama pull qwen3:8b
 
 # Hillstar will auto-detect and use
 ```
@@ -255,8 +250,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "content": "Hello! How can I help?",
  "stop_reason": "end_turn",
  "input_tokens": 10,
- "output_tokens": 5,
- "cost_usd": 0.15
+ "output_tokens": 5
  }
 }
 ```
@@ -398,7 +392,6 @@ Each server implements:
 - Exponential backoff on rate limits
 - Quota tracking per provider
 - Fallback to alternate providers
-- Cost limiting to prevent bill shock
 
 ---
 
@@ -438,14 +431,12 @@ Solutions:
 3. Reduce batch size
 4. Implement timeouts
 
-### Token/Cost Issues
+### Token Issues
 
 Check:
 
 1. Model context window (max_tokens)
-2. Actual vs. estimated costs
-3. Provider billing dashboard
-4. Request token counts
+2. Request token counts
 
 ---
 
@@ -479,8 +470,7 @@ class CustomMCPServer:
  "content": "response",
  "stop_reason": "end_turn",
  "input_tokens": 10,
- "output_tokens": 5,
- "cost_usd": 0.01
+ "output_tokens": 5
  }
 
  def handle_request(self, request: dict) -> dict:
@@ -589,3 +579,7 @@ SDK Versions (pinned in requirements.txt):
 **Version:** 1.1.0
 
 See PROVIDER_MODEL_REFERENCE.md for provider-specific details and capabilities.
+
+---
+
+*Last updated: 2026-09-03*
