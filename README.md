@@ -1,4 +1,4 @@
-# Hillstar Orchestrator v1.1.0
+# Hillstar Orchestrator v1.2.0
 
 ![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
 
@@ -7,7 +7,7 @@
   <a href="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml"><img src="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml/badge.svg" alt="Docs"/></a>
   <a href="https://pypi.org/project/hillstar-orchestrator/"><img src="https://img.shields.io/pypi/v/hillstar-orchestrator?style=flat" alt="PyPI"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL%20v3-blue?style=flat" alt="License: AGPL v3"/></a>
-  <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.10+"/>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat&logo=python&logoColor=white" alt="Python 3.11+"/>
 </p>
 
 **[PyPI](https://pypi.org/project/hillstar-orchestrator/)** | **[API Documentation](https://evoclock.github.io/hillstar-orchestrator/)** | **[User Manual](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/User_Manual.md)** | **[Setup Guide](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/SETUP_GUIDE.md)**
@@ -26,7 +26,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 
 ---
 
-## Current Features (v1.1.0)
+## Current Features (v1.2.0)
 
 - **DAG-based workflows** - Define complex research pipelines as
  directed acyclic graphs
@@ -181,7 +181,7 @@ Complete workflows require root-level configuration with DAG nodes:
  "analyze": {
  "tool": "model_call",
  "provider": "anthropic",
- "model": "claude-opus-4-6",
+ "model": "<claude-model>",
  "task": "Analyze data",
  "parameters": {
  "max_tokens": 4096
@@ -213,8 +213,9 @@ Complete workflows require root-level configuration with DAG nodes:
 - **Cloud APIs**: Anthropic (Claude), OpenAI (GPT), Mistral,
  Google (Gemini)
 - All use API keys/credentials (never embedded in workflows)
-- **Local Models**: Ollama, llama.cpp, Devstral, Jan-Code, or any
- HTTP-compatible server
+- **Local Models**: Ollama, llama.cpp, vLLM, LM Studio, or any
+ OpenAI-compatible HTTP server via the configurable `local` provider
+ (see `models/local_model.py`)
 - **Custom Providers**: Bring your own via wrapper scripts
 - **Subscription mode**: OpenAI only. Unlike Anthropic, OpenAI has decided to support access and usage of your subscription via third party harnesses/tools. A caveat worth mentioning is that if you are developing software, you should default to Cloud APIs for reliability.
 
@@ -229,7 +230,7 @@ Complete workflows require root-level configuration with DAG nodes:
 {
  "tool": "model_call",
  "provider": "anthropic",
- "model": "claude-opus-4-6",
+ "model": "<claude-model>",
  "parameters": {
  "system": "You are an expert in ...",
  "max_tokens": 4096
@@ -243,13 +244,13 @@ Check model constraints before setting sampling parameters:
 
 - **Anthropic Claude**: Cannot use `temperature` and `top_p`
  simultaneously
-- **OpenAI o-series & GPT-5**: Do not support `temperature` (use
+- **OpenAI reasoning models**: Do not support `temperature` (use
  `reasoning_effort` instead)
-- **Google Gemini 3**: Keep `temperature` at default (1.0) to avoid
+- **Google Gemini**: Keep `temperature` at default (1.0) to avoid
  performance issues
 
-See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
-for complete constraints by model and provider.
+Consult **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
+for provider API links to assess model parameters.
 
 ### Model Selection & Presets
 
@@ -301,6 +302,7 @@ See `spec/workflow-schema.json` for complete schema.
 - `file_write` - Write output
 - `script_run` - Execute a script
 - `checkpoint` - Save workflow state
+- `git_commit` - Create a git commit
 
 ---
 
@@ -323,25 +325,27 @@ external systems.
 ```bash
 hillstar-orchestrator/
 ├── README.md # This file
+├── CHANGELOG.md # Release history
 ├── LICENSE # AGPLv3
+├── CITATION.cff # Citation metadata
 ├── requirements.txt # Python dependencies
-├── pyproject.toml # Package configuration
-├── .gitignore
+├── pyproject.toml # Package configuration (single version source)
 │
 ├── cli.py # Command-line interface
 │
 ├── config/ # Configuration management
 │ ├── config.py
-│ ├── config_manager.py
 │ ├── model_selector.py
 │ ├── provider_registry.py
-│ └── provider_registry.default.json
+│ ├── provider_registry.default.json
+│ └── setup_wizard.py
 │
 ├── execution/ # Workflow execution engine
 │ ├── runner.py # Main orchestration
 │ ├── node_executor.py # Node execution and provider chains
 │ ├── model_selector.py # Model selection and fallback logic
-│ ├── cost_manager.py # Cost tracking and budget enforcement
+│ ├── loops.py # Bounded loop expansion
+│ ├── seat_resolver.py # Router-seat resolution
 │ ├── config_validator.py # Configuration validation
 │ ├── graph.py # DAG execution with topological ordering
 │ ├── checkpoint.py # Checkpoint persistence
@@ -356,52 +360,62 @@ hillstar-orchestrator/
 │ └── project_init.py
 │
 ├── models/ # LLM provider integrations
-│ ├── mcp_model.py
+│ ├── local_model.py # Generic local OpenAI-compatible provider
+│ ├── mcp_model.py # MCP base class
 │ ├── anthropic_model.py
 │ ├── anthropic_mcp_model.py
 │ ├── anthropic_ollama_api_model.py
 │ ├── openai_mcp_model.py
 │ ├── mistral_api_model.py
 │ ├── mistral_mcp_model.py
-│ ├── ollama_mcp_model.py
-│ └── local_model.py
+│ ├── ollama_api_model.py
+│ └── ollama_mcp_model.py
 │
 ├── workflows/ # Workflow discovery & validation
 │ ├── validator.py
 │ ├── discovery.py
 │ ├── auto_discover.py
+│ ├── agent_scanner.py # Static MCP/skill security scanning
 │ └── model_presets.py
 │
 ├── utils/ # Utility functions
 │ ├── credential_redactor.py
 │ ├── exceptions.py
+│ ├── json_output_viewer.py
 │ └── report.py
 │
 ├── spec/ # Workflow JSON schema
 │ └── workflow-schema.json
 │
-├── tests/ # Unit tests
-│ ├── test_credential_redactor.py
-│ ├── test_integration.py
-│ ├── test_mcp_error_handling.py
-│ └── test_workflow_execution.py
+├── scripts/ # Release & maintenance tooling
+│ ├── stamp_docs.py # Stamp doc version footers
+│ └── check_licences.py
+│
+├── tests/ # Unit and integration tests
 │
 ├── examples/ # Example workflows
 │ ├── simple-workflow.json
 │ └── multi-provider-workflow.json
 │
 ├── docs/ # User documentation
-│ ├── INSTALLATION.md
-│ ├── QUICK_START.md
-│ ├── USER_MANUAL.md
+│ ├── SETUP_GUIDE.md
+│ ├── QUICK_REFERENCE.md
+│ ├── User_Manual.md # Generated from source
 │ ├── PROVIDER_MODEL_REFERENCE.md
-│ └── PROVIDER_SETUP.md
+│ ├── OPENAI_HILLSTAR_SETUP.md
+│ ├── MCP_SERVERS.md
+│ ├── ARCHITECTURE.md
+│ └── agent_scan_presentation.md
 │
 └── mcp-server/ # MCP server implementations
+ ├── base_mcp_server.py
  ├── anthropic_mcp_server.py
  ├── openai_mcp_server.py
  ├── mistral_mcp_server.py
- └── ... (other MCP servers)
+ ├── google_ai_studio_mcp_server.py
+ ├── ollama_mcp_server.py
+ ├── file_operations_mcp_server.py
+ └── secure_logger.py
 ```
 
 ### Local Development
@@ -451,9 +465,9 @@ hillstar wizard
 
 #### Error: "Unsupported parameter: 'temperature' not supported..."
 
-- Model does not support temperature (o3, o3-mini, GPT-5 series)
+- Model does not support temperature (reasoning model families; use `reasoning_effort`)
 - See **[docs/PROVIDER_MODEL_REFERENCE.md](https://github.com/evoclock/hillstar-orchestrator/blob/main/docs/PROVIDER_MODEL_REFERENCE.md)**
- for constraints
+ and your provider's model documentation for constraints
 - Remove temperature from parameters, or use a different model
 
 #### Error: "Model not found" or "Model not accessible"
@@ -527,7 +541,7 @@ If you use Hillstar Orchestrator in research, please cite:
 ```bibtex
 
 @software{gamboa2026hillstar,
- title={Hillstar Orchestrator v1.1.0},
+ title={Hillstar Orchestrator v1.2.0},
  author={Gamboa, Julen},
  year={2026},
  doi={10.5281/zenodo.18829921},
@@ -539,27 +553,31 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟢 **v1.1.0 Release** (Jun 28, 2026) - Builds on the v1.0.0 production
-engine with an agent security scanner, expanded local-model providers, and a
-licence change to AGPLv3.
+🟡 **v1.2.0** (Sep 3, 2026) - Reliability hardening, provider cleanup,
+and removal of cost management. See the
+[CHANGELOG](https://github.com/evoclock/hillstar-orchestrator/blob/main/CHANGELOG.md)
+for the full list.
 
-**New in v1.1.0:**
+**New in v1.2.0:**
 
-- **Agent security scanning** - `agent-scan` statically checks MCP configs
- and skill files for hardcoded secrets, injection, dangerous flags, and
- data-exfiltration patterns
-- **Expanded local providers** - Ollama over its HTTP API, plus the Jan-Code
- 4B local model via llama.cpp
-- **Documented resilience** - Provider retry/backoff policy (3 retries at
- 30/60/120s) surfaced in the setup guide
-- **Licence** - Relicensed to AGPLv3 with Section 7(b) attribution terms
+- **Honest failures** - Retired Ollama models (HTTP 410), empty MCP
+ responses, and script timeouts now fail closed with typed errors instead
+ of silently producing "successful" output
+- **OpenAI subscription auth** - Works without an API key; opt-in
+ subscription-only mode disables API-key fallback entirely
+- **Generic local provider** - One configurable `local` provider replaces
+ the former hard-coded local models; point it at any
+ OpenAI-compatible server
+- **Cost management removed** - No pricing tables to maintain; check your
+ provider's dashboard for spend
 
-**v1.1.0 Capabilities:**
+**Capabilities:**
 
 - **Multi-provider access** - Anthropic, OpenAI, Mistral, Google cloud
- APIs; local models (Ollama, llama.cpp, Devstral, Jan-Code); MCP servers
-- **Smart model selection** - Four cost/quality presets or explicitly
- choose any model
+ APIs; local models via the generic `local` provider (Ollama, llama.cpp,
+ vLLM, ...); MCP servers
+- **Model-agnostic selection** - Four presets or explicitly choose any
+ model; no hard-coded model lists anywhere
 - **Safe parameters** - Model constraints auto-documented with helpful
  errors before execution
 - **Workflow governance** - Three commit modes: require workflow
@@ -576,9 +594,9 @@ licence change to AGPLv3.
 - **Workflow discovery & validation** - Auto-find and validate workflows
  before execution
 
-**v1.1.0 Test & Quality Metrics:**
+**Test & Quality Metrics:**
 
-- **1,117 tests** - 100% pass rate
+- **1,158 tests** - 100% pass rate (e2e excluded)
 - **83% line coverage** - Project-wide (`pytest --cov=.`)
 - **Credential security** - 24 pattern types detected and redacted
 - **MCP integration** - 7 MCP servers validated and tested
@@ -587,7 +605,6 @@ licence change to AGPLv3.
 **Future Releases (v2.0+):**
 
 - Advanced safety guards for complex testing infrastructure
-- SDK integration for token counting and real-time pricing
 - Extended provider support (Vertex AI, additional local models)
 - Plugin system and extensibility
 - Web UI for workflow visualization and management

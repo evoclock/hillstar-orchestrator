@@ -2,7 +2,7 @@
 
 All notable changes to Hillstar are documented in this file.
 
-## 1.2.0-rc.1 (2026-09-03)
+## 1.2.0 (2026-09-03)
 
 ### Removed (breaking)
 
