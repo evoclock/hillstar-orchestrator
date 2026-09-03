@@ -509,7 +509,7 @@ See coverage.md for test coverage details.
 
 ---
 
-__Document Status:__ Release candidate (post-sprint provider cleanup, cost management removed)
+__Document Status:__ Release candidate
 
 ---
 
