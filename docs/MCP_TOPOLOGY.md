@@ -35,4 +35,4 @@ If you see two different sets of MCP servers, it is usually because of global us
 
 ---
 
-*Last updated: 2026-09-03*
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

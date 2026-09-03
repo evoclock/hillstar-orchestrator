@@ -32,7 +32,7 @@ class TestPresetTiersStructure:
 		"""Verify all 4 preset names exist."""
 		assert len(PRESET_TIERS) == 4
 		assert set(PRESET_TIERS.keys()) == {
-			"cost_saver",
+			"lightweight",
 			"balanced",
 			"quality_first",
 			"premium",
@@ -41,7 +41,7 @@ class TestPresetTiersStructure:
 	@pytest.mark.parametrize(
 		"preset_name,expected_tiers",
 		[
-			("cost_saver", ["free", "affordable"]),
+			("lightweight", ["free", "affordable"]),
 			("balanced", ["affordable", "standard"]),
 			("quality_first", ["standard", "expensive"]),
 			("premium", ["expensive", "premium"]),
@@ -92,7 +92,7 @@ class TestPresetResolverInitialization:
 		assert resolver.tier_sequence == ["affordable", "standard"]
 
 	@pytest.mark.parametrize(
-		"preset_name", ["cost_saver", "balanced", "quality_first", "premium"]
+		"preset_name", ["lightweight", "balanced", "quality_first", "premium"]
 	)
 	def test_init_all_presets_initialize(self, preset_name):
 		"""Parameterized: All valid presets initialize without error."""
@@ -110,7 +110,7 @@ class TestPresetResolverInitialization:
 
 		error_msg = str(exc_info.value)
 		assert "Unknown preset" in error_msg
-		assert "cost_saver" in error_msg # Should list valid presets
+		assert "lightweight" in error_msg # Should list valid presets
 
 	def test_init_with_empty_providers_list(self):
 		"""Boundary: Empty provider list should initialize (will fail in resolve)."""
@@ -422,8 +422,8 @@ class TestComplexityEscalation:
 	@pytest.mark.parametrize(
 		"preset,complexity,expected_min_tier",
 		[
-			("cost_saver", "simple", "free"),
-			("cost_saver", "critical", "affordable"), # clamped to last tier
+			("lightweight", "simple", "free"),
+			("lightweight", "critical", "affordable"), # clamped to last tier
 			("balanced", "simple", "affordable"),
 			("balanced", "critical", "standard"), # clamped to last tier in balanced
 			("quality_first", "simple", "standard"),

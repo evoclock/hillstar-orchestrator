@@ -172,7 +172,7 @@ class WorkflowValidator:
 				errors.append("mode=preset requires 'preset' field")
 			else:
 				valid_presets = [
-					"minimize_cost",
+					"lightweight",
 					"balanced",
 					"maximize_quality",
 					"local_only",

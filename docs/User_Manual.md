@@ -41549,3 +41549,7 @@ Depends on:
 
 Generated with AST-based documentation generator.
 Last Updated: 2026
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

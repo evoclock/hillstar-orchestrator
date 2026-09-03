@@ -328,7 +328,7 @@ chmod 600 ~/.config/openai/codex-home/auth.json
 | `OPENAI_CHATGPT_LOGIN_MODE` | Enable subscription token mode | No | `false` |
 | `OPENAI_API_KEY` | OpenAI API key (API key mode) | If not subscription | — |
 | `CODEX_HOME` | Location of Codex auth directory | No | `~/.config/openai/codex-home` |
-| `MODEL_DEFAULT` | Default model if not specified | No | `gpt-5.2` |
+| `MODEL_DEFAULT` | Default model if not specified | Recommended | (unset — set it to a current model id) |
 
 ---
 
@@ -389,7 +389,7 @@ The MCP server allows up to 60 seconds for codex CLI commands. If commands consi
 
 - Check network connectivity
 - Verify codex CLI is properly installed
-- Try running directly: `codex exec --model gpt-5.2 "echo test"`
+- Try running directly: `codex exec --model <model-id> "echo test"`
 
 ### Token Expired (Subscription Mode)
 
@@ -429,7 +429,7 @@ Example workflow node:
 {
   "task": "Analyze this data: {{data}}",
   "provider": "openai",
-  "model": "gpt-5.2"
+  "model": "<openai-model>"
 }
 ```
 
@@ -464,3 +464,7 @@ The server handles authentication transparently.
 **Last Updated**: 2026-02-28
 **Version**: 1.1.0
 **Project**: Hillstar v1.1.0 (Production Release)
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

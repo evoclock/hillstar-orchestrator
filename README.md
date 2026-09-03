@@ -33,7 +33,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 - **Workflow visualization** - Mermaid diagrams for GitHub, Obsidian,
  and Markdown
 - **Multi-provider support** - Integration with cloud and local models
-- **Flexible model selection** - Presets for cost, quality, and
+- **Flexible model selection** - Presets for efficiency, quality, and
  air-gapped setups
 - **Full auditability** - Comprehensive trace logs with model selection
  reasoning
@@ -257,9 +257,9 @@ Hillstar provides flexible model selection with four preset strategies:
 
 **Four Built-in Presets**:
 
-- `minimize_cost` - Cheapest models per complexity level
-- `balanced` - Mix of cost and quality
-- `maximize_quality` - Highest quality models regardless of cost
+- `lightweight` - Smallest capable models per complexity level
+- `balanced` - Balance between capability and efficiency
+- `maximize_quality` - Highest capability models available
 - `local_only` - Air-gapped: Local models only (no cloud APIs)
 
 ---

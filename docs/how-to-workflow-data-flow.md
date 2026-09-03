@@ -25,7 +25,7 @@ This example shows a 5-node pipeline where each node processes the output of the
  "haiku_generation": {
  "tool": "model_call",
  "provider": "anthropic",
- "model": "claude-haiku-4-5",
+ "model": "<claude-model>",
  "parameters": {
  "prompt": "Write 3 haikus about harmony, vigilance, and efficiency using nature metaphors.",
  "max_tokens": 300
@@ -43,7 +43,7 @@ This example shows a 5-node pipeline where each node processes the output of the
  "nano_summary": {
  "tool": "model_call",
  "provider": "openai",
- "model": "gpt-5-nano",
+ "model": "<openai-model>",
  "parameters": {
  "prompt": "You will receive 3 haikus:\n\n{{ haiku_generation.output }}\n\nSummarize their central themes in exactly 2 sentences.",
  "max_tokens": 100
@@ -62,7 +62,7 @@ This example shows a 5-node pipeline where each node processes the output of the
  "mistral_condense": {
  "tool": "model_call",
  "provider": "mistral",
- "model": "ministral-3b",
+ "model": "<mistral-model>",
  "parameters": {
  "prompt": "Here is a summary:\n\n{{ nano_summary.output }}\n\nCondense this into a single paragraph (max 5 sentences).",
  "max_tokens": 150
@@ -100,7 +100,7 @@ This example shows a 5-node pipeline where each node processes the output of the
  "final_synthesis": {
  "tool": "model_call",
  "provider": "anthropic_ollama",
- "model": "minimax-m2.1:cloud",
+ "model": "<ollama-model>",
  "parameters": {
  "prompt": "Here are key concepts:\n\n{{ entity_extraction.output }}\n\nWrite a synthesis paragraph explaining how these concepts relate to workflow orchestration.",
  "max_tokens": 250
@@ -213,9 +213,9 @@ Some nodes run independently, later node uses outputs of multiple nodes:
 }
 ```
 
-## Limitations
+## Limitations and Coming Features
 
-### 1. No Cyclic Data Dependencies
+### 1. No Cyclic Data Dependencies (loops with retry coming next iteration)
 The workflow graph itself is a DAG. You cannot create data-dependency cycles:
 
 ```json
@@ -228,25 +228,20 @@ The workflow graph itself is a DAG. You cannot create data-dependency cycles:
 }
 ```
 
-Loops (bounded retry with iteration) ARE supported: declare a `loop` with
-`max_attempts` and an `until` exit condition. The validator expands each
-iteration into a suffixed copy of the body, so the executed graph remains a
-DAG while the workflow semantics include retry. Exit conditions can inspect
-node outputs (`contains`, `not_contains`, `equals`) and multiple conditions
-can be combined with `all_of` — see `workflows/validator.py` and
-`execution/loops.py`.
+Bounded loops with retry are coming in the next iteration: a `loop` block
+with `max_attempts` and an `until` exit condition will provide
+retry-with-next-iteration semantics while the executed graph remains a DAG
+(the validator expands iterations into suffixed node copies). Work in
+progress: `workflows/validator.py`, `execution/loops.py`.
 
 ### 2. Output Type
 Currently, outputs are treated as strings/text. For complex structured data, you should return it as formatted text (JSON, CSV, etc.) that the next node can parse.
 
-### 3. Conditional Logic Is Loop-Mediated
-There is no standalone if/else branching node. Conditional behavior is
-expressed through loop exit conditions: a loop's `until` condition can end
-iteration early based on a node's output content (e.g. retry until the
-reviewer output contains "APPROVED"). Unconditional fan-out/fan-in and
-concurrent execution within an iteration are supported. Node failures fail
-the workflow (or trigger provider fallback for model calls) rather than
-switching to an alternate branch.
+### 3. Conditional Branching (coming next iteration)
+There is currently no standalone if/else branching node (Node C runs if A
+succeeds, else run D). Conditional execution is planned for the next
+iteration together with the loop work above; until then, all referenced
+nodes execute.
 
 ## Debugging Template References
 
@@ -293,4 +288,4 @@ python -m pytest tests/test_e2e_haiku_synthesis.py -v
 
 ---
 
-*Last updated: 2026-09-03*
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

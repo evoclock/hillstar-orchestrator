@@ -120,3 +120,7 @@ User-facing evidence of testing quality and scope achieved in v1.0.0 production 
 - models/mistral_api_model.py: 57%
 
 Report generated: February 28, 2026
+
+---
+
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

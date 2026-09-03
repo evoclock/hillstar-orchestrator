@@ -46,9 +46,7 @@ Flexibility:
 
 **Models Supported:**
 
-- claude-opus-4-6
-- claude-sonnet-4-5-20250929
-- claude-haiku-4-5-20251001
+Any Claude model identifier (see Anthropic model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -76,11 +74,7 @@ Flexibility:
 
 **Models Supported:**
 
-- gpt-5.2-pro
-- gpt-5.2
-- gpt-5-mini
-- o3, o3-mini
-- Legacy: gpt-4o, gpt-4, gpt-3.5-turbo
+Any OpenAI model identifier (see OpenAI model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -130,11 +124,7 @@ See https://docs.mistral.ai/getting-started/models for the current catalog
 
 **Models Supported:**
 
-- gemini-3.1-pro-preview
-- gemini-3-flash-preview
-- gemini-2.5-pro
-- gemini-2.5-flash
-- gemini-2.5-flash-lite
+Any Gemini model identifier (see Google AI Studio model docs). No hard-coded list.
 
 **Implementation:**
 
@@ -213,7 +203,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "id": 1,
  "result": {
  "provider": "anthropic",
- "models": ["claude-opus-4-6", "claude-sonnet-4-5"],
+ "models": ["<claude-model-1>", "<claude-model-2>"],
  "status": "ready"
  }
 }
@@ -227,7 +217,7 @@ Note: API keys are passed via environment variables (e.g., ANTHROPIC_API_KEY), n
  "id": 2,
  "method": "call",
  "params": {
- "model": "claude-opus-4-6",
+ "model": "<claude-model>",
  "messages": [
  {
  "role": "user",
@@ -582,4 +572,4 @@ See PROVIDER_MODEL_REFERENCE.md for provider-specific details and capabilities.
 
 ---
 
-*Last updated: 2026-09-03*
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

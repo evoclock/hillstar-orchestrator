@@ -45,9 +45,8 @@ hillstar presets  # Should list Claude models
 
 **Model Options:**
 
-- `claude-opus-4-6` (best quality, adaptive thinking, building agents, coding)
-- `claude-sonnet-4-6` (balanced speed and intelligence, agentic tasks)
-- `claude-haiku-4-5-20251001` (fastest with near-frontier intelligence)
+Any current Claude model identifier — see
+https://docs.anthropic.com/en/docs/about-claude/models. No list is kept here.
 
 **Important:** Use `effort` parameter ("low", "medium", "high") for reasoning control, not temperature. Do not adjust temperature with Claude models.
 
@@ -74,20 +73,11 @@ export OPENAI_API_KEY="sk-proj-..."
 
 **Model Options:**
 
-Agentic & Reasoning (use reasoning_effort):
+Any current OpenAI model identifier — see
+https://platform.openai.com/docs/models. No list is kept here.
 
-- `gpt-5.2` (primary coding model, agentic tasks)
-- `gpt-5.1` (coding, previous generation)
-- `o3` (deep complex reasoning, math, research)
-- `o3-mini` (faster reasoning alternative)
-
-Standard (use temperature + top_p):
-
-- `gpt-4.1` (instruction following, tool use, knowledge)
-- `gpt-5-mini` (lightweight reasoning, quick tasks)
-- `gpt-5-nano` (ultra-lightweight, classification)
-
-**Important:** GPT-5 and o-series do not support temperature. Use `reasoning_effort` ("low", "medium", "high") instead.
+**Important:** Reasoning model families do not support temperature. Use
+`reasoning_effort` ("low", "medium", "high") instead.
 
 **Verify:**
 
@@ -117,13 +107,6 @@ export MISTRAL_API_KEY="your-api-key"
 
 **Model Options:**
 
-- `magistral-medium-1.2` (multimodal reasoning, agentic tasks)
-- `mistral-large-3` (general purpose, efficient)
-- `mistral-medium-3.1` (multimodal, general tasks)
-- `codestral` (code completion, code generation, low-latency)
-- `mistral-small-3.2` (lightweight general purpose)
-- `ministral-8b` / `ministral-3b` (small tasks, edge deployment)
-
 No model list is maintained here — see https://docs.mistral.ai/getting-started/models
 for the current catalog.
 
@@ -152,17 +135,8 @@ export GOOGLE_API_KEY="AIza..."
 
 **Model Options:**
 
-Frontier Models (Gemini 3.x):
-
-- `gemini-3.1-pro-preview` (best overall, multimodal, context-aware pricing)
-- `gemini-3-flash-preview` (price-performance multimodal)
-
-Advanced Reasoning (Gemini 2.5):
-
-- `gemini-2.5-pro` (SOTA thinking for code, math, STEM, codebases)
-- `gemini-2.5-flash` (fast multimodal inference)
-- `gemini-2.5-flash-lite` (lightweight)
-- `gemini-2.5-computer-user` (agentic browser automation, UI testing)
+Any current Gemini model identifier — see
+https://ai.google.dev/gemini-api/docs/models. No list is kept here.
 
 **Important:** Keep temperature at default (1.0). Changing temperature causes performance degradation on reasoning tasks. Use thinking mode for complex problems.
 
@@ -365,4 +339,4 @@ provider's usage dashboard for spend.
 
 ---
 
-*Last updated: 2026-09-03*
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*

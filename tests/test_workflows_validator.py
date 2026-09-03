@@ -205,7 +205,7 @@ class TestValidateModelConfig:
 		assert any("preset" in e.lower() for e in errors)
 
 	@pytest.mark.parametrize("preset", [
-		"minimize_cost",
+		"lightweight",
 		"balanced",
 		"maximize_quality",
 		"local_only",

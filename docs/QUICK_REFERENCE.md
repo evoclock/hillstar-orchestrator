@@ -68,7 +68,7 @@ is_valid = validator.validate('workflows/my_workflow.json')
 
 ```python
 runner = WorkflowRunner('workflow.json', 'output/')
-model = runner.get_model('anthropic', 'claude-opus-4-6')
+model = runner.get_model('anthropic', '<claude-model>')
 result = model.call("Your prompt here")
 ```
 
@@ -216,7 +216,7 @@ export GOOGLE_API_KEY="AIza..."
    "id": "node_1",
    "type": "model",
    "provider": "anthropic",
-   "model": "claude-opus-4-6",
+   "model": "<model-id>",
    "prompt": "Your prompt template"
   }
  ],
@@ -357,4 +357,4 @@ For complete documentation, see [User_Manual.md](User_Manual.md)
 
 ---
 
-*Last updated: 2026-09-03*
+*Version: 1.2.0-rc.1 · Last updated: 2026-09-03*
