@@ -524,11 +524,11 @@ environmental constraints.
 
 ## License and provider terms
 
-Hillstar is free software licensed under the GNU Affero General Public License v3.0 (AGPLv3), together with the additional author-attribution terms set forth under Section 7(b) in the LICENSE file at the repository root. See that file for the full text.
+Hillstar is free software licensed under AGPL-3.0-only, together with the additional author-attribution terms set forth under Section 7(b) in the LICENSE file at the repository root. See that file for the full text.
 
 Hillstar was designed by Julen Gamboa. All copies, modified versions, and derivative works must preserve attribution to the original author, and any user-facing primary documentation must link to the upstream repository at https://github.com/evoclock/hillstar-orchestrator (Section 7(b)).
 
-A commercial licence that waives the AGPLv3 obligations (including the Section 13 network-use source-disclosure requirement and the Section 7(b) attribution terms) is available for users who cannot or do not wish to comply with the AGPLv3. Contact the author for details.
+Commercial use, including forks and substantial modifications, is permitted under the AGPL when all AGPL obligations and the Section 7(b) attribution requirements are followed. A separate commercial licence is available for organisations that require proprietary modifications, alternative attribution terms, or otherwise cannot or do not wish to comply with the AGPL, including its Section 13 network-use source-disclosure requirement. Contact the author for details.
 
 Running API calls through Hillstar does not grant any rights or warranties regarding each API provider's Terms of Service. The operator of Hillstar is responsible for complying with each API provider's Terms of Service.
 

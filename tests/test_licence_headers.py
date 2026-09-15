@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-only
 
 """
 Licence-header invariant test.
@@ -12,7 +12,7 @@ either header.
 
 Failure modes asserted (not just the happy path):
 - a tracked .py with no SPDX-License-Identifier at all (the new-file-added case),
-- a tracked .py whose identifier is not AGPL-3.0-or-later (e.g. a stray
+- a tracked .py whose identifier is not AGPL-3.0-only (e.g. a stray
   Apache/MIT header left over from before the relicence),
 - a tracked .py missing the SPDX-FileCopyrightText author line (7(b) attribution).
 
@@ -29,7 +29,7 @@ import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-EXPECTED_ID = "SPDX-License-Identifier: AGPL-3.0-or-later"
+EXPECTED_ID = "SPDX-License-Identifier: AGPL-3.0-only"
 EXPECTED_COPYRIGHT = "SPDX-FileCopyrightText: 2026 Julen Gamboa"
 
 

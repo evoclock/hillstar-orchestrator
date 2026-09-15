@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-only
 
 """Unit tests for scripts/check_licences.py.
 
@@ -46,7 +46,7 @@ def test_classify_allowed_licences() -> None:
         "LGPL-2.1-or-later",
         "LGPL-3.0-or-later",
         "MPL-2.0",
-        "AGPL-3.0-or-later",
+        "AGPL-3.0-only",
         "PSF",
     ]
     for lic in allowed:
