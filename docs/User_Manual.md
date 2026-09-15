@@ -6,7 +6,7 @@
 | **Version** | 1.2.0 |
 | **Description** | Security and reproducibility-first workflow orchestrator for research environments |
 | **Author** | Julen Gamboa |
-| **License** | AGPL-3.0-or-later |
+| **License** | AGPL-3.0-only |
 | **Repository** | <https://github.com/evoclock/hillstar-orchestrator.git> |
 | **Python** | >=3.11 |
 

@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2026 Julen Gamboa <j.a.r.gamboa@gmail.com>
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-only
 
 """
 Script
@@ -605,7 +605,7 @@ class DocumentationGenerator:
 				"author": (proj.get("authors") or [{}])[0].get("name", ""),
 				"author_email": (proj.get("authors") or [{}])[0].get("email", ""),
 				"url": (proj.get("urls") or {}).get("Repository", ""),
-				"license": "AGPL-3.0-or-later",
+				"license": "AGPL-3.0-only",
 				"python_requires": proj.get("requires-python", ""),
 			})
 			return metadata
