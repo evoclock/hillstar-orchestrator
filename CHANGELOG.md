@@ -2,6 +2,12 @@
 
 All notable changes to Hillstar are documented in this file.
 
+## 1.2.1 (2026-09-20)
+
+### Documentation
+
+- API-key docs now follow the Keychain standing rule: interactive provisioning with `security add-generic-password -U`, shell-config runtime lookup (`export KEY="$(/usr/bin/security find-generic-password … -w 2>/dev/null)"`), explicit `source ~/.bashrc` after editing, presence-only verification redirected to `/dev/null`, and rotation/removal guidance. Literal key-shaped placeholder strings (`sk-proj-...`, `sk-ant-...`, `AIza...`) removed from `docs/OPENAI_HILLSTAR_SETUP.md`, `docs/SETUP_GUIDE.md`, `docs/QUICK_REFERENCE.md`, and `docs/MCP_SERVERS.md`; the wizard discovery text no longer shows plausible key fragments. Hillstar MCP servers read provider keys from environment variables — the shell-config Keychain lookup is how those variables get set safely at login.
+
 ## 1.2.0 (2026-09-03)
 
 ### Removed (breaking)

@@ -197,11 +197,11 @@ MCP (subprocess-based):
 # Recommended: Setup wizard (stores in OS keyring)
 hillstar wizard
 
-# Alternative: Environment variable (CI/CD or temporary use)
-export ANTHROPIC_API_KEY="sk-ant-..."
-export OPENAI_API_KEY="sk-proj-..."
-export MISTRAL_API_KEY="..."
-export GOOGLE_API_KEY="AIza..."
+# Alternative: macOS Keychain + shell config (persistent; see SETUP_GUIDE.md)
+export ANTHROPIC_API_KEY="$(/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' -w 2>/dev/null)"
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
+export MISTRAL_API_KEY="$(/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' -w 2>/dev/null)"
+export GOOGLE_API_KEY="$(/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' -w 2>/dev/null)"
 ```
 
 ## Workflow JSON Format
@@ -353,4 +353,4 @@ For complete documentation, see [User_Manual.md](User_Manual.md)
 
 ---
 
-*Version: 1.2.0 · Last updated: 2026-09-03*
+*Version: 1.2.1 · Last updated: 2026-09-20*

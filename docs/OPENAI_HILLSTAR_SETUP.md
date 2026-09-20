@@ -60,7 +60,7 @@ hillstar config
 
 The setup wizard will **automatically search your system keyring** for existing OpenAI credentials:
 
-1. **Discovery Phase**: Scans system keyring for credentials matching `sk-proj-*` pattern
+1. **Discovery Phase**: Scans system keyring for existing credentials (key values are never displayed in full)
 2. **If credentials found**: Shows a numbered list of discovered credentials
    - Select an existing credential to use it
    - Choose "Enter new key" to add a fresh credential
@@ -74,23 +74,57 @@ The setup wizard will **automatically search your system keyring** for existing 
 - **Linux**: Secret Service or pass utility
 - **Windows**: Credential Manager (native)
 
-### **Alternative: Environment Variable (Temporary Session)**
+### **Alternative: Environment Variable (macOS Keychain, Persistent)**
 
-If you prefer not to use keyring, set as environment variable:
+If you prefer not to use the setup wizard, store the key in the macOS
+Keychain and have your shell export it at login. The key value is typed at
+an interactive prompt and never appears in shell history or transcripts.
 
-```bash
-export OPENAI_API_KEY=sk-proj-your-key-here
+#### 1. Provision the Keychain item
+
+```sh
+security add-generic-password -U -a openai -s OPENAI_API_KEY -w
+```
+
+Enter the API key at the prompt; nothing is echoed.
+
+#### 2. Export it from your shell config
+
+Add this line to `~/.bashrc` (or `~/.zshrc`) — never a literal key:
+
+```sh
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
+```
+
+#### 3. Reload the shell config
+
+```sh
+source ~/.bashrc
+```
+
+#### 4. Verify presence only
+
+```sh
+/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' >/dev/null 2>&1 && echo "keychain item present"
+```
+
+No secret material is printed; this confirms the item exists.
+
+#### 5. Rotation and removal
+
+To rotate, re-run the provisioning command from step 1 and enter the new
+value at the prompt (`-U` updates the existing item). To remove the item
+entirely:
+
+```sh
+security delete-generic-password -a openai -s OPENAI_API_KEY
 ```
 
 ### **Legacy: .env File (Least Secure, Use with Caution)**
 
 For development only, you can store in `.env` file:
 
-```bash
-echo "OPENAI_API_KEY=sk-proj-your-key-here" >> <your-hillstar-repo>/.env
-```
-
-Warning: `.env` files are less secure. Hillstar's setup process recommends using OS keyring instead.
+Warning: `.env` files are less secure. Hillstar's setup process recommends using the OS keychain instead.
 
 ---
 
@@ -116,8 +150,8 @@ $ hillstar config
 CloudAI Provider Setup
 ======================
 Found existing OpenAI credentials:
-  1. sk-proj-abc123def456... (from keyring)
-  2. sk-proj-xyz789uvw101... (from keyring)
+  1. sk-proj-•••••••• (from keyring)
+  2. sk-proj-•••••••• (from keyring)
 
 Select credential to use (1-2), enter new, or skip [1]: 1
 Using credential from system keyring
@@ -352,7 +386,13 @@ variable. Unknown model names fall back to conservative token limits.
 
 **Solution**: Set up one of the authentication modes:
 
-- API Key: `export OPENAI_API_KEY=sk-proj-...`
+```bash
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
+```
+
+or provision it in the macOS Keychain first (see the keychain section under
+Quick Start), then reload the shell config with `source ~/.bashrc`.
+
 - Subscription: Run `codex login` and set `export OPENAI_CHATGPT_LOGIN_MODE=true`
 
 ### Error: "Subscription token not found in any location"
@@ -444,6 +484,64 @@ The server handles authentication transparently.
 - Never commit to git (use `.env` and `.gitignore`)
 - Rotate regularly at <https://platform.openai.com/api-keys>
 - Limit permissions to API-only in OpenAI dashboard
+- Prefer the macOS Keychain over `.env` files; see the keychain section under Quick Start
+
+### Keychain Items for All Providers (macOS)
+
+The same five-step pattern applies to every provider key. Provision
+interactively, export from the shell config via a Keychain lookup, reload
+with `source ~/.bashrc`, verify presence only, and rotate by re-running the
+provisioning command (`-U` updates in place):
+
+| Variable | account (`-a`) | service (`-s`) |
+|----------|----------------|----------------|
+| `OPENAI_API_KEY` | `openai` | `OPENAI_API_KEY` |
+| `ANTHROPIC_API_KEY` | `anthropic` | `ANTHROPIC_API_KEY` |
+| `MISTRAL_API_KEY` | `mistral` | `MISTRAL_API_KEY` |
+| `GOOGLE_API_KEY` | `google` | `GOOGLE_API_KEY` |
+
+Provisioning (repeat per row; value typed at the prompt, never echoed):
+
+```sh
+security add-generic-password -U -a anthropic -s ANTHROPIC_API_KEY -w
+security add-generic-password -U -a mistral -s MISTRAL_API_KEY -w
+security add-generic-password -U -a google -s GOOGLE_API_KEY -w
+```
+
+Shell config runtime lookup (one line per key, added to `~/.bashrc`):
+
+```sh
+export ANTHROPIC_API_KEY="$(/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' -w 2>/dev/null)"
+export MISTRAL_API_KEY="$(/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' -w 2>/dev/null)"
+export GOOGLE_API_KEY="$(/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' -w 2>/dev/null)"
+```
+
+After editing the shell config, reload it:
+
+```sh
+source ~/.bashrc
+```
+
+Presence-only verification (no secret material printed):
+
+```sh
+/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' >/dev/null 2>&1 && echo "keychain item present"
+/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' >/dev/null 2>&1 && echo "keychain item present"
+/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' >/dev/null 2>&1 && echo "keychain item present"
+```
+
+Removal:
+
+```sh
+security delete-generic-password -a anthropic -s ANTHROPIC_API_KEY
+security delete-generic-password -a mistral -s MISTRAL_API_KEY
+security delete-generic-password -a google -s GOOGLE_API_KEY
+```
+
+Note: the Hillstar MCP server reads provider keys from environment
+variables; the shell-config Keychain lookup above is how those variables
+get set safely at login. Nothing reads key values from the Keychain
+directly at server runtime.
 
 ### Subscription Tokens (OAuth)
 
@@ -461,4 +559,4 @@ The server handles authentication transparently.
 
 ---
 
-*Version: 1.2.0 · Last updated: 2026-09-03*
+*Version: 1.2.1 · Last updated: 2026-09-20*

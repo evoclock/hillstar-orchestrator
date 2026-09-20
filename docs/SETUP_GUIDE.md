@@ -8,10 +8,11 @@ Complete instructions for configuring each LLM provider.
 # Interactive setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Or set environment variables (CI/CD or temporary use)
-export ANTHROPIC_API_KEY="sk-ant-..."
-export OPENAI_API_KEY="sk-proj-..."
-export MISTRAL_API_KEY="..."
+# Or set environment variables via the macOS Keychain (see "Keychain
+# Provisioning" below; CI/CD may inject them directly)
+export ANTHROPIC_API_KEY="$(/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' -w 2>/dev/null)"
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
+export MISTRAL_API_KEY="$(/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' -w 2>/dev/null)"
 ```
 
 ---
@@ -33,8 +34,14 @@ export MISTRAL_API_KEY="..."
 # Option 1: Setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Option 2: Environment variable (for CI/CD or temporary use)
-export ANTHROPIC_API_KEY="sk-ant-..."
+# Option 2: macOS Keychain + shell config (persistent; value never in shell history)
+# Provision once (value typed at the prompt, never echoed):
+security add-generic-password -U -a anthropic -s ANTHROPIC_API_KEY -w
+# Then add to ~/.bashrc (or ~/.zshrc) and reload:
+export ANTHROPIC_API_KEY="$(/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' -w 2>/dev/null)"
+source ~/.bashrc
+# Verify presence only (no secret material printed):
+/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' >/dev/null 2>&1 && echo "keychain item present"
 ```
 
 **Verify:**
@@ -67,8 +74,14 @@ https://docs.anthropic.com/en/docs/about-claude/models. No list is kept here.
 # Option 1: Setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Option 2: Environment variable (for CI/CD or temporary use)
-export OPENAI_API_KEY="sk-proj-..."
+# Option 2: macOS Keychain + shell config (persistent; value never in shell history)
+# Provision once (value typed at the prompt, never echoed):
+security add-generic-password -U -a openai -s OPENAI_API_KEY -w
+# Then add to ~/.bashrc (or ~/.zshrc) and reload:
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
+source ~/.bashrc
+# Verify presence only (no secret material printed):
+/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' >/dev/null 2>&1 && echo "keychain item present"
 ```
 
 **Model Options:**
@@ -101,8 +114,14 @@ hillstar presets  # Should list GPT models
 # Option 1: Setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Option 2: Environment variable (for CI/CD or temporary use)
-export MISTRAL_API_KEY="your-api-key"
+# Option 2: macOS Keychain + shell config (persistent; value never in shell history)
+# Provision once (value typed at the prompt, never echoed):
+security add-generic-password -U -a mistral -s MISTRAL_API_KEY -w
+# Then add to ~/.bashrc (or ~/.zshrc) and reload:
+export MISTRAL_API_KEY="$(/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' -w 2>/dev/null)"
+source ~/.bashrc
+# Verify presence only (no secret material printed):
+/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' >/dev/null 2>&1 && echo "keychain item present"
 ```
 
 **Model Options:**
@@ -129,9 +148,17 @@ for the current catalog.
 # Option 1: Setup wizard (recommended - uses secure keyring storage)
 hillstar wizard
 
-# Option 2: Environment variable (for CI/CD or temporary use)
-export GOOGLE_API_KEY="AIza..."
+# Option 2: macOS Keychain + shell config (persistent; value never in shell history)
+# Provision once (value typed at the prompt, never echoed):
+security add-generic-password -U -a google -s GOOGLE_API_KEY -w
+# Then add to ~/.bashrc (or ~/.zshrc) and reload:
+export GOOGLE_API_KEY="$(/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' -w 2>/dev/null)"
+source ~/.bashrc
+# Verify presence only (no secret material printed):
+/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' >/dev/null 2>&1 && echo "keychain item present"
 ```
+
+**Rotation and removal:** to rotate, re-run the `security add-generic-password -U` provisioning command and enter the new value at the prompt (`-U` updates the existing item). To remove the item entirely: `security delete-generic-password -a <account> -s <service>` (e.g. `security delete-generic-password -a google -s GOOGLE_API_KEY`).
 
 **Model Options:**
 
@@ -339,4 +366,4 @@ provider's usage dashboard for spend.
 
 ---
 
-*Version: 1.2.0 · Last updated: 2026-09-03*
+*Version: 1.2.1 · Last updated: 2026-09-20*
