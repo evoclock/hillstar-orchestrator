@@ -1,6 +1,8 @@
 # Hillstar Orchestrator v1.2.1
 
-![Hillstar Logo](assets/icons/Hillstar_icon_small.png)
+<p align="center">
+  <img src="assets/icons/Hillstar_icon_small.png" alt="Hillstar Logo"/>
+</p>
 
 <p align="center">
   <a href="https://doi.org/10.5281/zenodo.18829921"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg" alt="DOI"/></a>
