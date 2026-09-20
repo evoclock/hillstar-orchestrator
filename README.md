@@ -14,13 +14,13 @@
 
 ## A security and reproducibility-first workflow orchestration tool
 
-Hillstar is an open-source workflow orchestrator built for scientific research labs and any environment where reproducibility and auditability are non-negotiable. Most worflow management tools in this space are designed for data/software engineering teams. Hillstar keeps the underlying rigor, but is built for researchers, analysts, and teams in regulated environments who need to prove what happened, when, and why—without requiring a background in DevOps.
+Hillstar is an open-source workflow orchestrator built for scientific research labs and any environment where reproducibility and auditability are non-negotiable. Most worflow management tools in this space are designed for data/software engineering teams. Hillstar keeps the underlying rigor, but is built for researchers, analysts, and teams in regulated environments who need to prove what happened, when, and why, without requiring a background in DevOps.
 
 Hillstar is designed with auditability, security, and governance as first-class concerns, so it fits naturally in tightly regulated environments.
 
 The core design principle: explicit over implicit. No unrestricted API access. No magic. You define workflows as composable DAGs where each node performs one action and data flows explicitly between stages. Every decision is auditable: which model was called, what parameters were used, whether review was required before the output moved downstream.
 
-This matters in environments where highly sensitive data is in use—teams working with human genomic data, clinical trials, or proprietary research—where governance isn't a nice-to-have, it's the foundation. Hillstar bakes in compliance checking, credential security, and comprehensive logging from the start.
+This matters in environments where highly sensitive data is in use, such as teams working with human genomic data, clinical trials, or proprietary research, where governance isn't a nice-to-have, it's the foundation. Hillstar bakes in compliance checking, credential security, and comprehensive logging from the start.
 
 Whether you are coordinating between multiple large language model (LLM) providers, integrating with custom or external agents via MCP servers, or running everything locally and offline, the same auditability guarantees apply.
 
@@ -561,7 +561,7 @@ placeholders remain. See the
 [CHANGELOG](https://github.com/evoclock/hillstar-orchestrator/blob/main/CHANGELOG.md)
 for the full list.
 
-**Previous release — New in v1.2.0:**
+**Previous release, New in v1.2.0:**
 
 - **Honest failures** - Retired Ollama models (HTTP 410), empty MCP
  responses, and script timeouts now fail closed with typed errors instead
