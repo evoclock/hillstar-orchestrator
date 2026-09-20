@@ -7,10 +7,14 @@ authors:
   - family-names: Gamboa
     given-names: Julen
 repository-code: 'https://github.com/evoclock/hillstar-orchestrator'
-url: 'https://zenodo.org/records/18829921'
+url: 'https://zenodo.org/records/20861238'
 identifiers:
   - type: doi
-    value: '10.5281/zenodo.18829921'
+    value: '10.5281/zenodo.22861705'
+    description: Version-specific DOI for v1.2.1
+  - type: doi
+    value: '10.5281/zenodo.20861238'
+    description: Concept DOI (resolves to the latest version)
 abstract: >-
   Hillstar is an open-source workflow orchestrator built for scientific research
   labs and regulated environments where reproducibility and auditability are
