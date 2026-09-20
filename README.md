@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://doi.org/10.5281/zenodo.18829921"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18829921.svg" alt="DOI"/></a>
+  <a href="https://doi.org/10.5281/zenodo.20861238"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20861238.svg" alt="DOI"/></a>
   <a href="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml"><img src="https://github.com/evoclock/hillstar-orchestrator/actions/workflows/docs.yml/badge.svg" alt="Docs"/></a>
   <a href="https://pypi.org/project/hillstar-orchestrator/"><img src="https://img.shields.io/pypi/v/hillstar-orchestrator?style=flat" alt="PyPI"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL%20v3-blue?style=flat" alt="License: AGPL v3"/></a>
@@ -546,8 +546,8 @@ If you use Hillstar Orchestrator in research, please cite:
  title={Hillstar Orchestrator v1.2.1},
  author={Gamboa, Julen},
  year={2026},
- doi={10.5281/zenodo.18829921},
- url={https://doi.org/10.5281/zenodo.18829921}
+ doi={10.5281/zenodo.22861705},
+ url={https://doi.org/10.5281/zenodo.22861705}
 }
 ```
 
