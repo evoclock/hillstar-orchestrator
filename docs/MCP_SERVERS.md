@@ -286,28 +286,28 @@ pip install -r requirements.txt
 #### Anthropic
 
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
+export ANTHROPIC_API_KEY="$(/usr/bin/security find-generic-password -s 'ANTHROPIC_API_KEY' -a 'anthropic' -w 2>/dev/null)"
 python mcp-server/anthropic_mcp_server.py
 ```
 
 #### OpenAI
 
 ```bash
-export OPENAI_API_KEY="sk-proj-..."
+export OPENAI_API_KEY="$(/usr/bin/security find-generic-password -s 'OPENAI_API_KEY' -a 'openai' -w 2>/dev/null)"
 python mcp-server/openai_mcp_server.py
 ```
 
 #### Mistral
 
 ```bash
-export MISTRAL_API_KEY="..."
+export MISTRAL_API_KEY="$(/usr/bin/security find-generic-password -s 'MISTRAL_API_KEY' -a 'mistral' -w 2>/dev/null)"
 python mcp-server/mistral_mcp_server.py
 ```
 
 #### Google AI Studio
 
 ```bash
-export GOOGLE_API_KEY="..."
+export GOOGLE_API_KEY="$(/usr/bin/security find-generic-password -s 'GOOGLE_API_KEY' -a 'google' -w 2>/dev/null)"
 python mcp-server/google_ai_studio_mcp_server.py
 ```
 
@@ -568,4 +568,4 @@ See PROVIDER_MODEL_REFERENCE.md for provider-specific details and capabilities.
 
 ---
 
-*Version: 1.2.0 · Last updated: 2026-09-03*
+*Version: 1.2.1 · Last updated: 2026-09-20*

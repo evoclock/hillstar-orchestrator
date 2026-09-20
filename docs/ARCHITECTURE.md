@@ -509,4 +509,4 @@ See coverage.md for test coverage details.
 
 ---
 
-*Version: 1.2.0 · Last updated: 2026-09-03*
+*Version: 1.2.1 · Last updated: 2026-09-20*
