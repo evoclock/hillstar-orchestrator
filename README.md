@@ -1,7 +1,7 @@
 # Hillstar Orchestrator v1.2.1
 
 <p align="center">
-  <img src="assets/icons/Hillstar_icon_small.png" alt="Hillstar Logo"/>
+  <img src="assets/icons/hillstar-app-icon-512.png" alt="Hillstar Logo"/>
 </p>
 
 <p align="center">
