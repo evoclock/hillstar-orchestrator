@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 evoclock
+# SPDX-FileCopyrightText: 2026 Julen Gamboa
 # SPDX-License-Identifier: AGPL-3.0-only
 """Timeout cleanup must include descendants of script_run shells."""
 

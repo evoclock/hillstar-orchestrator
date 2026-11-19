@@ -31,7 +31,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXPECTED_ID = "SPDX-License-Identifier: AGPL-3.0-only"
 EXPECTED_COPYRIGHT = "SPDX-FileCopyrightText: 2026 Julen Gamboa"
-PROJECT_COPYRIGHT = "SPDX-FileCopyrightText: 2026 evoclock"
 
 
 def _tracked_py_files():
@@ -58,6 +57,6 @@ def test_every_python_file_has_author_copyright_header():
 	missing = [
 		str(p.relative_to(REPO_ROOT))
 		for p in _tracked_py_files()
-		if EXPECTED_COPYRIGHT not in _header(p) and PROJECT_COPYRIGHT not in _header(p)
+		if EXPECTED_COPYRIGHT not in _header(p)
 	]
 	assert not missing, f"tracked .py files missing {EXPECTED_COPYRIGHT!r}: {missing}"
