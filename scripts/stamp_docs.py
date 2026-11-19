@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 evoclock
 # SPDX-License-Identifier: AGPL-3.0-only
 """Stamp Markdown documentation footers from the release metadata."""
 
