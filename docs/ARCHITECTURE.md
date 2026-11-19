@@ -96,7 +96,7 @@ Operation Types:
 - model_call: LLM inference
 - file_read: Read file content
 - file_write: Write file
-- script_run: Execute shell command
+- script_run: Execute shell command. Node-level `timeout` defaults to 1800 seconds; `timeout_grace` defaults to 10 seconds before SIGKILL of the script process group.
 - git_commit: Create git commit
 
 Key Methods:
@@ -509,4 +509,4 @@ See coverage.md for test coverage details.
 
 ---
 
-*Version: 1.2.1 · Last updated: 2026-09-20*
+*Version: 1.2.2 · Last updated: 2026-11-19*

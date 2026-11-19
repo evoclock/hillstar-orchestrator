@@ -455,11 +455,10 @@ class TestScriptExecution:
 
 	def test_execute_script_run_zero_exit_remains_success(self, node_executor):
 		"""A zero exit, including an intentional --soft check, remains successful."""
-		with patch("subprocess.run") as mock_run:
-			mock_run.return_value = MagicMock(
-				returncode=0,
-				stdout="FAIL: semantic checks are reported in soft mode",
-				stderr=""
+		with patch("subprocess.Popen") as mock_popen:
+			mock_popen.return_value.returncode = 0
+			mock_popen.return_value.communicate.return_value = (
+				"FAIL: semantic checks are reported in soft mode", ""
 			)
 
 			node = {"tool": "script_run", "parameters": {"script": "verify --soft"}}
@@ -470,7 +469,7 @@ class TestScriptExecution:
 
 	def test_execute_script_run_timeout(self, node_executor):
 		"""Test script timeout."""
-		with patch("subprocess.run", side_effect=TimeoutError):
+		with patch("subprocess.Popen", side_effect=TimeoutError):
 			node = {"tool": "script_run", "parameters": {"script": "sleep 1000"}}
 			result = node_executor._execute_script_run("node1", node, {})
 
@@ -480,12 +479,9 @@ class TestScriptExecution:
 
 	def test_execute_script_run_nonzero_exit(self, node_executor):
 		"""A non-zero exit fails even when the script writes no stderr."""
-		with patch("subprocess.run") as mock_run:
-			mock_run.return_value = MagicMock(
-				returncode=1,
-				stdout="",
-				stderr=""
-			)
+		with patch("subprocess.Popen") as mock_popen:
+			mock_popen.return_value.returncode = 1
+			mock_popen.return_value.communicate.return_value = ("", "")
 
 			node = {"tool": "script_run", "parameters": {"script": "false"}}
 			result = node_executor._execute_script_run("node1", node, {})

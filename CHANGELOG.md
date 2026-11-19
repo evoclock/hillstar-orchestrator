@@ -2,6 +2,16 @@
 
 All notable changes to Hillstar are documented in this file.
 
+## 1.2.2 (2026-11-19)
+
+### Fixed
+
+- Kill the whole script process group on timeout; `timeout_grace` defaults to 10 seconds before SIGKILL. Previously grandchildren such as blastn were orphaned.
+
+### Added
+
+- Regression tests for background grandchildren and SIGKILL escalation.
+
 ## 1.2.1 (2026-09-20)
 
 ### Documentation
