@@ -49,10 +49,11 @@ import json
 import argparse
 
 from pathlib import Path
+from importlib.metadata import PackageNotFoundError, version
 
 try:
-	from __init__ import __version__
-except ImportError:
+	__version__ = version("hillstar-orchestrator")
+except PackageNotFoundError:
 	__version__ = "unknown"
 
 # Auto-load secrets from ~/.config/hillstar/secrets.env if it exists
