@@ -1,4 +1,4 @@
-# Hillstar Orchestrator v1.2.1
+# Hillstar Orchestrator v1.2.2
 
 <p align="center">
   <img src="assets/icons/hillstar-app-icon-512.png" alt="Hillstar Logo"/>
@@ -28,7 +28,7 @@ Whether you are coordinating between multiple large language model (LLM) provide
 
 ---
 
-## Current Features (v1.2.1)
+## Current Features (v1.2.2)
 
 - **DAG-based workflows** - Define complex research pipelines as
  directed acyclic graphs
@@ -543,7 +543,7 @@ If you use Hillstar Orchestrator in research, please cite:
 ```bibtex
 
 @software{gamboa2026hillstar,
- title={Hillstar Orchestrator v1.2.1},
+ title={Hillstar Orchestrator v1.2.2},
  author={Gamboa, Julen},
  year={2026},
  doi={10.5281/zenodo.22861705},
@@ -555,11 +555,9 @@ If you use Hillstar Orchestrator in research, please cite:
 
 ## Status
 
-🟡 **v1.2.1** (Sep 20, 2026) - Documentation: API-key handling across all
-docs now follows the Keychain standing rule (interactive provisioning,
-shell-config runtime lookup, explicit shell reload, presence-only
-verification, rotation/removal guidance). No literal key-shaped
-placeholders remain. See the
+🟡 **v1.2.2** (Nov 19, 2026) - Script timeouts now terminate the whole
+process group, with a configurable 10-second grace period before SIGKILL.
+See the
 [CHANGELOG](https://github.com/evoclock/hillstar-orchestrator/blob/main/CHANGELOG.md)
 for the full list.
 

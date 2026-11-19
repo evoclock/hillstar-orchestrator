@@ -62,6 +62,7 @@ Last Edited
 """
 
 import os
+import signal
 import subprocess
 import time
 from datetime import datetime
@@ -509,11 +510,53 @@ class NodeExecutor:
         except Exception as e:
             return {"error": str(e)}
 
+    @staticmethod
+    def _run_in_process_group(command, input_text, timeout, grace, cwd, shell):
+        """Run a script in its own session and reap it after group termination."""
+        proc = subprocess.Popen(
+            command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, cwd=cwd, shell=shell,
+            start_new_session=True,
+        )
+
+        def terminate(sig):
+            if os.name == "posix" and hasattr(os, "killpg"):
+                try:
+                    os.killpg(proc.pid, sig)
+                except ProcessLookupError:
+                    pass
+            else:
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass
+
+        try:
+            stdout, stderr = proc.communicate(input_text, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            terminate(signal.SIGTERM)
+            try:
+                proc.communicate(timeout=grace)
+            except subprocess.TimeoutExpired:
+                terminate(signal.SIGKILL)
+                proc.communicate()
+            except BaseException:
+                terminate(signal.SIGKILL)
+                proc.communicate()
+                raise
+            raise
+        except BaseException:
+            terminate(signal.SIGKILL)
+            proc.communicate()
+            raise
+        return subprocess.CompletedProcess(command, proc.returncode, stdout, stderr)
+
     def _execute_script_run(self, node_id: str, node: dict, inputs: Any) -> dict:
         """Run script with optional working directory support."""
         script = node.get("parameters", {}).get("script")
         cwd = node.get("cwd")  # Support cwd parameter for working directory
         timeout = node.get("timeout", 1800)  # Default 30 minutes, configurable per node
+        grace = node.get("timeout_grace", 10)  # Seconds before SIGKILL escalation
 
         if not script:
             return {"error": "script_run requires script parameter"}
@@ -523,14 +566,9 @@ class NodeExecutor:
             # Otherwise, assume it's a direct executable path
             use_shell = " " in script or any(c in script for c in ["|", ">", "<", "&"])
 
-            result = subprocess.run(
+            result = self._run_in_process_group(
                 script if use_shell else [script],
-                input=str(inputs) if inputs else "",
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                cwd=cwd,  # Set working directory if specified
-                shell=use_shell,  # Use shell for complex commands
+                str(inputs) if inputs else "", timeout, grace, cwd, use_shell,
             )
             error = None
             if result.returncode != 0:

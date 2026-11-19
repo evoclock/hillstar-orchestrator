@@ -27,8 +27,9 @@ def make_executor():
 class TestScriptRunPropagation:
 	def test_success_returns_all_streams(self):
 		executor = make_executor()
-		with patch("subprocess.run") as mock_run:
-			mock_run.return_value = MagicMock(returncode=0, stdout="out", stderr="err")
+		with patch("subprocess.Popen") as mock_popen:
+			mock_popen.return_value.communicate.return_value = ("out", "err")
+			mock_popen.return_value.returncode = 0
 			result = executor._execute_script_run(
 				"n1", {"tool": "script_run", "parameters": {"script": "true"}}, {}
 			)
@@ -37,8 +38,9 @@ class TestScriptRunPropagation:
 
 	def test_nonzero_exit_sets_error_even_without_stderr(self):
 		executor = make_executor()
-		with patch("subprocess.run") as mock_run:
-			mock_run.return_value = MagicMock(returncode=3, stdout="", stderr="")
+		with patch("subprocess.Popen") as mock_popen:
+			mock_popen.return_value.communicate.return_value = ("", "")
+			mock_popen.return_value.returncode = 3
 			result = executor._execute_script_run(
 				"n1", {"tool": "script_run", "parameters": {"script": "false"}}, {}
 			)
@@ -49,7 +51,8 @@ class TestScriptRunPropagation:
 	def test_timeout_is_typed_and_nonempty(self):
 		executor = make_executor()
 		exc = subprocess.TimeoutExpired(cmd="sleep", timeout=5)
-		with patch("subprocess.run", side_effect=exc):
+		with patch("subprocess.Popen") as mock_popen, patch("os.killpg"):
+			mock_popen.return_value.communicate.side_effect = [exc, ("", "")]
 			result = executor._execute_script_run(
 				"n1",
 				{"tool": "script_run", "parameters": {"script": "sleep 100", "timeout": 5}},

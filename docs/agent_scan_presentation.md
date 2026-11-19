@@ -249,4 +249,4 @@ not a complete capability map.
 
 ---
 
-*Version: 1.2.1 · Last updated: 2026-09-20*
+*Version: 1.2.2 · Last updated: 2026-11-19*
