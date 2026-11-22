@@ -3,7 +3,7 @@
 ### Where work runs
 - All work runs in Herdr/Pi on Julen's machines (MacBook Pro first, then Mac mini, then linux-backend), using his model subscriptions.
 - Never use Grok Bot or Cursor cloud compute for this work. Bots only brief, spawn and check Pi workers.
-- Never serve models via llama.cpp. Use the existing MLX serve setup or TensorFold.
+- Serve models with vLLM, SGLang, TensorFold or native macOS MLX. llama.cpp only where Julen has approved it for a specific model. Never download a model without Julen's approval.
 
 ### Design before build
 - Required for major work and for initial work on a repo or feature.
